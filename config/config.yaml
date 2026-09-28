@@ -34,3 +34,26 @@ nhl_api:
   timeout_s: 30
   max_retries: 4
   backoff_base_s: 2.0
+
+# The Odds API (the-odds-api.com). Key only in .env (ODDS_API_KEY).
+# Credits: live event odds = markets returned x regions; historical = 10x
+# that. docs/market_discovery_plan.md section 4 and 8.
+odds:
+  sport: icehockey_nhl
+  regions: us
+  # Phase 0 candidates (plan section 2). Nothing else is bought.
+  markets: [player_shots_on_goal, player_total_saves, player_blocked_shots]
+  # Entry snapshot anchor = 10:00 US/Eastern on the game day (16:00 CZ),
+  # the same anchor as NBA, fixed before any row is downloaded.
+  morning_et: "10:00"
+  closing_minutes_before_start: 10
+  # A closing watcher that wakes up late still prices a game up to this
+  # many minutes before / after puck drop minus the offset.
+  closing_window_minutes: 20
+  # Stop when the shared account balance falls below these.
+  reserve_live: 2000
+  reserve_backfill: 15000
+  # Historical sample (plan 4.2): whole 2025-26 game days in golden-ratio
+  # order until this many games.
+  backfill_season: "2025-26"
+  backfill_target_games: 330

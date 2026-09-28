@@ -1,0 +1,49 @@
+{
+ "gameInfo": {
+  "homeTeam": {
+   "scratches": [
+    {
+     "id": 8476979,
+     "firstName": {
+      "default": "Erik"
+     },
+     "lastName": {
+      "default": "Gustafsson"
+     }
+    },
+    {
+     "id": 8480879,
+     "firstName": {
+      "default": "Jacob"
+     },
+     "lastName": {
+      "default": "Bernard-Docker"
+     }
+    }
+   ]
+  },
+  "awayTeam": {
+   "scratches": [
+    {
+     "id": 8480813,
+     "firstName": {
+      "default": "Joseph",
+      "fr": "Joe"
+     },
+     "lastName": {
+      "default": "Veleno"
+     }
+    },
+    {
+     "id": 8481593,
+     "firstName": {
+      "default": "Jayden"
+     },
+     "lastName": {
+      "default": "Struble"
+     }
+    }
+   ]
+  }
+ }
+}

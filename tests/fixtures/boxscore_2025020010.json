@@ -1,0 +1,279 @@
+{
+ "id": 2025020010,
+ "season": 20252026,
+ "gameType": 2,
+ "gameDate": "2025-10-09",
+ "startTimeUTC": "2025-10-09T23:00:00Z",
+ "gameState": "OFF",
+ "periodDescriptor": {
+  "number": 3,
+  "periodType": "REG",
+  "maxRegulationPeriods": 3
+ },
+ "homeTeam": {
+  "id": 17,
+  "abbrev": "DET",
+  "score": 1,
+  "sog": 31,
+  "commonName": {
+   "default": "Red Wings"
+  },
+  "placeName": {
+   "default": "Detroit"
+  }
+ },
+ "awayTeam": {
+  "id": 8,
+  "abbrev": "MTL",
+  "score": 5,
+  "sog": 17,
+  "commonName": {
+   "default": "Canadiens"
+  },
+  "placeName": {
+   "default": "Montréal"
+  }
+ },
+ "gameOutcome": {
+  "lastPeriodType": "REG"
+ },
+ "playerByGameStats": {
+  "homeTeam": {
+   "forwards": [
+    {
+     "playerId": 8477429,
+     "sweaterNumber": 18,
+     "name": {
+      "default": "A. Copp"
+     },
+     "position": "C",
+     "goals": 0,
+     "assists": 0,
+     "points": 0,
+     "plusMinus": -1,
+     "pim": 0,
+     "hits": 1,
+     "powerPlayGoals": 0,
+     "sog": 1,
+     "faceoffWinningPctg": 0.5,
+     "toi": "16:03",
+     "blockedShots": 1,
+     "shifts": 23,
+     "giveaways": 0,
+     "takeaways": 0
+    },
+    {
+     "playerId": 8478891,
+     "sweaterNumber": 22,
+     "name": {
+      "default": "M. Appleton"
+     },
+     "position": "C",
+     "goals": 0,
+     "assists": 0,
+     "points": 0,
+     "plusMinus": -1,
+     "pim": 0,
+     "hits": 3,
+     "powerPlayGoals": 0,
+     "sog": 1,
+     "faceoffWinningPctg": 0.0,
+     "toi": "13:53",
+     "blockedShots": 0,
+     "shifts": 17,
+     "giveaways": 0,
+     "takeaways": 0
+    }
+   ],
+   "defense": [
+    {
+     "playerId": 8475279,
+     "sweaterNumber": 8,
+     "name": {
+      "default": "B. Chiarot"
+     },
+     "position": "D",
+     "goals": 0,
+     "assists": 0,
+     "points": 0,
+     "plusMinus": -1,
+     "pim": 0,
+     "hits": 2,
+     "powerPlayGoals": 0,
+     "sog": 1,
+     "faceoffWinningPctg": 0.0,
+     "toi": "16:55",
+     "blockedShots": 1,
+     "shifts": 25,
+     "giveaways": 3,
+     "takeaways": 0
+    }
+   ],
+   "goalies": [
+    {
+     "playerId": 8476434,
+     "sweaterNumber": 36,
+     "name": {
+      "default": "J. Gibson"
+     },
+     "position": "G",
+     "evenStrengthShotsAgainst": "5/9",
+     "powerPlayShotsAgainst": "3/4",
+     "shorthandedShotsAgainst": "0/0",
+     "saveShotsAgainst": "8/13",
+     "savePctg": 0.615385,
+     "evenStrengthGoalsAgainst": 4,
+     "powerPlayGoalsAgainst": 1,
+     "shorthandedGoalsAgainst": 0,
+     "pim": 0,
+     "goalsAgainst": 5,
+     "toi": "37:12",
+     "starter": true,
+     "decision": "L",
+     "shotsAgainst": 13,
+     "saves": 8
+    },
+    {
+     "playerId": 8475660,
+     "sweaterNumber": 39,
+     "name": {
+      "default": "C. Talbot"
+     },
+     "position": "G",
+     "evenStrengthShotsAgainst": "3/3",
+     "powerPlayShotsAgainst": "0/0",
+     "shorthandedShotsAgainst": "1/1",
+     "saveShotsAgainst": "4/4",
+     "savePctg": 1.0,
+     "evenStrengthGoalsAgainst": 0,
+     "powerPlayGoalsAgainst": 0,
+     "shorthandedGoalsAgainst": 0,
+     "pim": 0,
+     "goalsAgainst": 0,
+     "toi": "22:37",
+     "starter": false,
+     "shotsAgainst": 4,
+     "saves": 4
+    }
+   ]
+  },
+  "awayTeam": {
+   "forwards": [
+    {
+     "playerId": 8475848,
+     "sweaterNumber": 11,
+     "name": {
+      "default": "B. Gallagher"
+     },
+     "position": "R",
+     "goals": 0,
+     "assists": 2,
+     "points": 2,
+     "plusMinus": 2,
+     "pim": 4,
+     "hits": 0,
+     "powerPlayGoals": 0,
+     "sog": 0,
+     "faceoffWinningPctg": 0.0,
+     "toi": "14:03",
+     "blockedShots": 0,
+     "shifts": 19,
+     "giveaways": 0,
+     "takeaways": 0
+    },
+    {
+     "playerId": 8481540,
+     "sweaterNumber": 13,
+     "name": {
+      "default": "C. Caufield"
+     },
+     "position": "R",
+     "goals": 0,
+     "assists": 1,
+     "points": 1,
+     "plusMinus": 1,
+     "pim": 0,
+     "hits": 2,
+     "powerPlayGoals": 0,
+     "sog": 3,
+     "faceoffWinningPctg": 0.0,
+     "toi": "14:30",
+     "blockedShots": 0,
+     "shifts": 19,
+     "giveaways": 1,
+     "takeaways": 0
+    }
+   ],
+   "defense": [
+    {
+     "playerId": 8476875,
+     "sweaterNumber": 8,
+     "name": {
+      "default": "M. Matheson"
+     },
+     "position": "D",
+     "goals": 1,
+     "assists": 1,
+     "points": 2,
+     "plusMinus": 1,
+     "pim": 0,
+     "hits": 1,
+     "powerPlayGoals": 0,
+     "sog": 3,
+     "faceoffWinningPctg": 0.0,
+     "toi": "20:22",
+     "blockedShots": 2,
+     "shifts": 23,
+     "giveaways": 3,
+     "takeaways": 0
+    }
+   ],
+   "goalies": [
+    {
+     "playerId": 8478470,
+     "sweaterNumber": 35,
+     "name": {
+      "default": "S. Montembeault"
+     },
+     "position": "G",
+     "evenStrengthShotsAgainst": "0/0",
+     "powerPlayShotsAgainst": "0/0",
+     "shorthandedShotsAgainst": "0/0",
+     "saveShotsAgainst": "0/0",
+     "evenStrengthGoalsAgainst": 0,
+     "powerPlayGoalsAgainst": 0,
+     "shorthandedGoalsAgainst": 0,
+     "pim": 0,
+     "goalsAgainst": 0,
+     "toi": "00:00",
+     "starter": false,
+     "shotsAgainst": 0,
+     "saves": 0
+    },
+    {
+     "playerId": 8482487,
+     "sweaterNumber": 75,
+     "name": {
+      "default": "J. Dobes"
+     },
+     "position": "G",
+     "evenStrengthShotsAgainst": "22/22",
+     "powerPlayShotsAgainst": "7/8",
+     "shorthandedShotsAgainst": "1/1",
+     "saveShotsAgainst": "30/31",
+     "savePctg": 0.967742,
+     "evenStrengthGoalsAgainst": 0,
+     "powerPlayGoalsAgainst": 1,
+     "shorthandedGoalsAgainst": 0,
+     "pim": 0,
+     "goalsAgainst": 1,
+     "toi": "60:00",
+     "starter": true,
+     "decision": "W",
+     "shotsAgainst": 31,
+     "saves": 30
+    }
+   ]
+  }
+ }
+}

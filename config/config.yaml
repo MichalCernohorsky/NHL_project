@@ -1,0 +1,36 @@
+# Central configuration for the NHL data pipeline.
+# Paths are relative to the repository root unless absolute.
+
+database:
+  path: data/nhl.db
+
+raw_cache_dir: data/raw_cache
+
+# Complete historical seasons (training / validation). 2025-26 is the
+# validation season against closing lines (docs/market_discovery_plan.md).
+seasons:
+  - "2023-24"
+  - "2024-25"
+  - "2025-26"
+
+# The season being played. Kept OUT of `seasons` on purpose: a running
+# season must never silently enter a training set.
+live:
+  season: "2026-27"
+
+# Which NHL game types are stored / backfilled. Schedule sync stores every
+# type it sees; box scores are backfilled only for the enabled ones.
+season_types:
+  preseason: false
+  regular: true
+  playoffs: false
+
+nhl_api:
+  web_base: https://api-web.nhle.com/v1
+  stats_base: https://api.nhle.com/stats/rest/en
+  # Public, unauthenticated endpoints. Be polite: one request at a time.
+  min_interval_s: 0.35
+  jitter_s: [0.0, 0.25]
+  timeout_s: 30
+  max_retries: 4
+  backoff_base_s: 2.0

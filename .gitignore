@@ -1,0 +1,17 @@
+# Data (SQLite DB + raw API cache) never goes to git
+data/*
+!data/.gitkeep
+
+# Secrets - the Odds API key and GitHub token live here and must never reach git
+.env
+
+# Logs written by the launchd jobs
+logs/
+
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+.DS_Store

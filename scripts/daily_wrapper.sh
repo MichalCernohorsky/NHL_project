@@ -40,6 +40,12 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 export PATH
 
+# Python block-buffers stdout when it goes to a file: the closing watcher's
+# "waiting until ..." lines would only reach the log when it exits, hours
+# later. Unbuffered output makes the log readable while a job runs.
+PYTHONUNBUFFERED=1
+export PYTHONUNBUFFERED
+
 cd "$REPO_ROOT" || {
     echo "daily_wrapper.sh: nelze prejit do $REPO_ROOT" >&2
     exit 66

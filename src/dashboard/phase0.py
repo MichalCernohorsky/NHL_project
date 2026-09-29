@@ -11,10 +11,11 @@ UPDATED = "29. 9. 2026"
 CRITERIA = [
     ("K1", "Tipsport vypisuje trh",
      "Střely hráče: den 1 ze 3 splněn (5/5 zápasů, 6 hráčů). "
-     "Zásahy brankáře a zblokované střely zatím nevidět.", "progress"),
+     "Zásahy brankáře a zblokované střely zatím nevidět; bloky 29. 9. "
+     "nevypsala ani žádná americká kniha.", "progress"),
     ("K2", "Data zdarma a denně",
-     "Splněno: 3 sezóny box score, čas na ledě, 0 chyb; střely za 60 min "
-     "se stahují.", "ok"),
+     "Splněno: 3 sezóny (3 936 zápasů) box score, čas na ledě i v přesilovce, "
+     "střely za 60 min z play-by-play, vše ověřeno proti box score, 0 chyb.", "ok"),
     ("K3", "Historické kurzy ≥ 300 zápasů vzorku",
      "Čeká na K1 a na „jeď“ (etapa A, strop 9 942 kreditů).", "wait"),
     ("K4a", "Brier modelu nejvýš o 0,010 horší než trh", "Po etapě A.", "wait"),

@@ -1,4 +1,4 @@
-.PHONY: migrate data daily report test dashboard props-dry-run odds-morning odds-closing odds-status \
+.PHONY: migrate data daily report test dashboard db-up db-down db-status props-dry-run odds-morning odds-closing odds-status \
         automation-install automation-status automation-uninstall
 
 migrate:
@@ -57,3 +57,15 @@ automation-status:
 
 automation-uninstall:
 	scripts/install_automation.sh --uninstall
+
+# --- database transfer (docs/cloud.md) -------------------------------------
+# data/nhl.db lives in ONE release of the PRIVATE repo NHL_project-data.
+# Needs NHL_DATA_TOKEN and NHL_DB_RELEASE_REPO in the environment (~/.zshrc).
+db-up:
+	python scripts/db_release.py up
+
+db-down:
+	python scripts/db_release.py down
+
+db-status:
+	python scripts/db_release.py status

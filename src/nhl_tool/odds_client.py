@@ -29,6 +29,11 @@ class OddsApiError(Exception):
 
 
 def load_api_key(env_path: Path | None = None) -> str:
+    # GitHub Actions passes the key as an encrypted secret in the process
+    # environment; on the Mac it lives in .env. Never in a file in git.
+    import os
+    if os.environ.get("ODDS_API_KEY", "").strip():
+        return os.environ["ODDS_API_KEY"].strip()
     env_path = env_path or ROOT / ".env"
     if not env_path.exists():
         raise OddsApiError(".env file not found - create it with ODDS_API_KEY=...")

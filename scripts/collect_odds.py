@@ -50,6 +50,14 @@ def main():
     ap.add_argument("--watch", action="store_true",
                     help="closing: keep running until every game of the day is priced")
     ap.add_argument("--date", help="ET game date (default: today in US/Eastern)")
+    ap.add_argument("--early-minutes", type=int, default=odds_live.EARLY_MIN,
+                    help="closing: price up to this many minutes before the closing "
+                         "moment (cloud job every 10 min: 20)")
+    ap.add_argument("--repeat", action="store_true",
+                    help="closing: price again games already priced (cloud: the "
+                         "LAST snapshot before puck drop is the closing line)")
+    ap.add_argument("--changed-flag", metavar="PATH",
+                    help="touch this file when any odds row was written")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -72,11 +80,15 @@ def main():
     print(f"{game_date}: {len(games)} zapasu v rozpisu | trhy {', '.join(oc['markets'])}")
     while True:
         now = odds_live.utc_now()
-        done = odds_live.done_keys(conn, args.kind)
-        due = odds_live.due_now(games, done, now, args.kind, minutes, window)
+        done = set() if (args.repeat and args.kind == "closing") \
+            else odds_live.done_keys(conn, args.kind)
+        due = odds_live.due_now(games, done, now, args.kind, minutes, window,
+                                early_min=args.early_minutes)
         if due:
             stats = odds_live.collect(conn, client, due, kind=args.kind, oc=oc, now=now)
             print_stats(args.kind, stats, client)
+            if stats["rows"] and args.changed_flag:
+                Path(args.changed_flag).touch()
             if stats.get("stopped_reserve"):
                 return
         if args.kind == "morning" or not args.watch:

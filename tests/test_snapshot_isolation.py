@@ -15,6 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 ALL_KINDS_ALLOWED = {
     # status line / coverage counts per kind; no analysis
     "scripts/report.py",
+    # release manifest: newest snapshot time and row count, a freshness
+    # check of the file - no analysis
+    "scripts/db_release.py",
 }
 
 PINNED = re.compile(r"snapshot_kind\s*(=|IN|IS)|snapshot_time\s*=\s*\?", re.I)

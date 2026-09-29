@@ -1,0 +1,62 @@
+name: Kurzy (rano + closing)
+
+# Every 10 minutes in the hours NHL games can start (UTC). A cheap gate
+# (scripts/odds_due.py, standard library only, free NHL schedule) decides
+# first; only when something is due is the database downloaded and The Odds
+# API called:
+#   morning  10:00-11:59 ET (the pre-registered 10:00 ET anchor; cron
+#            delays move the real time, the snapshot records it)
+#   closing  a game starts within 30 min; priced again on every run until
+#            puck drop, so the LAST snapshot before puck drop is the
+#            closing line (--repeat). Never after puck drop.
+# Credits: ~3 per game per snapshot (3 markets x region us).
+on:
+  schedule:
+    - cron: "*/10 13-23,0-5 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nhl-db
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NHL_DB_RELEASE_REPO: MichalCernohorsky/NHL_project-data
+
+jobs:
+  odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Je co ocenit?
+        id: gate
+        run: python3 scripts/odds_due.py
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.due != 'none'
+        with: { python-version: "3.12", cache: pip }
+      - if: steps.gate.outputs.due != 'none'
+        run: pip install -q -r requirements.txt
+      - name: Stazeni databaze
+        if: steps.gate.outputs.due != 'none'
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py down --force
+      - name: Migrace schematu
+        if: steps.gate.outputs.due != 'none'
+        run: python scripts/migrate.py
+      - name: Ranni snimek
+        if: steps.gate.outputs.due == 'morning'
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: python scripts/collect_odds.py morning --changed-flag data/.changed
+      - name: Closing snimek
+        if: steps.gate.outputs.due == 'closing'
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: >-
+          python scripts/collect_odds.py closing --early-minutes 20 --repeat
+          --changed-flag data/.changed
+      - name: Ulozeni databaze
+        if: steps.gate.outputs.due != 'none' && hashFiles('data/.changed') != ''
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py up

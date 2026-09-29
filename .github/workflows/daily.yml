@@ -1,0 +1,43 @@
+name: Denni beh (data zive sezony)
+
+# Same job as launchd com.nhltool.daily on the Mac (docs/automation.md):
+# schedule -> box scores -> TOI -> names -> 60-min counts, only what is new.
+# GitHub delays or drops scheduled runs (MLB saw 40 min and a skipped day),
+# hence two backup times; the run is idempotent, a second one costs seconds.
+on:
+  schedule:
+    - cron: "30 10 * * *"     # 12:30 CEST / 11:30 CET
+    - cron: "30 13 * * *"     # backup
+    - cron: "30 17 * * *"     # backup
+  workflow_dispatch:
+
+concurrency:
+  group: nhl-db               # never two writers of the database at once
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NHL_DB_RELEASE_REPO: MichalCernohorsky/NHL_project-data
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - name: Stazeni databaze
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py down --force
+      - name: Migrace schematu
+        run: python scripts/migrate.py
+      - name: Denni beh
+        run: python scripts/daily_collect.py
+      - name: Ulozeni databaze
+        if: always()
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py up

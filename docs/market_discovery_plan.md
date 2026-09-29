@@ -276,3 +276,48 @@ ale jen předem zapsaný, nikdy podle výsledků.
   dnech to částečně pokrývá, ne úplně.
 - Naivní model je schválně jednoduchý. Neprojde-li, neznamená to, že trh
   nejde porazit — jen že fáze 0 k tomu nedala důvod.
+
+## 11. Dodatky
+
+### D1 — vyhodnocení za kurz Tipsportu (29. 9. 2026, před schválením a před nákupem)
+
+**Zjištění.** První screenshot Tipsportu (FLA@CAR, 29. 9.): „Počet střel
+hráče na branku v zápasu" u 6 hráčů, obě strany, lajny 1,5 / 2,5. Marže
+každé z šesti dvojic kurzů je **8,70–8,80 %** (např. 1,84 / 1,84 →
+8,70 %). Týmové střely mají 7,5–7,6 %. Zásahy brankáře ani zblokované
+střely v nabídce zápasu nebyly.
+
+**Díra v plánu.** K4b a K5 (sekce 3, 6.4) vyhodnocují ROI za closingový
+kurz amerických knih, jejichž marže je u propsů zhruba 4,5–7 %. Sázkař ale
+sází za kurz Tipsportu. Trh by mohl K4b splnit a u Tipsportu prodělávat —
+metrikou projektu je reálný zisk, ne zisk v knize, kde se nesází.
+
+**Změna (jediná):**
+
+- **Výběr sázek se nemění** (hrana ≥ 3 p.b. proti de-vig téže knihy,
+  jedna sázka na (zápas, hráč, trh)) — stejně jako NBA, kde se hrana
+  u Tipsportu přepočítává přes de-vig jeho dvou kurzů.
+- **Výplata v K4b a K5 = simulovaný kurz Tipsportu:**
+  kurz_T = 1 / (p_trh × (1 + m)), kde p_trh je de-vig closing téže strany
+  a lajny (sekce 6.3) a m je marže Tipsportu.
+- **m se zafixuje před nákupem** jako medián marže všech hráčských dvojic
+  daného trhu ze screenshotů K1 (3 herní dny). Zapíše se sem jako číslo
+  s datem. Do té doby platí odhad m = 0,087.
+- ROI za kurz amerických knih se v reportu uvádí dál, ale jen jako
+  **vedlejší** údaj; o postupu rozhoduje ROI za simulovaný kurz Tipsportu.
+- Simulace nulového efektu (6.5) se počítá se stejnou výplatou.
+
+**Co to znamená předem (nahlas).** Při m = 8,7 % a kurzu kolem 1,84 je
+break-even 54,3 %. Sázka s hranou přesně 3 p.b. proti férové ceně je
+u Tipsportu v průměru ztrátová (≈ −2,5 %); zisk dají jen sázky, kde je
+skutečná hrana nad ~4,4 p.b. Práh 3 p.b. se přesto **nemění**: jeho
+zvednutí by byl další parametr volený podle očekávaného výsledku. Je
+pravděpodobnější, že fáze 0 skončí „nesázet". To je platný výsledek.
+
+**Co D1 nezachytí.** Hodnotu z toho, že Tipsport přebírá lajny se
+zpožděním (zastaralá lajna proti americkému konsensu). Historická data
+Tipsportu nemáme, takže to fáze 0 změřit neumí; pokud trh projde, měří to
+až dopředný test na kurzech z tiketů.
+
+**Co D1 nemění.** Kandidátní trhy, prahy K1–K5, vzorek, rozpočet, naivní
+modely, práh hrany, co se nevyhodnotí.

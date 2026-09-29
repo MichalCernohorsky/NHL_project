@@ -8,7 +8,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 
 | den | zápasů dne | zápasů zkontrolováno | střely hráče (hráčů na zápas) | zásahy brankáře | zblokované střely | čas screenshotu |
 |---|---|---|---|---|---|---|
-| út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | doplnit |
+| út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~20:00 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -55,3 +55,7 @@ Vzor výběru hráčů (pozorování, 29. 9.): Tipsport vypisuje **3 hráče za 
 typicky 2 útočníky s nejvyšší lajnou a 1 obránce (FLA: Tkachuk, Reinhart,
 Jones; CAR: Aho, Svechnikov, Gostisbehere; MTL: Caufield, Slafkovský,
 Hutson). Americké knihy kotují víc hráčů — viz dodatek D2 v plánu.
+
+Pravidla (uživatel, 29. 9.): „Počet střel hráče na branku" se vyhodnocuje
+za **60 minut, bez prodloužení** (americké knihy prodloužení počítají) —
+dodatek D3 v plánu.

@@ -344,3 +344,41 @@ model nejvíc přeceněný (hvězdy: tvrdí 52 %, trefí 38 %) — pokud trh
 projde, ukáže to až dopředný test.
 
 **Co D2 nemění.** Nic dalšího; D1 platí.
+
+### D3 — Tipsport vyhodnocuje hráčské střely za 60 minut (29. 9. 2026, před schválením a před nákupem)
+
+**Zjištění.** Uživatel ověřil v pravidlech Tipsportu: „Počet střel hráče
+na branku" se vyhodnocuje za **60 minut, bez prodloužení**. Americké
+knihy počítají prodloužení (FanDuel: základní doba + OT, bez nájezdů).
+Změřeno na našich datech: do prodloužení jde 20,7 / 20,7 / 24,8 %
+zápasů (2023-24 / 2024-25 / 2025-26), v prodloužení padne 1,28 / 1,27 /
+1,65 % všech střel na branku. U lajny 2,5 to posouvá P(více) řádově
+o 1–2 p.b. — srovnatelně s prahem hrany 3 p.b. Bez opravy by fáze 0
+mohla „najít hranu" na undrech jen z rozdílu pravidel.
+
+**Změny:**
+
+1. **Vypořádání v K4b a K5 (za kurz Tipsportu) = střely za 60 minut**
+   (třetiny 1–3 z play-by-play, `player_game_logs.sog_reg`; nájezdy ani
+   bloky spoluhráčem se nepočítají, každý zápas ověřen proti box score).
+2. **Naivní model predikuje střely za 60 minut**: rychlost = střely za
+   60 min / čas na ledě bez prodloužení (`toi_s − ot_toi_s`). Plné
+   rozdělení (s prodloužením) se odvodí jako μ_plné = μ_60 × (1 + r),
+   kde r = poměr střel v prodloužení ke střelám za 60 minut u hráčů téže
+   pozice (útočník / obránce), odhadnutý jen na 2023-24 + 2024-25.
+   μ_plné slouží jen pro K4a (Brier proti americkému trhu, který
+   prodloužení počítá — vypořádání K4a zůstává plné, jako u trhu).
+3. **Převod trhu na 60 minut (konzervativně):** z de-vig P(více) americké
+   knihy se dopočte střední hodnota μ_trh tak, aby negativně binomické
+   rozdělení (disperze z tréninku) dávalo tutéž P(více); pak
+   μ_trh_60 = μ_trh / (1 + r) a p_trh_60 = P(více) při μ_trh_60. Výběr
+   sázky: p_model_60 − p_trh_60 ≥ 3 p.b.; simulovaný kurz Tipsportu
+   (D1) = 1 / (p_trh_60 × (1 + m)). Tím se předpokládá, že Tipsport
+   naceňuje 60 minut správně — rozdíl pravidel tedy nedá žádnou „hranu
+   zadarmo".
+4. **Jestli Tipsport 60 minut opravdu naceňuje, nebo přebírá americké
+   kurzy**, se měří až dopředu (živé americké snímky vs. screenshoty
+   Tipsportu) a je to jen diagnostika — ve fázi 0 nic nemění.
+
+**Co D3 nemění.** Kandidátní trhy, prahy K1–K5, vzorek, rozpočet, práh
+hrany, D1, D2, co se nevyhodnotí.

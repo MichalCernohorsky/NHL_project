@@ -50,7 +50,12 @@ znamená, že to nešlo potvrdit — ne že to neplatí.
   zásahy platí, jen když uvedený brankář začne zápas. Moneyline, puck
   line a totaly počítají OT i nájezdy.
 - DraftKings: **neověřeno** (stránka pravidel vrátila 403).
-- Tipsport: **ověří uživatel** (plán fáze 0, sekce 7, bod 6).
+- **Tipsport: hráčské střely na branku za 60 minut, bez prodloužení**
+  (ověřil uživatel 29. 9. 2026) — jiné pravidlo než americké knihy,
+  proto dodatek D3.
+- Play-by-play (`/v1/gamecenter/{id}/play-by-play`) dává třetinu u každé
+  události; nájezdy (`periodType = SO`) a bloky spoluhráčem
+  (`reason = teammate-blocked`) nejsou statistiky zápasu.
 
 ## NHL API (zdarma, bez klíče)
 

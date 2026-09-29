@@ -26,7 +26,9 @@ SELECT g.season,
        (SELECT COUNT(*) FROM player_game_logs p JOIN games x USING (game_id)
          WHERE x.season = g.season AND p.pp_toi_s IS NOT NULL)    AS with_pp_toi,
        (SELECT COUNT(*) FROM goalie_game_logs p JOIN games x USING (game_id)
-         WHERE x.season = g.season AND p.started = 1)             AS goalie_starts
+         WHERE x.season = g.season AND p.started = 1)             AS goalie_starts,
+       (SELECT COUNT(*) FROM player_game_logs p JOIN games x USING (game_id)
+         WHERE x.season = g.season AND p.sog_reg IS NOT NULL)     AS with_sog_60
 FROM games g
 LEFT JOIN team_game_logs t ON t.game_id = g.game_id AND t.is_home = 1
 WHERE g.season_type = 'regular'
@@ -38,7 +40,7 @@ def main():
     conn = connect(resolve_db_path(load_config()))
     rows = conn.execute(QUERY).fetchall()
     head = ("sezona", "zapasu", "odehrano", "OT", "SO", "box score",
-            "radku hracu", "s PP TOI", "starty G")
+            "radku hracu", "s PP TOI", "starty G", "strely 60 min")
     print(" | ".join(head))
     for r in rows:
         print(" | ".join(str(v if v is not None else 0) for v in tuple(r)))

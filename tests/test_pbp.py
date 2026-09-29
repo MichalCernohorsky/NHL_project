@@ -52,7 +52,7 @@ def test_regulation_counts_exclude_overtime(conn):
 
 def test_goal_counts_as_a_shot_but_not_a_save():
     counts = pbp.parse_pbp({"plays": [
-        _ev("goal", "REG", scoringPlayerId=7, goalieInNetId=30),
+        _ev("goal", "REG", scoringPlayerId=7, goalieInNetId=30, shotType="snap"),
         _ev("shot-on-goal", "REG", shootingPlayerId=7, goalieInNetId=30),
         _ev("shot-on-goal", "OT", shootingPlayerId=7, goalieInNetId=30)]})
     assert counts["sog"][7] == 3 and counts["sog_reg"][7] == 2
@@ -72,8 +72,18 @@ def test_shootout_and_teammate_blocks_are_not_statistics():
     counts = pbp.parse_pbp({"plays": [
         _ev("shot-on-goal", "REG", shootingPlayerId=7, goalieInNetId=30),
         _ev("shot-on-goal", "SO", shootingPlayerId=7, goalieInNetId=30),
-        _ev("goal", "SO", scoringPlayerId=7, goalieInNetId=30),
+        _ev("goal", "SO", scoringPlayerId=7, goalieInNetId=30, shotType="wrist"),
         _ev("blocked-shot", "REG", blockingPlayerId=4, reason="blocked"),
         _ev("blocked-shot", "REG", blockingPlayerId=4, reason="teammate-blocked")]})
     assert counts["sog"][7] == 1 and counts["sa_reg"][30] == 1
     assert counts["blk"][4] == 1
+
+
+def test_goal_without_a_shot_is_not_a_shot():
+    """Own goals / awarded goals carry no shot type; the box score does not
+    count them as shots (found on 4 of the first 500 games of 2023-24)."""
+    counts = pbp.parse_pbp({"plays": [
+        _ev("goal", "REG", scoringPlayerId=7, goalieInNetId=30, shotType="wrist"),
+        _ev("goal", "REG", scoringPlayerId=7, goalieInNetId=30)]})
+    assert counts["sog"][7] == 1 and counts["sog_reg"][7] == 1
+    assert counts["sa_reg"][30] == 1 and counts["sv_reg"][30] == 0

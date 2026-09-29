@@ -33,8 +33,10 @@ def sync_season(conn, client, season: str, live: bool, playoffs: bool) -> int:
         teams, games = parse_week(client.web(f"schedule/{week}", cache_key=key), season)
         upsert_teams(conn, teams)
         upsert_games(conn, games)
+        # Commit per week: holding the write lock across ~30 requests
+        # (15 s) made a parallel backfill fail with "database is locked".
+        conn.commit()
         n += len(games)
-    conn.commit()
     return n
 
 

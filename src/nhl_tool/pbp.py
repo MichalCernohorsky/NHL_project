@@ -12,6 +12,10 @@ found by that check on the first 20 games of 2025-26):
 - shootout attempts (period type 'SO') - not game statistics anywhere;
 - 'teammate-blocked' shots - a shot stopped by the shooter's own teammate
   is not a blocked shot of the blocker in the box score.
+And one found on 2023-24 (4 games in the first 500): a goal WITHOUT a shot
+type is a goal credited without a shot (own goal put in by the opponent,
+awarded goal). It is a goal, not a shot on goal - for the scorer or
+against the goalie.
 """
 from __future__ import annotations
 
@@ -31,6 +35,8 @@ def parse_pbp(payload: dict) -> dict:
         if period == "SO":
             continue
         reg = period == "REG"
+        if kind == "goal" and not det.get("shotType"):
+            continue
         if kind in SOG_EVENTS:
             shooter = det.get("shootingPlayerId") if kind == "shot-on-goal" \
                 else det.get("scoringPlayerId")

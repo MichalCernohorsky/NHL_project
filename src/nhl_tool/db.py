@@ -6,7 +6,10 @@ from pathlib import Path
 def connect(db_path: str | Path) -> sqlite3.Connection:
     db_path = Path(db_path)
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    # Several jobs share one file (the daily run, an odds snapshot, a long
+    # backfill in the terminal): wait up to a minute for another writer's
+    # lock instead of failing after sqlite's default 5 seconds.
+    conn = sqlite3.connect(str(db_path), timeout=60)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")

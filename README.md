@@ -34,6 +34,8 @@ pip install -r requirements.txt
 | — | `make data` | kroky 2–5 najednou | |
 | — | `python scripts/backfill_props.py --dry-run` | vzorek a cena nákupu kurzů | nic (bez klíče) |
 | — | `make odds-morning` / `make odds-closing` | živé snímky kurzů dne | ~3 kredity na zápas a snímek |
+| — | `make daily` | denní běh živé sezóny (automaticky 12:30, `docs/automation.md`) | jen NHL API |
+| — | `make dashboard` | dashboard jen pro čtení: Přehled, Kurzy, Hráč, Brankáři, Týmy | nic |
 
 Všechny stahovací kroky jsou **resumable**: přerušení (Ctrl+C) nic
 neztratí, další spuštění pokračuje. Stažené JSON odehraných zápasů se

@@ -1,0 +1,62 @@
+"""Every dashboard page renders without an exception on a small database,
+and on an empty one (the first morning of a season)."""
+import shutil
+import sqlite3
+from pathlib import Path
+
+import pytest
+
+pytest.importorskip("streamlit")
+from streamlit.testing.v1 import AppTest  # noqa: E402
+
+from conftest import game, load_fixture, week  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[1]
+VIEWS = sorted((ROOT / "dashboard" / "views").glob("*.py"))
+
+
+def _build_db(path: Path, with_data: bool):
+    from migrate import apply_migrations, ensure_migrations_table
+    from nhl_tool import boxscore, odds_import, pbp, toi
+    from nhl_tool.schedule import parse_week, upsert_games, upsert_teams
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    ensure_migrations_table(conn)
+    apply_migrations(conn)
+    if with_data:
+        teams, games = parse_week(week([game(2025020010)]), "2025-26")
+        upsert_teams(conn, teams)
+        upsert_games(conn, games)
+        parsed = boxscore.parse_boxscore(load_fixture("boxscore_2025020010.json"))
+        boxscore.store(conn, parsed, [])
+        toi.store(conn, toi.parse_rows(load_fixture("toi_2025-10-09.json")))
+        conn.execute("UPDATE player_game_logs SET sog_reg = sog, blocked_shots_reg = blocked_shots")
+        conn.execute("UPDATE goalie_game_logs SET saves_reg = saves")
+        roster = odds_import.build_roster_lookup(conn, 2025020010)
+        odds_import.insert_odds_rows(
+            conn, [{"bookmaker": "draftkings", "player_name": "Andrew Copp", "side": s,
+                    "line": 1.5, "price": p} for s, p in (("over", 1.8), ("under", 2.0))],
+            event_id="e1", game_id=2025020010, market="player_shots_on_goal",
+            snapshot_time="2025-10-09T14:00:00Z", snapshot_kind="morning", roster=roster)
+    conn.commit()
+    conn.close()
+
+
+@pytest.fixture(params=[True, False], ids=["data", "empty"])
+def db(tmp_path, monkeypatch, request):
+    path = tmp_path / "nhl.db"
+    _build_db(path, request.param)
+    monkeypatch.setenv("NHL_DASHBOARD_DB", str(path))
+    return path
+
+
+@pytest.mark.parametrize("view", VIEWS, ids=[v.stem for v in VIEWS])
+def test_page_renders(db, view):
+    at = AppTest.from_file(str(view), default_timeout=30).run()
+    assert not at.exception, [e.value for e in at.exception]
+
+
+def test_router_lists_every_view():
+    app = (ROOT / "dashboard" / "app.py").read_text()
+    for v in VIEWS:
+        assert v.name in app, v.name

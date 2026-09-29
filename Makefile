@@ -18,6 +18,10 @@ data:
 daily:
 	python scripts/daily_collect.py
 
+# Read-only dashboard (docs: README). Local only in phase 0.
+dashboard:
+	streamlit run dashboard/app.py
+
 report:
 	python scripts/report.py
 

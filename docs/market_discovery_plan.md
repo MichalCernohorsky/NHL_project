@@ -321,3 +321,26 @@ až dopředný test na kurzech z tiketů.
 
 **Co D1 nemění.** Kandidátní trhy, prahy K1–K5, vzorek, rozpočet, naivní
 modely, práh hrany, co se nevyhodnotí.
+
+### D2 — objem (K5) podle počtu hráčů, které Tipsport vypisuje (29. 9. 2026, před schválením a před nákupem)
+
+**Zjištění.** 29. 9. vypsal Tipsport střely hráče u všech 5 zápasů, vždy
+**6 hráčů na zápas** (3 za tým, typicky 2 útočníci a 1 obránce;
+`docs/tipsport_k1_log.md`). Americké knihy kotují víc hráčů na zápas,
+takže K5 spočítaný z nich by nadsadil počet tipů, které lze u Tipsportu
+podat.
+
+**Změna (jediná):** K5 = sázky na herní den **× (6 / průměrný počet
+hráčů na zápas s lajnou trhu v closingu vzorku)**. Číslo 6 se po
+3 herních dnech K1 nahradí průměrem z `docs/tipsport_k1_log.md` a zapíše
+se sem s datem, před nákupem.
+
+**Co D2 záměrně NEdělá.** Nevybírá „tipsportovou" podmnožinu hráčů pro
+ROI (K4b). Historicky nevíme, které tři hráče by Tipsport vypsal, a
+pravidlo typu „dva útočníci s nejvyšší lajnou + obránce" by byl filtr
+vymyšlený teď bez možnosti ověření. ROI se proto měří na všech hráčích;
+omezení: Tipsport vypisuje hlavně nejlepší hráče, u kterých byl v NBA
+model nejvíc přeceněný (hvězdy: tvrdí 52 %, trefí 38 %) — pokud trh
+projde, ukáže to až dopředný test.
+
+**Co D2 nemění.** Nic dalšího; D1 platí.

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Daily data run: 12:30 CZ = 06:30 ET, when even the last West Coast games
+  of the previous night are final (they end around 07:30 CZ). Schedule,
+  box scores, TOI split, names, 60-minute counts for the live season.
+
+  Local Mac time (CET/CEST). StartCalendarInterval is pinned to the wall
+  clock; a run missed during sleep starts after wake-up. launchd never runs
+  two copies of one job at once.
+
+  __REPO_ROOT__ is replaced with the absolute repository path by
+  scripts/install_automation.sh (same scheme as NBA_tool).
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nhltool.daily</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO_ROOT__/scripts/daily_wrapper.sh</string>
+        <string>daily</string>
+        <string>make</string>
+        <string>daily</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO_ROOT__</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>12</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>__REPO_ROOT__/logs/launchd_daily.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO_ROOT__/logs/launchd_daily.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>NHL_TOOL_JOB</key>
+        <string>daily</string>
+    </dict>
+
+    <key>ExitTimeOut</key>
+    <integer>30</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

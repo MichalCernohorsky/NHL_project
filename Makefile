@@ -1,4 +1,5 @@
-.PHONY: migrate data report test props-dry-run odds-morning odds-closing odds-status
+.PHONY: migrate data daily report test dashboard props-dry-run odds-morning odds-closing odds-status \
+        automation-install automation-status automation-uninstall
 
 migrate:
 	python scripts/migrate.py
@@ -12,6 +13,10 @@ data:
 	python scripts/backfill_toi.py
 	python scripts/backfill_players.py
 	python scripts/backfill_pbp.py
+
+# Live season, every morning (launchd 12:30 CZ): only what is new.
+daily:
+	python scripts/daily_collect.py
 
 report:
 	python scripts/report.py
@@ -34,3 +39,17 @@ odds-closing:
 
 odds-status:
 	python scripts/collect_odds.py status
+
+# --- automation (macOS launchd; docs/automation.md) -----------------------
+# daily 12:30, odds-morning 16:00, odds-closing 17:00 (local Mac time).
+# Never decides a bet.
+automation-install:
+	scripts/install_automation.sh
+
+# Shows what is loaded AND the newest log line per job. Read the log dates,
+# not the exit code: launchd reports 0 for a job that has never run.
+automation-status:
+	scripts/install_automation.sh --status
+
+automation-uninstall:
+	scripts/install_automation.sh --uninstall

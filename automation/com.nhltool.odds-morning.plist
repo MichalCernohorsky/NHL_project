@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entry odds snapshot: 16:00 CZ = 10:00 ET, the morning anchor fixed in
+  docs/market_discovery_plan.md (same anchor as NBA). ~3 credits a game.
+
+  Local Mac time (CET/CEST). StartCalendarInterval is pinned to the wall
+  clock; a run missed during sleep starts after wake-up. launchd never runs
+  two copies of one job at once.
+
+  __REPO_ROOT__ is replaced with the absolute repository path by
+  scripts/install_automation.sh (same scheme as NBA_tool).
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nhltool.odds-morning</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO_ROOT__/scripts/daily_wrapper.sh</string>
+        <string>odds-morning</string>
+        <string>make</string>
+        <string>odds-morning</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO_ROOT__</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>16</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>__REPO_ROOT__/logs/launchd_odds-morning.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO_ROOT__/logs/launchd_odds-morning.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>NHL_TOOL_JOB</key>
+        <string>odds-morning</string>
+    </dict>
+
+    <key>ExitTimeOut</key>
+    <integer>30</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

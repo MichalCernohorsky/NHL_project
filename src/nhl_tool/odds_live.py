@@ -53,26 +53,28 @@ def closing_moment(start_utc: str, minutes_before: int) -> datetime:
 
 
 def due_now(games, done: set[str], now: datetime, kind: str,
-            minutes_before: int, window_min: int):
+            minutes_before: int, window_min: int, early_min: int = EARLY_MIN):
     """Games to price in this pass.
 
     morning: every game not started yet. closing: games whose closing moment
-    has come (up to EARLY_MIN early, clock drift) and passed by at most
-    window_min - a watcher that wakes up a little late still prices the
-    game; one that wakes up later does not, because a price from mid-game
-    is not a closing line."""
+    (puck drop - minutes_before) has come - up to early_min early (clock
+    drift; the cloud job runs every 10 min and passes a larger value) - and
+    passed by at most window_min, and ALWAYS strictly before puck drop: a
+    price from a game already under way is not a closing line. (Before
+    29. 9. the window alone allowed up to 10 min after puck drop.)"""
     out = []
     for g in games:
         if str(g["game_id"]) in done:
             continue
         start = parse_iso(g["start_time_utc"])
+        if now >= start:
+            continue
         if kind == "morning":
-            if now < start:
-                out.append(g)
+            out.append(g)
             continue
         moment = closing_moment(g["start_time_utc"], minutes_before)
         late = (now - moment).total_seconds()
-        if -EARLY_MIN * 60 <= late <= window_min * 60:
+        if -early_min * 60 <= late <= window_min * 60:
             out.append(g)
     return out
 

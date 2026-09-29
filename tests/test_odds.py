@@ -125,9 +125,15 @@ def test_closing_window():
     g = {"game_id": 1, "start_time_utc": "2025-10-09T23:00:00Z"}
     moment = datetime(2025, 10, 9, 22, 50, tzinfo=timezone.utc)
     due = lambda t: odds_live.due_now([g], set(), t, "closing", 10, 20)  # noqa: E731
-    assert due(moment) and due(moment + timedelta(minutes=15))
+    assert due(moment) and due(moment + timedelta(minutes=5))
+    assert not due(moment + timedelta(minutes=15))     # 5 min into the game (the old bug)
     assert not due(moment - timedelta(minutes=10))     # too early: not a closing line
     assert not due(moment + timedelta(minutes=25))     # mid-game: not a closing line
+    assert not due(moment + timedelta(minutes=10))     # exactly puck drop: too late
+    assert due(moment + timedelta(minutes=9, seconds=59))
+    # the cloud job (every 10 min) prices from 30 min before puck drop
+    cloud = lambda t: odds_live.due_now([g], set(), t, "closing", 10, 20, early_min=20)  # noqa: E731
+    assert cloud(moment - timedelta(minutes=20)) and not cloud(moment - timedelta(minutes=21))
     assert odds_live.next_wakeup([g], set(), moment - timedelta(hours=1), 10) == moment
     assert odds_live.next_wakeup([g], {"1"}, moment - timedelta(hours=1), 10) is None
 

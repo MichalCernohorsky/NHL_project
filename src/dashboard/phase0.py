@@ -10,9 +10,9 @@ UPDATED = "2. 10. 2026"
 # (id, criterion, status text, state: ok / progress / wait / fail)
 CRITERIA = [
     ("K1", "Tipsport vypisuje trh",
-     "Střely hráče: den 1 splněn (5/5 zápasů, 6 hráčů), den 2 rozpracovaný "
-     "(1/5 zápasů, 6 hráčů). Zásahy brankáře v Tipsportu nevidět; zblokované "
-     "střely nevypsal nikdo, ani americké knihy (21 zápasů).", "progress"),
+     "Střely hráče: dny 1 a 2 ze 3 splněny (10/10 zápasů, vždy 6 hráčů). "
+     "Zásahy brankáře v Tipsportu nevidět; zblokované střely nevypsal nikdo, "
+     "ani americké knihy (21 zápasů).", "progress"),
     ("K2", "Data zdarma a denně",
      "Splněno: 3 sezóny (3 936 zápasů) box score, čas na ledě i v přesilovce, "
      "střely za 60 min z play-by-play, vše ověřeno proti box score, 0 chyb.", "ok"),

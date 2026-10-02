@@ -38,6 +38,11 @@ jobs:
         run: python scripts/migrate.py
       - name: Denni beh
         run: python scripts/daily_collect.py
+      # Yesterday's morning + closing snapshots from the archive (plan D4).
+      # Does nothing while odds.hist_daily_enabled is false.
+      - name: Nakup vcerejsich snimku kurzu
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: python scripts/buy_snapshots.py
       # Also after a failed daily step (keeps what was downloaded), but never
       # when the download itself failed: there is nothing to upload then.
       - name: Ulozeni databaze

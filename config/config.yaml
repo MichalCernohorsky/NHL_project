@@ -57,3 +57,9 @@ odds:
   # order until this many games.
   backfill_season: "2025-26"
   backfill_target_games: 330
+  # Live season, bought the day after from the historical archive at the
+  # same anchors (plan amendment D4; scripts/buy_snapshots.py, cloud daily
+  # job). OFF until the user's "jed" - flipping it is a commit of its own.
+  hist_daily_enabled: false
+  hist_daily_days: 7        # look-back window: a missed run catches up
+  hist_daily_budget: 1000   # max credits per run

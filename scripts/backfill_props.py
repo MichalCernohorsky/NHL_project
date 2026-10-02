@@ -30,12 +30,9 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from nhl_tool.config import load_config, resolve_db_path
 from nhl_tool.db import connect, set_state, state_keys
-from nhl_tool.odds_import import (build_roster_lookup, find_event, insert_odds_rows,
-                                  parse_event_odds)
-from nhl_tool.parsing import et_time_to_utc, minus_minutes
+from nhl_tool.hist_odds import CREDITS_PER_MARKET_REGION, HistoricalBuyer
+from nhl_tool.hist_odds import snapshot_for as _snapshot_for
 from nhl_tool.sampling import sample_days
-
-CREDITS_PER_MARKET_REGION = 10     # historical multiplier (docs + NBA measurement)
 
 
 def task_name(markets, snapshot: str) -> str:
@@ -43,9 +40,7 @@ def task_name(markets, snapshot: str) -> str:
 
 
 def snapshot_for(snapshot: str, start_utc: str, game_date: str, cfg_odds: dict) -> str:
-    if snapshot == "morning":
-        return et_time_to_utc(game_date, cfg_odds["morning_et"])
-    return minus_minutes(start_utc, cfg_odds["closing_minutes_before_start"])
+    return _snapshot_for(snapshot, start_utc, game_date, cfg_odds)
 
 
 def estimate_credits(n_games: int, n_markets: int, n_days: int) -> int:
@@ -158,8 +153,7 @@ def main():
         print("STOP: zustatek je pod rezervou, nic se nestahuje.")
         return
 
-    sport = oc["sport"]
-    events_by_day: dict = {}
+    buyer = HistoricalBuyer(conn, client, oc, markets, cache_fn=cache_response)
     per_market, all_unmatched, n_done = defaultdict(int), set(), 0
     for i, g in enumerate(todo, 1):
         spent = (client.last_used or 0) - start_used
@@ -168,47 +162,13 @@ def main():
                   f" zustatek {client.last_remaining:.0f}. Spust znovu (resumable).")
             break
         gid = g["game_id"]
-        snap = snapshot_for(args.snapshot, g["start_time_utc"], g["game_date"], oc)
-        if snap >= g["start_time_utc"]:
-            set_state(conn, task, str(gid), "missing", "snapshot not before puck drop")
-            conn.commit()
-            continue
         try:
-            day = g["game_date"]
-            if day not in events_by_day:
-                anchor = et_time_to_utc(day, oc["morning_et"])
-                payload, _ = client.get(f"/historical/sports/{sport}/events", date=anchor)
-                cache_response("events", f"{day}", payload)
-                events_by_day[day] = payload
-            event_id = find_event(events_by_day[day], g["home"], g["away"],
-                                  g["start_time_utc"])
-            if event_id is None:   # e.g. a game that started before the anchor
-                payload, _ = client.get(f"/historical/sports/{sport}/events", date=snap)
-                event_id = find_event(payload, g["home"], g["away"], g["start_time_utc"])
-            if event_id is None:
-                set_state(conn, task, str(gid), "missing", "event not found")
-                conn.commit()
-                continue
-            odds_payload, _ = client.get(
-                f"/historical/sports/{sport}/events/{event_id}/odds",
-                date=snap, regions=oc["regions"], markets=",".join(markets),
-                oddsFormat="decimal")
-            cache_response("event_odds", f"{gid}_{args.snapshot}_{'_'.join(markets)}",
-                           odds_payload)
-            roster = build_roster_lookup(conn, gid)
-            details, total = [], 0
-            for market in markets:
-                rows = parse_event_odds(odds_payload.get("data", {}), market)
-                n, unmatched = insert_odds_rows(
-                    conn, rows, event_id=event_id, game_id=gid, market=market,
-                    snapshot_time=odds_payload.get("timestamp", snap),
-                    snapshot_kind=args.snapshot, roster=roster)
+            res = buyer.price(g, args.snapshot)
+            for market, n in res["rows"].items():
                 per_market[market] += n
-                total += n
-                all_unmatched |= unmatched
-                details.append(f"{market}={n}")
-            set_state(conn, task, str(gid), "done" if total else "missing", " ".join(details))
-            n_done += 1
+            all_unmatched |= res["unmatched"]
+            set_state(conn, task, str(gid), res["status"], res["detail"])
+            n_done += res["status"] == "done"
         except KeyboardInterrupt:
             conn.commit()
             print("\npreruseno - postup ulozen, spust znovu pro pokracovani")

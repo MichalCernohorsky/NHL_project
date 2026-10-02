@@ -1,5 +1,11 @@
 # Automatika: denní provoz NHL (launchd na macOS)
 
+> **Od 2. 10. 2026 vypnuto — provoz běží v cloudu (`docs/cloud.md`).**
+> Úlohy jsou odinstalované; soubory zůstávají jako záloha
+> (`make automation-install` je vrátí). Živé snímky kurzů z Macu nahradil
+> nákup den poté z archivu (dodatek D4 plánu), protože Mac je ve spánku
+> ztrácel.
+
 Tři úlohy se na Macu spouští samy, stejně jako v NBA_tool (převzatá
 obálka `scripts/daily_wrapper.sh` a instalátor `scripts/install_automation.sh`).
 Když krok selže, vyskočí notifikace a do `logs/` se zapíše, co se stalo.

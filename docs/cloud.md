@@ -18,20 +18,18 @@ repozitáře kódu.
 
 | soubor | kdy (čas CZ) | co |
 |---|---|---|
-| `.github/workflows/daily.yml` | 12:30, záloha 15:30 a 19:30 | denní běh dat (jako `make daily`) |
-| `.github/workflows/odds.yml` | každých 10 min, 15:00–07:50 | brána → ranní snímek (10:00–11:59 ET) nebo closing (zápas do 30 min) |
+| `.github/workflows/daily.yml` | 12:30, záloha 15:30 a 19:30 | denní běh dat (jako `make daily`) + nákup včerejších snímků kurzů z archivu (`scripts/buy_snapshots.py`, dodatek D4 plánu) |
+| `.github/workflows/odds.yml` | jen ručně | bezplatná kontrola klíče The Odds API |
 | `.github/workflows/tests.yml` | každý push | testy |
 
-**Rozdíl proti Macu (nahlas):** GitHub plánované úlohy zpožďuje
-(MLB: až 40 min, jednou vynechal den). Ranní snímek proto proběhne mezi
-10:00 a 11:59 ET a closing je **poslední snímek před začátkem zápasu**
-(oceňuje se opakovaně od 30 min před zápasem, nikdy po začátku). Skutečný
-čas každého snímku je v `odds.snapshot_time`. Ve fázi 0 je closing jen
-diagnostika; historická data (plán, sekce 4) mají pevné časy a tohle se
-jich netýká.
-
-Kredity: ~3 za zápas a snímek; closing se opakuje až 3× → ~50–70 za
-herní den, ~2 000 měsíčně. Pod 2 000 na účtu se sběr zastaví.
+**Proč ne živé snímky (2. 10. 2026):** GitHub spouštěl plán „každých 10
+minut" jen jednou za 3–6 hodin a Mac snímky ztrácí, když spí. Archiv The
+Odds API drží každou lajnu po 5 minutách, takže den poté se koupí přesně
+v kotvách z plánu (10:00 ET; začátek −10 min). Desetinásobná cena:
+~31 kreditů na zápas, ~6 500 měsíčně. Na časech GitHubu tím nezáleží —
+denní běh smí doběhnout s hodinovým zpožděním a okno 7 dní dožene
+i vynechaný den. Nákup je vypnutý, dokud uživatel neřekne „jeď"
+(`odds.hist_daily_enabled` v `config/config.yaml`).
 
 ## Nastavení (jednorázově, ~20 minut, dělá uživatel)
 
@@ -77,9 +75,8 @@ a v soukromém repozitáři spotřebovávají minuty Actions sdílené s MLB
    Klíč The Odds API se ověří zdarma: *Actions* → *Kurzy (rano + closing)*
    → *Run workflow* → mode **check** (volá bezplatný dotaz, žádný kredit).
    Ověřeno 2. 10. 2026: denní běh i klíč v cloudu zelené.
-8. **Vypnutí Macu jako sběrače** až po zeleném kroku 7 a prvním zeleném
-   běhu *Kurzy*: `make automation-uninstall`. Jinak by se kurzy stahovaly
-   dvakrát a platily dvakrát kredity.
+8. **Vypnutí Macu jako sběrače:** hotovo 2. 10. 2026
+   (`make automation-uninstall`). Do databáze od té doby zapisuje jen cloud.
 
 ## Dashboard na Macu
 

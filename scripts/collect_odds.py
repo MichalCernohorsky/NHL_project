@@ -62,6 +62,12 @@ def main():
 
     cfg = load_config()
     oc = cfg["odds"]
+    if args.kind == "check":      # no database needed: one free call proves the key
+        from nhl_tool.odds_client import OddsClient
+        client = OddsClient()
+        client.get("/sports")
+        print(f"klic The Odds API funguje | zbyva {client.last_remaining:.0f} kreditu")
+        return
     conn = connect(resolve_db_path(cfg))
     game_date = args.date or datetime.now(ET).date().isoformat()
     refresh_schedule(conn, cfg, game_date)
@@ -76,10 +82,6 @@ def main():
 
     from nhl_tool.odds_client import OddsClient
     client = OddsClient()
-    if args.kind == "check":
-        client.get("/sports")      # free endpoint: proves the key, costs nothing
-        print(f"klic The Odds API funguje | zbyva {client.last_remaining:.0f} kreditu")
-        return
     minutes, window = oc["closing_minutes_before_start"], oc["closing_window_minutes"]
     print(f"{game_date}: {len(games)} zapasu v rozpisu | trhy {', '.join(oc['markets'])}")
     while True:

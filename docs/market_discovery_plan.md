@@ -382,3 +382,32 @@ mohla „najít hranu" na undrech jen z rozdílu pravidel.
 
 **Co D3 nemění.** Kandidátní trhy, prahy K1–K5, vzorek, rozpočet, práh
 hrany, D1, D2, co se nevyhodnotí.
+
+### D4 — kurzy živé sezóny se kupují den poté z archivu (2. 10. 2026, před schválením a před nákupem)
+
+**Zjištění.** Sekce 8 počítala s živými snímky (ranní 10:00 ET, closing
+10 min před zápasem) za 1 kredit na trh. Obojí potřebuje spuštění v přesný
+čas. Mac snímky ztrácí, když spí (30. 9.–2. 10. přišel o všechny closingy),
+a GitHub Actions spouštěl plán „každých 10 minut" jen jednou za 3–6 hodin
+(změřeno 29. 9.–2. 10., ~7 % běhů).
+
+**Změna (rozhodl uživatel 2. 10., varianta C):** cloudový denní běh
+kupuje snímky **včerejška z historického archivu The Odds API** přesně
+v kotvách z plánu (10:00 ET; začátek zápasu −10 min), stejným kódem jako
+vzorek 2025-26 (`src/nhl_tool/hist_odds.py`, `scripts/buy_snapshots.py`).
+Okno 7 dní zpět, takže zmeškaný běh se dožene; zápas, který už má snímek
+daného druhu (živý sběr Macu do 2. 10.), se nekupuje znovu.
+
+**Cena (nahlas):** 10 kreditů za trh, který kniha opravdu vypíše.
+Změřeno na živých datech: ranní snímek 1,12 trhu na zápas, closing 2,00
+(střely + zásahy; bloky nevypisuje nikdo, neplatí se). **~31 kreditů na
+zápas, ~227 na herní den, ~6 500 měsíčně, ~42 000 za základní část**
+(1 344 zápasů). Kdyby po K1 vypadly zásahy brankáře, ~21 na zápas.
+Jednorázově dohnat 29. 9.–1. 10.: odhad 279 kreditů.
+
+**Spouští se až po „jeď"** (`odds.hist_daily_enabled`), samostatným
+commitem.
+
+**Co D4 nemění.** Nic z výběru trhu (K1–K5, vzorek 2025-26, modely, práh).
+Živé snímky nikdy nerozhodovaly o fázi 0; jen se mění, jak a za kolik se
+sbírají.

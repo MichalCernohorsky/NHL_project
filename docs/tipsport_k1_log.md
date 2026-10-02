@@ -9,7 +9,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | den | zápasů dne | zápasů zkontrolováno | střely hráče (hráčů na zápas) | zásahy brankáře | zblokované střely | čas screenshotu |
 |---|---|---|---|---|---|---|
 | út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~20:00 CZ |
-| pá 2. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~21:45–22:15 CZ |
+| pá 2. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~21:30 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -72,3 +72,8 @@ střely nevypsala žádná kniha ani jednou**; zásahy brankáře v closingu
 29. 9. u 5/5 zápasů, v ranních snímcích jen 2 z 21 zápasů (lajny vznikají
 až po potvrzení brankáře). Tipsport: zásahy ani bloky ve 2 dnech nevidět (2. 10. ověřeno vyhledáním
 „zákrok“ / „zblok“ u WSH@CAR, BOS@WPG, STL@DAL, ANA@VGK).
+
+**Podmínka „vypsaný nejpozději v 18:00 CZ" (K1) zatím neověřena:** kontroly
+29. 9. (~20:00) a 2. 10. (~21:30) proběhly až po 18:00. Pokrytí a počet
+hráčů z nich platí, čas ne. K1 tedy potřebuje 3 herní dny s kontrolou
+mezi 17:30 a 18:00 (od so 3. 10.).

@@ -97,3 +97,40 @@ jakýkoli výsledek tipu):
 Kapacita: tipů bývá víc, než lze vsadit; Tipsport ale vypisuje jen
 6 hráčů na zápas a „minimální kurz" vyřadí sázky, kde marže sní hranu.
 Strop počtu tipů se nezavádí (byl by to další nevalidovaný filtr).
+
+## 8. ⭐ TOP dne — pevná definice (2. 10. 2026, před prvním vyhodnoceným tipem)
+
+Na přání uživatele jako v MLB / NBA (A4). **TOP dne = nejvýš 3 tipy dne
+s největší hranou mezi tipy bez varování (hrana 3–10 p.b.), nejvýš jeden
+na zápas; při shodě vyšší p_model.** Členství se zapíše do tabulky `tips`
+(`arm_top`) při sestavení tipů a zpětně se needituje.
+
+- Proč bez ⚠: v NBA měly tipy s hranou > 10 p.b. nejhorší výsledky
+  (model tvrdil 51,7 %, trefil 38,6 %); TOP podle největší hrany by jinak
+  vybral přesně je.
+- Proč jeden na zápas: střely spoluhráčů a soupeřů v jednom zápase
+  závisí na tempu téhož zápasu — tři tipy z jednoho zápasu by byly
+  jedna sázka třikrát.
+- Je to **rameno měření**, ne nové pravidlo: tipy zůstávají tipy, ⭐ je
+  značka. Vyhodnocení jako NBA A4: ROI TOP − ROI MODEL s bootstrap
+  intervalem (převzorkují se dny); podpořeno jen s celým 95% intervalem
+  rozdílu nad nulou a ≥ 150 vyhodnocenými TOP tipy, vyvráceno s celým
+  intervalem pod nulou, jinak nerozhodnuto.
+
+## 9. ✅ Vsazeno a Moje sázky (2. 10. 2026, před kódem)
+
+Tok jako MLB: **Tipy dne → Rozbor zápasu** (✅ Vsazeno / ❌ Ne u každého
+tipu) **→ Moje sázky** (tiket: lajna, sázkovka, kurz, vklad v Kč).
+
+- **Zámek v kódu** (NBA `decisions.py`): rozhodnutí i uložení tiketu po
+  začátku zápasu kód odmítne. Nerozhodnuto = nevsazeno. Smazat překlep
+  tiketu jde jen do začátku zápasu — prohraný tiket nejde zpětně „vymazat".
+- **Uložení:** append-only záznamy (rozhodnutí, tiket, smazání) v souborech
+  mimo repozitář (`~/.nhl_project/`) + záloha každého zápisu do
+  **soukromého** `NHL_project-data` (GitHub Contents API, token `nhl-data`).
+  Při startu dashboardu se záloha sloučí s lokální kopií (sjednocení
+  záznamů). Nikdy ve veřejném repozitáři.
+- **Vyhodnocení tiketu:** za lajnu a kurz z tiketu, střely za 60 minut;
+  hráč bez času na ledě = vrácený vklad; celočíselná lajna = možný push.
+- **Bilance TY** (Kč i jednotky) vedle ramene MODEL; v Tipech dne
+  i v Moje sázky.

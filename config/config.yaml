@@ -67,3 +67,8 @@ odds:
   hist_daily_markets: [player_shots_on_goal]
   hist_daily_days: 7        # look-back window: a missed run catches up
   hist_daily_budget: 1000   # max credits per run
+  # Live tips (docs/tips_plan.md): one live snapshot of today's games per
+  # game, these markets only (~1 credit per game).
+  live_markets: [player_shots_on_goal]
+  # Tipsport margin m of amendment D1 - interim value until fixed after K1.
+  tipsport_margin: 0.0875

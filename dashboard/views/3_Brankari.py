@@ -46,7 +46,7 @@ row = starters.iloc[pick]
 g = data.goalie_games(int(row["player_id"]), season)
 g = g[g["start"] == 1]
 section(f"{row['jmeno']} — zásahy v odchytaných startech")
-st.markdown(f'<img src="{logo_url(row["tym"])}" style="height:34px">', unsafe_allow_html=True)
+st.markdown(f'<img src="{logo_url(row["tym"], light=True)}" style="height:34px">', unsafe_allow_html=True)
 fig = go.Figure()
 fig.add_bar(x=g["datum"], y=g["zasahy"], name="zásahy", marker_color=COLORS["accent"],
             customdata=g[["souper", "strely_proti", "obdrzene"]],

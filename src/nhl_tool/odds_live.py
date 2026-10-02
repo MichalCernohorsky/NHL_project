@@ -69,7 +69,7 @@ def due_now(games, done: set[str], now: datetime, kind: str,
         start = parse_iso(g["start_time_utc"])
         if now >= start:
             continue
-        if kind == "morning":
+        if kind in ("morning", "live"):
             out.append(g)
             continue
         moment = closing_moment(g["start_time_utc"], minutes_before)
@@ -108,8 +108,12 @@ def sleep_until(target: datetime, now_fn=utc_now, sleep_fn=None,
         sleep_fn(min(chunk_s, max(1.0, left)))
 
 
-def collect(conn, client, games, *, kind: str, oc: dict, now: datetime) -> dict:
-    """Price the given games once. Returns counts for the status line."""
+def collect(conn, client, games, *, kind: str, oc: dict, now: datetime,
+            markets: list[str] | None = None) -> dict:
+    """Price the given games once. Returns counts for the status line.
+    'live' (tips) marks a game done only when lines came back, so a later
+    run of the day retries a game whose props were not posted yet."""
+    markets = markets or oc["markets"]
     events, _ = client.get(f"/sports/{oc['sport']}/events")
     stats = {"games": 0, "rows": 0, "missing": 0, "unmatched": set()}
     for g in games:
@@ -123,17 +127,18 @@ def collect(conn, client, games, *, kind: str, oc: dict, now: datetime) -> dict:
             continue
         payload, _ = client.get(
             f"/sports/{oc['sport']}/events/{event_id}/odds",
-            regions=oc["regions"], markets=",".join(oc["markets"]), oddsFormat="decimal")
+            regions=oc["regions"], markets=",".join(markets), oddsFormat="decimal")
         roster = build_roster_lookup(conn, g["game_id"])
         total = 0
-        for market in oc["markets"]:
+        for market in markets:
             rows = parse_event_odds(payload, market)
             n, unmatched = insert_odds_rows(
                 conn, rows, event_id=event_id, game_id=g["game_id"], market=market,
                 snapshot_time=iso(now), snapshot_kind=kind, roster=roster)
             total += n
             stats["unmatched"] |= unmatched
-        set_state(conn, task(kind), str(g["game_id"]), "done", f"rows={total}")
+        if kind != "live" or total:
+            set_state(conn, task(kind), str(g["game_id"]), "done", f"rows={total}")
         conn.commit()
         stats["games"] += 1
         stats["rows"] += total

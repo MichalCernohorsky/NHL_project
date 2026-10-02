@@ -49,7 +49,7 @@ st.dataframe(t, hide_index=True, use_container_width=True,
 abbr = st.selectbox("Tým", t["tym"].tolist())
 g = data.team_games(abbr, season)
 section(f"{abbr} po zápasech")
-st.markdown(f'<img src="{logo_url(abbr)}" style="height:34px">', unsafe_allow_html=True)
+st.markdown(f'<img src="{logo_url(abbr, light=True)}" style="height:34px">', unsafe_allow_html=True)
 fig2 = go.Figure()
 fig2.add_scatter(x=g["datum"], y=g["strely_pro"], name="pro", mode="lines+markers",
                  line_color=COLORS["over"])

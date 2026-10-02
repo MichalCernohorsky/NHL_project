@@ -43,6 +43,13 @@ jobs:
       - name: Nakup vcerejsich snimku kurzu
         env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
         run: python scripts/buy_snapshots.py
+      # Tips (docs/tips_plan.md): one live snapshot of today's games (~1
+      # credit a game), then today's tips + settlement of finished days.
+      - name: Zivy snimek kurzu pro tipy
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: python scripts/collect_odds.py live
+      - name: Tipy dne a vyhodnoceni
+        run: python scripts/build_tips.py
       # Also after a failed daily step (keeps what was downloaded), but never
       # when the download itself failed: there is nothing to upload then.
       - name: Ulozeni databaze

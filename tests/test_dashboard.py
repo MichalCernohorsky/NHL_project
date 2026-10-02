@@ -38,8 +38,36 @@ def _build_db(path: Path, with_data: bool):
                     "line": 1.5, "price": p} for s, p in (("over", 1.8), ("under", 2.0))],
             event_id="e1", game_id=2025020010, market="player_shots_on_goal",
             snapshot_time="2025-10-09T14:00:00Z", snapshot_kind="morning", roster=roster)
+        _today_with_tips(conn)
     conn.commit()
     conn.close()
+
+
+def _today_with_tips(conn):
+    """A finished game today (ET) with a settled tip, a pending one with the
+    big-disagreement warning, and a candidate that is not a tip."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    today = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+    conn.execute("""INSERT INTO games (game_id, season, season_type, game_date, start_time_utc,
+                        home_team_id, away_team_id, home_score, away_score, last_period_type,
+                        game_state) VALUES (2026029999, '2026-27', 'regular', ?, ?, 17, 8, 3, 2,
+                        'REG', 'OFF')""", (today, f"{today}T23:00:00Z"))
+    base = dict(model="t", game_id=2026029999, game_date=today, start_time_utc=f"{today}T23:00:00Z",
+                team_id=17, opp_id=8, market="player_shots_on_goal", mu_60=1.4, p_market=0.5,
+                books=3, best_book="dk", best_price=1.9, sim_tipsport_price=1.84,
+                entry_live=1, gp_season=0, gp_prev=80, snapshot_kind="live",
+                snapshot_time=f"{today}T14:00:00Z", built_at=f"{today}T15:00:00Z")
+    rows = [dict(base, tip_id="a", player_id=8477429, player_name="Andrew Copp", line=1.5,
+                 side="under", p_model=0.6, edge=0.10 - 1e-9, tipsport_min_price=1.75, playable=1,
+                 actual_60=1, outcome="win", profit_units=0.84, settled_at=today),
+            dict(base, tip_id="b", player_id=8475279, player_name="Ben Chiarot", line=2.5,
+                 side="over", p_model=0.65, edge=0.15, tipsport_min_price=1.61, playable=1),
+            dict(base, tip_id="c", player_id=8475279, player_name="Ben Chiarot", line=2.5,
+                 side="under", p_model=0.35, edge=-0.15, tipsport_min_price=3.13, playable=0)]
+    for r in rows:
+        cols = ",".join(r)
+        conn.execute(f"INSERT INTO tips ({cols}) VALUES ({','.join('?' * len(r))})", list(r.values()))
 
 
 @pytest.fixture(params=[True, False], ids=["data", "empty"])
@@ -60,3 +88,16 @@ def test_router_lists_every_view():
     app = (ROOT / "dashboard" / "app.py").read_text()
     for v in VIEWS:
         assert v.name in app, v.name
+
+
+def test_tips_page_renders_cards_and_calculator(tmp_path, monkeypatch):
+    path = tmp_path / "nhl.db"
+    _build_db(path, True)
+    monkeypatch.setenv("NHL_DASHBOARD_DB", str(path))
+    at = AppTest.from_file(str(ROOT / "dashboard" / "views" / "0_Tipy_dne.py"),
+                           default_timeout=30).run()
+    assert not at.exception, [e.value for e in at.exception]
+    page = " ".join(m.value for m in at.markdown)
+    assert "Andrew Copp" in page and "Ben Chiarot" in page
+    assert "⚠" in page and "✅" in page                 # warning and a settled win
+    assert "splňuje pravidlo" in page                   # calculator verdict rendered

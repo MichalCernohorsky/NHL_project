@@ -4,8 +4,8 @@ Run:  make dashboard   (= streamlit run dashboard/app.py)
 
 Page scripts live in dashboard/views/, NOT dashboard/pages/ (a pages/
 folder next to the entrypoint makes Streamlit register it the old way
-first; see NBA_tool dashboard/Prehled_modelu.py). Phase 0: no tips, no
-approval page - the rule does not exist yet.
+first; see NBA_tool dashboard/Prehled_modelu.py). Tipy dne = tips of the frozen
+naive model (docs/tips_plan.md); marking a tip as bet comes next.
 """
 import sys
 from pathlib import Path
@@ -34,9 +34,13 @@ with st.sidebar:
                 "🔒 jen pro čtení</div>", unsafe_allow_html=True)
 
 st.navigation({
+    "Sázení": [
+        st.Page(str(PAGES / "0_Tipy_dne.py"), title="Tipy dne",
+                icon=":material/sports_hockey:", default=True),
+    ],
     "Projekt": [
         st.Page(str(PAGES / "1_Prehled.py"), title="Přehled",
-                icon=":material/dashboard:", default=True),
+                icon=":material/dashboard:", url_path="prehled"),
         st.Page(str(PAGES / "5_Kurzy.py"), title="Kurzy",
                 icon=":material/receipt_long:", url_path="kurzy"),
     ],
@@ -44,7 +48,7 @@ st.navigation({
         st.Page(str(PAGES / "2_Hrac.py"), title="Hráč",
                 icon=":material/person_search:", url_path="hrac"),
         st.Page(str(PAGES / "3_Brankari.py"), title="Brankáři",
-                icon=":material/sports_hockey:", url_path="brankari"),
+                icon=":material/shield:", url_path="brankari"),
         st.Page(str(PAGES / "4_Tymy.py"), title="Týmy",
                 icon=":material/groups:", url_path="tymy"),
     ],

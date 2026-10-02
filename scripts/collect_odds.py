@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Live odds for today's NHL games (US/Eastern date).
 
+    python scripts/collect_odds.py live              # tips: today's games once (cloud daily job)
     python scripts/collect_odds.py morning           # 16:00 CZ = 10:00 ET
     python scripts/collect_odds.py closing --watch   # evening; sleeps to puck drop -10 min
     python scripts/collect_odds.py status            # no credits
@@ -45,7 +46,7 @@ def print_stats(kind, stats, client):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("kind", choices=("morning", "closing", "status", "check"),
+    ap.add_argument("kind", choices=("morning", "closing", "live", "status", "check"),
                     help="check = verify the API key with a free call (no credits)")
     ap.add_argument("--watch", action="store_true",
                     help="closing: keep running until every game of the day is priced")
@@ -91,13 +92,14 @@ def main():
         due = odds_live.due_now(games, done, now, args.kind, minutes, window,
                                 early_min=args.early_minutes)
         if due:
-            stats = odds_live.collect(conn, client, due, kind=args.kind, oc=oc, now=now)
+            stats = odds_live.collect(conn, client, due, kind=args.kind, oc=oc, now=now,
+                                      markets=oc["live_markets"] if args.kind == "live" else None)
             print_stats(args.kind, stats, client)
             if stats["rows"] and args.changed_flag:
                 Path(args.changed_flag).touch()
             if stats.get("stopped_reserve"):
                 return
-        if args.kind == "morning" or not args.watch:
+        if args.kind in ("morning", "live") or not args.watch:
             return
         wake = odds_live.next_wakeup(games, odds_live.done_keys(conn, args.kind),
                                      odds_live.utc_now(), minutes)

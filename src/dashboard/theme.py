@@ -1,9 +1,10 @@
 """Dashboard design system: colors, typography, Plotly template, CSS.
 
-Taken over from NBA_tool (src/dashboard/theme.py) so both dashboards read
-as one family; only the accent changes - ice blue instead of basketball
-orange. Semantic colors are fixed across the whole dashboard: accent =
-our numbers, muted steel = market / baseline, over = green, under = red.
+Light "Gameday" look of the MLB dashboard (user's choice, 2. 10. 2026):
+navy accent, white cards on a cool gray ground, deep navy sidebar. The
+component structure (setup_page, hero bands, router) comes from NBA_tool.
+Semantic colors: navy = our numbers, steel = market, green = over / win,
+red = under / loss, amber = warning.
 """
 from pathlib import Path
 
@@ -14,27 +15,28 @@ import streamlit as st
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
 
 COLORS = {
-    "bg": "#0B0E14",
-    "surface": "#131824",
-    "surface2": "#1A2130",
-    "border": "#232B3D",
-    "text": "#EDF1F7",
-    "muted": "#8B95A9",
-    "accent": "#4CC3FF",       # ice blue
-    "accent_soft": "rgba(76, 195, 255, 0.16)",
-    "model": "#4CC3FF",
-    "baseline": "#7C89A6",
-    "reality": "#EDF1F7",
-    "over": "#2EE6A8",
-    "under": "#FF5C7A",
-    "warn": "#FFC759",
-    "grid": "rgba(139, 149, 169, 0.14)",
+    "bg": "#eef1f4",
+    "surface": "#ffffff",
+    "surface2": "#f7f9fb",
+    "border": "#e2e6ea",
+    "text": "#0c1c33",
+    "muted": "#5a6572",
+    "accent": "#2E5FB7",       # MLB Gameday navy
+    "accent_soft": "rgba(46, 95, 183, 0.14)",
+    "model": "#2E5FB7",
+    "baseline": "#8b95a9",
+    "reality": "#0c1c33",
+    "over": "#1e7a46",
+    "under": "#b3403a",
+    "warn": "#b7791f",
+    "red": "#c8102e",
+    "grid": "rgba(12, 28, 51, 0.08)",
 }
 
 FONT_STACK = ("Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Text', "
               "'Segoe UI', Roboto, sans-serif")
 
-PLOTLY_TEMPLATE = "nhl_dark"
+PLOTLY_TEMPLATE = "nhl_light"
 ROUTER_FLAG = "_nhl_router_active"
 
 

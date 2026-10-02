@@ -3,7 +3,8 @@
 Same component as NBA_tool (src/dashboard/hero.py): a low dark band with a
 hand-drawn SVG scene per page, title, subtitle and one key figure in a
 glass capsule; gentle CSS/SMIL loops that honor prefers-reduced-motion.
-Scenes are redrawn for hockey (rink, puck, net, goalie, ticket).
+Scenes are redrawn for hockey (rink, puck, net, goalie, ticket). Navy
+band and red title rule from the MLB dashboard's ballpark headers.
 """
 from __future__ import annotations
 
@@ -14,13 +15,15 @@ import streamlit as st
 # NHL's public asset CDN, by team abbreviation (the schedule payload links
 # the same files). Loaded by the browser, hidden on error.
 TEAM_LOGO = "https://assets.nhle.com/logos/nhl/svg/{abbr}_dark.svg"
+# light-background variant for the white game cards
+TEAM_LOGO_LIGHT = "https://assets.nhle.com/logos/nhl/svg/{abbr}_light.svg"
 
 _CSS = """
 <style>
-.nb-wrap{border-radius:16px;overflow:hidden;margin:0 0 18px;
-  border:1px solid #232B3D;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.nb-wrap{border-radius:14px;overflow:hidden;margin:0 0 16px;
+  box-shadow:0 4px 18px rgba(12,28,51,.10)}
 .nb-hero{position:relative;height:150px;overflow:hidden;
-  background:linear-gradient(105deg,#131824 0%,#1A2130 55%,#242B3F 100%)}
+  background:linear-gradient(105deg,#0c2340 0%,#122f54 55%,#1a3f6f 100%)}
 .nb-hero::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse at 78% 110%,rgba(76,195,255,.28),
   transparent 55%)}
@@ -33,21 +36,21 @@ _CSS = """
   display:flex;align-items:center;gap:16px}
 .nb-tx img.nb-logo{height:64px;width:64px;object-fit:contain;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-.nb-ttl{margin:0;font-size:29px;font-weight:750;color:#EDF1F7;
+.nb-ttl{margin:0;font-size:29px;font-weight:750;color:#ffffff;
   letter-spacing:-.01em;line-height:1.15}
 .nb-ttl::before{content:"";display:inline-block;width:26px;height:4px;
-  background:#4CC3FF;border-radius:2px;margin-right:12px;vertical-align:8px}
-.nb-sub{color:#8B95A9;font-size:13px;margin-top:4px}
-.nb-sub b{color:#EDF1F7;font-weight:600}
+  background:#c8102e;border-radius:2px;margin-right:12px;vertical-align:8px}
+.nb-sub{color:rgba(255,255,255,.72);font-size:13px;margin-top:4px}
+.nb-sub b{color:#ffffff;font-weight:650}
 .nb-kpi{position:absolute;right:24px;top:50%;transform:translateY(-50%);
-  text-align:right;z-index:3;background:rgba(11,14,20,.86);
-  border:1px solid rgba(255,255,255,.12);border-radius:12px;
+  text-align:right;z-index:3;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.18);border-radius:12px;
   padding:9px 15px;backdrop-filter:blur(4px)}
 .nb-kpi .l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;
-  color:#8B95A9;font-weight:700}
-.nb-kpi .v{font-size:21px;font-weight:800;color:#EDF1F7;
+  color:rgba(255,255,255,.65);font-weight:700}
+.nb-kpi .v{font-size:21px;font-weight:800;color:#ffffff;
   font-variant-numeric:tabular-nums}
-.nb-kpi .v.up{color:#2EE6A8}.nb-kpi .v.dn{color:#FF5C7A}.nb-kpi .v.acc{color:#4CC3FF}
+.nb-kpi .v.up{color:#7fd6a4}.nb-kpi .v.dn{color:#ff9d8f}.nb-kpi .v.acc{color:#ffffff}
 @media(max-width:760px){.nb-kpi{display:none}.nb-tx img.nb-logo{display:none}
   .nb-ttl{font-size:22px}.nb-tx{left:18px;right:18px}.nb-sub{font-size:12px}
   .nb-hero svg.nb-scene{opacity:.28}.nb-hero .nb-lines{display:none}}
@@ -88,18 +91,18 @@ _CSS = """
   .nb-blink,.nb-float,.nb-wobble,.nb-tick-track{animation:none}}
 
 /* games ticker */
-.nb-tick{background:#0B0E14;border-top:1px solid #232B3D;overflow:hidden;height:44px}
+.nb-tick{background:#0a1c33;border-top:1px solid rgba(255,255,255,.08);overflow:hidden;height:42px}
 .nb-tick-track{display:flex;gap:10px;align-items:center;height:100%;
   width:max-content;padding:0 10px;animation:nb-roll 46s linear infinite}
 .nb-tick:hover .nb-tick-track{animation-play-state:paused}
 @keyframes nb-roll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.nb-g{display:flex;align-items:center;gap:6px;background:#131824;
-  border:1px solid #232B3D;border-radius:8px;padding:4px 10px;
-  font-size:12px;color:#EDF1F7;white-space:nowrap;
+.nb-g{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);border-radius:8px;padding:4px 10px;
+  font-size:12px;color:#ffffff;white-space:nowrap;
   font-variant-numeric:tabular-nums}
 .nb-g b{font-weight:700}
-.nb-g .t{color:#8B95A9}
-.nb-g .s{color:#4CC3FF;font-weight:700}
+.nb-g .t{color:rgba(255,255,255,.6)}
+.nb-g .s{color:#ffcf6e;font-weight:700}
 .nb-g img{height:18px;width:18px;object-fit:contain}
 .nb-g .star{color:#FFC759;font-size:11px}
 .nb-g .live{color:#2EE6A8;font-size:10px;font-weight:800;letter-spacing:.08em}
@@ -211,14 +214,17 @@ def hero(title: str, sub: str = "", kpi_label: str | None = None,
         unsafe_allow_html=True)
 
 
-def logo_url(abbr: str | None) -> str | None:
-    return TEAM_LOGO.format(abbr=abbr) if abbr else None
+def logo_url(abbr: str | None, light: bool = False) -> str | None:
+    """Dark variant for the navy bands, light variant for white cards."""
+    if not abbr:
+        return None
+    return (TEAM_LOGO_LIGHT if light else TEAM_LOGO).format(abbr=abbr)
 
 
-def team_logo(abbr: str | None, size: int = 22) -> str:
+def team_logo(abbr: str | None, size: int = 22, light: bool = False) -> str:
     if not abbr:
         return ""
-    return (f'<img src="{html.escape(logo_url(abbr), quote=True)}" alt="" '
+    return (f'<img src="{html.escape(logo_url(abbr, light), quote=True)}" alt="" '
             f'style="height:{size}px;width:{size}px;object-fit:contain;'
             'vertical-align:middle" onerror="this.style.display=&quot;none&quot;">')
 

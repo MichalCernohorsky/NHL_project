@@ -229,3 +229,56 @@ def team_games(abbr: str, season: str) -> pd.DataFrame:
                 JOIN teams o ON o.team_id = op.team_id
                 WHERE t.abbreviation = ? AND g.season = ? AND g.season_type = 'regular'
                 ORDER BY g.game_date""", (abbr, season))
+
+
+# ------------------------------------------------------------ tips
+
+def tip_days() -> list[str]:
+    """ET game dates that have tips, newest first."""
+    if not _has_table("tips"):
+        return []
+    return q("SELECT DISTINCT game_date FROM tips ORDER BY game_date DESC")["game_date"].tolist()
+
+
+def _has_table(name: str) -> bool:
+    return not q("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (name,)).empty
+
+
+def tips_on(game_date: str) -> pd.DataFrame:
+    """All candidates of the day from the latest snapshot per game, with
+    team abbreviations and the player's last two seasons (context, plan 7)."""
+    if not _has_table("tips"):
+        return pd.DataFrame()
+    df = q("""SELECT t.*, tm.abbreviation AS tym, op.abbreviation AS souper,
+                     g.home_team_id, g.game_state, g.home_score, g.away_score
+              FROM tips t
+              JOIN games g USING (game_id)
+              LEFT JOIN teams tm ON tm.team_id = t.team_id
+              LEFT JOIN teams op ON op.team_id = t.opp_id
+              WHERE t.game_date = ?
+                AND t.snapshot_time = (SELECT MAX(x.snapshot_time) FROM tips x
+                                       WHERE x.game_id = t.game_id)""", (game_date,))
+    if df.empty:
+        return df
+    season = q("SELECT season FROM games WHERE game_date = ? LIMIT 1", (game_date,))["season"][0]
+    y = int(season[:4])
+    prev1, prev2 = f"{y - 1}-{str(y)[2:]}", f"{y - 2}-{str(y - 1)[2:]}"
+    ctx = q(f"""SELECT p.player_id, g.season, COUNT(*) AS gp, AVG(p.sog_reg) AS s60
+                FROM player_game_logs p JOIN games g USING (game_id)
+                WHERE g.season IN (?, ?) AND g.season_type = 'regular' AND p.toi_s > 0
+                  AND p.player_id IN ({",".join(str(int(x)) for x in df.player_id.unique())})
+                GROUP BY p.player_id, g.season""", (prev1, prev2))
+    for label, season_ in (("loni", prev1), ("predloni", prev2)):
+        part = ctx[ctx.season == season_].set_index("player_id")
+        df[f"{label}_s60"] = df.player_id.map(part["s60"])
+        df[f"{label}_gp"] = df.player_id.map(part["gp"])
+    return df
+
+
+def model_record() -> pd.DataFrame:
+    """Settled playable tips (MODEL arm, paper), one row per tip."""
+    if not _has_table("tips"):
+        return pd.DataFrame()
+    return q("""SELECT game_date, edge, outcome, profit_units FROM tips
+                WHERE playable = 1 AND outcome IN ('win', 'loss')
+                ORDER BY game_date""")

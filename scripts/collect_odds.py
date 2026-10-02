@@ -84,7 +84,8 @@ def main():
     from nhl_tool.odds_client import OddsClient
     client = OddsClient()
     minutes, window = oc["closing_minutes_before_start"], oc["closing_window_minutes"]
-    print(f"{game_date}: {len(games)} zapasu v rozpisu | trhy {', '.join(oc['markets'])}")
+    markets = oc["live_markets"] if args.kind == "live" else oc["markets"]
+    print(f"{game_date}: {len(games)} zapasu v rozpisu | trhy {', '.join(markets)}")
     while True:
         now = odds_live.utc_now()
         done = set() if (args.repeat and args.kind == "closing") \

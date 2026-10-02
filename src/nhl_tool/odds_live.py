@@ -87,6 +87,27 @@ def next_wakeup(games, done: set[str], now: datetime, minutes_before: int):
     return min(future) if future else None
 
 
+SLEEP_CHUNK_S = 60
+
+
+def sleep_until(target: datetime, now_fn=utc_now, sleep_fn=None,
+                chunk_s: float = SLEEP_CHUNK_S) -> None:
+    """Sleep until the WALL CLOCK reaches target, in short chunks.
+
+    One long time.sleep() is wrong on a laptop: its clock does not run while
+    the Mac sleeps (lid closed), so a 498-minute wait started on 30. 9. at
+    17:00 was still waiting two days later - and launchd will not start the
+    next day's watcher while one is alive. Chunks re-read the wall clock, so
+    after wake-up the watcher sees the real time and moves on."""
+    import time
+    sleep_fn = sleep_fn or time.sleep
+    while True:
+        left = (target - now_fn()).total_seconds()
+        if left <= 0:
+            return
+        sleep_fn(min(chunk_s, max(1.0, left)))
+
+
 def collect(conn, client, games, *, kind: str, oc: dict, now: datetime) -> dict:
     """Price the given games once. Returns counts for the status line."""
     events, _ = client.get(f"/sports/{oc['sport']}/events")

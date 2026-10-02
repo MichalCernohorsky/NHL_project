@@ -146,3 +146,26 @@ def test_reserve_stops_live_collection(conn):
     stats = odds_live.collect(conn, client, games, kind="morning", oc=OC,
                               now=datetime(2025, 10, 9, 14, tzinfo=timezone.utc))
     assert stats.get("stopped_reserve") and stats["rows"] == 0
+
+
+def test_watcher_follows_the_wall_clock_through_system_sleep():
+    """30. 9.: one long sleep did not advance while the lid was closed and the
+    watcher hung for days. A system sleep shows up as the wall clock jumping
+    forward between two chunks; the watcher must notice and stop waiting."""
+    t0 = datetime(2026, 10, 1, 15, 0, tzinfo=timezone.utc)
+    clock = {"now": t0}
+    slept = []
+
+    def fake_sleep(s):
+        slept.append(s)
+        clock["now"] += timedelta(seconds=s)
+        if len(slept) == 3:                         # lid closed for 9 hours
+            clock["now"] += timedelta(hours=9)
+
+    target = t0 + timedelta(hours=8)
+    odds_live.sleep_until(target, now_fn=lambda: clock["now"], sleep_fn=fake_sleep)
+    assert len(slept) == 3 and max(slept) <= odds_live.SLEEP_CHUNK_S
+    # after waking, the games whose closing passed are skipped, not priced late
+    g = {"game_id": 1, "start_time_utc": "2026-10-01T23:00:00Z"}
+    assert odds_live.due_now([g], set(), clock["now"], "closing", 10, 20) == []
+    assert odds_live.next_wakeup([g], set(), clock["now"], 10) is None

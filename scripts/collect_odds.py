@@ -12,7 +12,6 @@ Stops below odds.reserve_live credits. Nothing here decides a bet.
 """
 import argparse
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -100,7 +99,7 @@ def main():
             return
         wait = (wake - odds_live.utc_now()).total_seconds()
         print(f"  cekam do {wake.astimezone(ET):%H:%M} ET ({wait / 60:.0f} min)")
-        time.sleep(max(1.0, wait))
+        odds_live.sleep_until(wake)
 
 
 if __name__ == "__main__":

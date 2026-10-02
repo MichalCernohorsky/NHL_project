@@ -74,6 +74,9 @@ a v soukromém repozitáři spotřebovávají minuty Actions sdílené s MLB
 7. **Zkušební běh:** `NHL_project` → *Actions* → *Denni beh* → *Run
    workflow*. Ověří, že NHL API z GitHubu funguje (NBA ho z cloudu
    blokuje, NHL by nemělo — ověřuje se tady).
+   Klíč The Odds API se ověří zdarma: *Actions* → *Kurzy (rano + closing)*
+   → *Run workflow* → mode **check** (volá bezplatný dotaz, žádný kredit).
+   Ověřeno 2. 10. 2026: denní běh i klíč v cloudu zelené.
 8. **Vypnutí Macu jako sběrače** až po zeleném kroku 7 a prvním zeleném
    běhu *Kurzy*: `make automation-uninstall`. Jinak by se kurzy stahovaly
    dvakrát a platily dvakrát kredity.

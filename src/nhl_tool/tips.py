@@ -22,6 +22,8 @@ import pandas as pd
 from . import naive_sog as ns
 
 EDGE_MIN = 0.03
+WARN_EDGE = 0.10          # display warning (tips plan 7); TOP excludes these
+TOP_N = 3                 # TOP of the day (tips plan 8)
 MARKET = "player_shots_on_goal"
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_FILE = ROOT / "models" / "naive_sog.json"
@@ -190,6 +192,33 @@ def store(conn, cand: pd.DataFrame, model_name: str, game_date: str, kind: str) 
     return n
 
 
+def mark_top(conn, game_date: str) -> int:
+    """Tips plan 8: TOP_N tips of the day with the largest edge among
+    playable tips without the warning, one per game; ties by p_model.
+    Only marks a day that has no TOP yet - membership never changes."""
+    if conn.execute("SELECT 1 FROM tips WHERE game_date = ? AND arm_top = 1",
+                    (game_date,)).fetchone():
+        return 0
+    rows = conn.execute(
+        """SELECT tip_id, game_id FROM tips
+           WHERE game_date = ? AND playable = 1 AND edge <= ?
+             AND snapshot_time = (SELECT MAX(x.snapshot_time) FROM tips x
+                                  WHERE x.game_id = tips.game_id)
+           ORDER BY edge DESC, p_model DESC, tip_id""",
+        (game_date, WARN_EDGE)).fetchall()
+    chosen, games = [], set()
+    for r in rows:
+        if r["game_id"] in games:
+            continue
+        chosen.append(r["tip_id"])
+        games.add(r["game_id"])
+        if len(chosen) == TOP_N:
+            break
+    conn.executemany("UPDATE tips SET arm_top = 1 WHERE tip_id = ?", [(t,) for t in chosen])
+    conn.commit()
+    return len(chosen)
+
+
 def build(conn, game_date: str, kind: str = "live", model_path: Path = MODEL_FILE,
           margin: float = 0.0875) -> dict:
     model = load_model(model_path)
@@ -198,9 +227,10 @@ def build(conn, game_date: str, kind: str = "live", model_path: Path = MODEL_FIL
     cand = candidates(lines, pred, model, margin)
     n = store(conn, cand, model["model"], game_date, kind)
     conn.commit()
+    top = mark_top(conn, game_date)
     return {"games": int(lines["game_id"].nunique()) if not lines.empty else 0,
             "candidates": int(len(cand)), "inserted": n,
-            "playable": int(cand["playable"].sum()) if not cand.empty else 0}
+            "playable": int(cand["playable"].sum()) if not cand.empty else 0, "top": top}
 
 
 # ---------------------------------------------------------------- settle

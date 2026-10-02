@@ -85,3 +85,32 @@ def test_store_and_settle(conn):
     assert res[8477429] == ("win", 1, pytest.approx(0.84))             # 1 shot < 1.5, under wins
     assert res[9999] == ("void", None, 0.0)                             # did not play
     assert tips.settle(conn, "2025-10-09") == 0                         # never twice
+
+
+def test_top_of_the_day(conn):
+    """Plan 8: 3 largest edges without the warning, one per game, written once."""
+    from conftest import game, week
+
+    from nhl_tool.schedule import parse_week, upsert_games, upsert_teams
+    gs = [game(2025020010 + i) for i in range(3)]
+    teams, games = parse_week(week(gs), "2025-26")
+    upsert_teams(conn, teams)
+    upsert_games(conn, games)
+
+    def row(tid, gid, edge, pm=0.6, playable=1):
+        conn.execute("""INSERT INTO tips (tip_id, model, game_id, game_date, player_id, market,
+                        line, side, mu_60, p_model, p_market, edge, books, sim_tipsport_price,
+                        entry_live, playable, snapshot_kind, snapshot_time, built_at)
+                        VALUES (?, 't', ?, '2025-10-09', ?, 'player_shots_on_goal', 1.5, 'under',
+                                1.0, ?, 0.5, ?, 3, 1.8, 1, ?, 'live', 'S', 'B')""",
+                     (tid, gid, hash(tid) % 10000, pm, edge, playable))
+    row("big", 2025020010, 0.20)            # warning: never TOP
+    row("a1", 2025020010, 0.09)
+    row("a2", 2025020010, 0.08)             # same game as a1: skipped
+    row("b1", 2025020011, 0.05)
+    row("c1", 2025020012, 0.05, pm=0.7)     # tie with b1, higher p_model first
+    row("d0", 2025020012, 0.095, playable=0)
+    assert tips.mark_top(conn, "2025-10-09") == 3
+    top = {r[0] for r in conn.execute("SELECT tip_id FROM tips WHERE arm_top = 1")}
+    assert top == {"a1", "c1", "b1"}
+    assert tips.mark_top(conn, "2025-10-09") == 0       # membership never changes

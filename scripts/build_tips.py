@@ -35,7 +35,8 @@ def main():
     settled = tips.settle(conn, (today - timedelta(days=1)).isoformat())
     res = tips.build(conn, day, kind=args.kind, margin=cfg["odds"]["tipsport_margin"])
     print(f"{day} ({args.kind}): zapasu s lajnami {res['games']}, kandidatu {res['candidates']},"
-          f" novych {res['inserted']}, TIPU {res['playable']} | vyhodnoceno {settled}")
+          f" novych {res['inserted']}, TIPU {res['playable']}, TOP {res['top']}"
+          f" | vyhodnoceno {settled}")
 
 
 if __name__ == "__main__":

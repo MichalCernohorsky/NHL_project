@@ -432,3 +432,22 @@ mimo předregistrované snímky.
 **Co D5 nemění:** verdikt fáze 0 se počítá jen z 2025-26 podle sekcí 3
 a 6. Záznam živých tipů ho neovlivní a podle něj se nic neladí; vykazuje
 se zvlášť.
+
+### D6 — živé tipy od začátku sezóny (2. 10. 2026, před kódem)
+
+**Na přání uživatele** se živé tipy (D5) nemají odkládat na konec října.
+Pro **živé tipy** platí vstupní podmínka: hráč má v sezóně ≥ 10
+odehraných zápasů **nebo** ≥ 20 zápasů v minulé sezóně. Model zůstává
+přesně podle 6.2: rychlost střel se stahuje k prioru z minulé sezóny
+(u hráče bez letošních zápasů je to prior sám), TOI_L10 je průměr posledních
+10 odehraných zápasů i přes hranici sezón, faktor soupeře se stahuje k 1.
+
+**Riziko, zapsané předem:** začátek sezóny je pro model nejslabší —
+změny rolí po létě, přestupy, nové lajny; v NBA vyšel říjen jako měsíc
+nejhorší shody s trhem (ROI brzké sezóny −7,3 %). Tipy jsou papír, dokud
+je uživatel neoznačí „vsazeno"; doporučení zůstává: skutečné peníze až po
+verdiktu fáze 0.
+
+**Co D6 nemění:** vyhodnocení fáze 0 na 2025-26 (sekce 6) dál bere jen
+hráče s ≥ 10 zápasy v sezóně. Pravidlo 6.4, konstanty modelu, zamrazení
+před etapou A — beze změny.

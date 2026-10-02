@@ -17,9 +17,10 @@ překlepu), kontrola hrany u Tipsportu z NBA (`rule_at_book`).
   2025-26 (etapa A)**. Pak se nemění. Až fáze 2 dodá produkční model,
   tipy na něj přejdou jako nová éra (vyhodnocení se řeže po érách).
 - **Pravidlo:** plán 6.4 — hrana p_model − p_trh ≥ 3 p.b. proti de-vig
-  trhu, na (zápas, hráč) nejvýš jedna strana. Hráč musí mít v sezóně
-  ≥ 10 odehraných zápasů (plán 6.2) → **první tipy 19.–29. 10.**, podle
-  týmu (11. zápas týmu: nejdřív 19. 10., medián 24. 10.).
+  trhu, na (zápas, hráč) nejvýš jedna strana. Vstup (dodatek D6): hráč má
+  v sezóně ≥ 10 odehraných zápasů **nebo** ≥ 20 zápasů v minulé sezóně →
+  tipy od chvíle, kdy je model hotový (původně by první tipy přišly až
+  19.–29. 10.).
 - **Trh při tipu:** jeden živý snímek amerických knih denně (`snapshot_kind
   = 'live'`, jen střely hráčů, ~1 kredit na zápas, ~200 měsíčně) v cloudovém
   denním běhu. Čas určuje GitHub (typicky 12:30–19:30 CZ); zápas, který do
@@ -71,5 +72,5 @@ a kurz, ne za lajnu tipu. Všechny tipy se ukládají a vyhodnocují, i nevsazen
 | do | co |
 |---|---|
 | ~6. 10. | naivní model + zamrazení (potřeba i pro fázi 0, před etapou A) |
-| ~20. 10. | denní predikce, živý snímek, tipy, stránka Tipy dne |
-| ~25. 10. | Vsazeno / Moje sázky / vyhodnocení / ramena — než hráči dosáhnou 10 zápasů |
+| ~10. 10. | denní predikce, živý snímek, tipy, stránka Tipy dne |
+| ~14. 10. | Vsazeno / Moje sázky / vyhodnocení / ramena |

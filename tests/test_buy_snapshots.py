@@ -130,3 +130,16 @@ def test_snapshot_at_or_after_puck_drop_is_never_bought(conn):
     client = FakeClient()
     res = HistoricalBuyer(conn, client, OC, OC["markets"]).price(items[0][0], "morning")
     assert res["status"] == "missing" and not any(p.endswith("/odds") for p, _ in client.calls)
+
+
+def test_only_the_bought_markets_count_as_covered(conn):
+    """A game with saves lines but no shots line of a kind still needs its
+    shots snapshot when only shots are bought."""
+    _seed(conn)
+    conn.execute("""INSERT INTO odds (event_id, game_id, market, side, line, price, bookmaker,
+                    snapshot_time, snapshot_kind, player_name_raw)
+                    VALUES ('e', 2026020010, 'player_total_saves', 'over', 24.5, 1.9, 'dk',
+                            '2026-10-01T22:50:00Z', 'closing', 'G')""")
+    sog = ["player_shots_on_goal"]
+    assert _kinds(bs.todo(conn, "2026-27", "2026-09-25", "2026-10-01", sog)) == ["closing", "morning"]
+    assert _kinds(bs.todo(conn, "2026-27", "2026-09-25", "2026-10-01")) == ["morning"]

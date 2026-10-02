@@ -411,3 +411,11 @@ commitem.
 **Co D4 nemění.** Nic z výběru trhu (K1–K5, vzorek 2025-26, modely, práh).
 Živé snímky nikdy nerozhodovaly o fázi 0; jen se mění, jak a za kolik se
 sbírají.
+
+**D4, upřesnění 2. 10. 2026 — „jeď" jen pro střely hráčů.** Uživatel
+schválil nákup s omezením na `player_shots_on_goal`
+(`odds.hist_daily_markets`). Zásahy brankáře a bloky Tipsport ve 2 dnech
+nevypsal; trh „střely týmu", který Tipsport vypisuje, The Odds API nemá.
+Suchý běh před zapnutím: dohnat 29. 9.–1. 10. = 16 snímků, **163 kreditů**;
+průběžně **~20 kreditů na zápas, ~145 na herní den, ~4 200 měsíčně,
+~27 000 za základní část**.

@@ -46,8 +46,9 @@ def window(until: str, days: int) -> tuple[str, str]:
     return (end - timedelta(days=days - 1)).isoformat(), end.isoformat()
 
 
-def todo(conn, season: str, start: str, end: str) -> list[tuple]:
-    """(game row, kind) pairs still to buy, oldest first."""
+def todo(conn, season: str, start: str, end: str, markets=None) -> list[tuple]:
+    """(game row, kind) pairs still to buy, oldest first. A game counts as
+    covered for a kind when it already has rows of one of `markets`."""
     games = conn.execute(
         """SELECT g.game_id, g.game_date, g.start_time_utc,
                   ht.full_name AS home, at.full_name AS away
@@ -62,21 +63,27 @@ def todo(conn, season: str, start: str, end: str) -> list[tuple]:
     out = []
     for kind in KINDS:
         done = state_keys(conn, task(kind), statuses=("done", "missing"))
-        have = {r[0] for r in conn.execute(
-            "SELECT DISTINCT game_id FROM odds WHERE snapshot_kind = ?", (kind,))}
+        sql = "SELECT DISTINCT game_id FROM odds WHERE snapshot_kind = ?"
+        params = [kind]
+        if markets:
+            sql += f" AND market IN ({','.join('?' * len(markets))})"
+            params += list(markets)
+        have = {r[0] for r in conn.execute(sql, params)}
         out += [(g, kind) for g in games if str(g["game_id"]) not in done
                 and g["game_id"] not in have]
     return sorted(out, key=lambda x: (x[0]["game_date"], x[0]["start_time_utc"], x[1]))
 
 
-def markets_per_snapshot(conn, season: str) -> dict:
-    """Observed average number of markets the books actually quote per game,
-    per kind - what a purchase really costs (unquoted markets are free)."""
+def markets_per_snapshot(conn, season: str, markets: list[str]) -> dict:
+    """Observed average number of the bought markets the books actually
+    quote per game, per kind - what a purchase really costs (unquoted
+    markets are free)."""
     rows = conn.execute(
-        """SELECT o.snapshot_kind, o.game_id, COUNT(DISTINCT o.market)
+        f"""SELECT o.snapshot_kind, o.game_id, COUNT(DISTINCT o.market)
            FROM odds o JOIN games g USING (game_id)
            WHERE g.season = ? AND o.snapshot_kind IN ('morning', 'closing')
-           GROUP BY o.snapshot_kind, o.game_id""", (season,)).fetchall()
+             AND o.market IN ({','.join('?' * len(markets))})
+           GROUP BY o.snapshot_kind, o.game_id""", (season, *markets)).fetchall()
     acc = defaultdict(list)
     for kind, _, n in rows:
         acc[kind].append(n)
@@ -99,15 +106,16 @@ def main():
     start, end = window(until, args.days or oc["hist_daily_days"])
     budget = args.budget or oc["hist_daily_budget"]
     conn = connect(resolve_db_path(cfg))
-    items = todo(conn, season, start, end)
+    markets = oc.get("hist_daily_markets") or oc["markets"]
+    items = todo(conn, season, start, end, markets)
 
     per_kind = Counter(k for _, k in items)
     days = sorted({g["game_date"] for g, _ in items})
-    avg = markets_per_snapshot(conn, season)
-    expected = sum(per_kind[k] * avg.get(k, len(oc["markets"])) * CREDITS_PER_MARKET_REGION
+    avg = markets_per_snapshot(conn, season, markets)
+    expected = sum(per_kind[k] * avg.get(k, len(markets)) * CREDITS_PER_MARKET_REGION
                    for k in KINDS) + len(days)
-    ceiling = len(items) * len(oc["markets"]) * CREDITS_PER_MARKET_REGION + 2 * len(days)
-    print(f"okno {start} .. {end} | trhy {', '.join(oc['markets'])}")
+    ceiling = len(items) * len(markets) * CREDITS_PER_MARKET_REGION + 2 * len(days)
+    print(f"okno {start} .. {end} | trhy {', '.join(markets)}")
     for d in days:
         c = Counter(k for g, k in items if g["game_date"] == d)
         print(f"  {d}: ranni {c['morning']}, closing {c['closing']}")
@@ -131,7 +139,7 @@ def main():
     client.get("/sports")                    # free: learn the balance
     start_used = client.last_used or 0
     print(f"zustatek uctu: {client.last_remaining:.0f} kreditu")
-    buyer = HistoricalBuyer(conn, client, oc, oc["markets"], cache_fn=cache_response)
+    buyer = HistoricalBuyer(conn, client, oc, markets, cache_fn=cache_response)
     rows, unmatched, n = defaultdict(int), set(), 0
     for g, kind in items:
         spent = (client.last_used or 0) - start_used

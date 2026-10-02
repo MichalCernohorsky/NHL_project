@@ -59,7 +59,11 @@ odds:
   backfill_target_games: 330
   # Live season, bought the day after from the historical archive at the
   # same anchors (plan amendment D4; scripts/buy_snapshots.py, cloud daily
-  # job). OFF until the user's "jed" - flipping it is a commit of its own.
-  hist_daily_enabled: false
+  # job). Switched ON by the user's "jed" on 2. 10. 2026 (shots only).
+  hist_daily_enabled: true
+  # Only these markets are bought for the live season (user, 2. 10.: shots
+  # only - saves and blocks have not appeared at Tipsport; there is no team
+  # shots market in The Odds API).
+  hist_daily_markets: [player_shots_on_goal]
   hist_daily_days: 7        # look-back window: a missed run catches up
   hist_daily_budget: 1000   # max credits per run

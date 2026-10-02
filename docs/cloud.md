@@ -6,7 +6,7 @@ je příloha jednoho vydání v **soukromém** repozitáři. Kód je **veřejný
 
 | repozitář | viditelnost | co v něm je |
 |---|---|---|
-| `MichalCernohorsky/NHL_project` | **veřejný** | kód, dokumentace, testy, úlohy (historie prověřena 29. 9. 2026: 11 commitů, 0 tajemství) |
+| `MichalCernohorsky/NHL_project` | **veřejný** | kód, dokumentace, testy, úlohy (historie prověřena 2. 10. 2026: 15 commitů, 0 tajemství) |
 | `MichalCernohorsky/NHL_project-data` | **soukromý** | jen vydání `db-latest` s `nhl.db.gz` |
 
 Proč data zvlášť: příloha vydání veřejného repozitáře je stažitelná pro
@@ -33,35 +33,47 @@ jich netýká.
 Kredity: ~3 za zápas a snímek; closing se opakuje až 3× → ~50–70 za
 herní den, ~2 000 měsíčně. Pod 2 000 na účtu se sběr zastaví.
 
-## Nastavení (jednorázově, ~15 minut, dělá uživatel)
+## Nastavení (jednorázově, ~20 minut, dělá uživatel)
 
-1. **Datový repozitář:** github.com → New repository → název
-   `NHL_project-data`, **Private**, zaškrtni *Add a README file* (vydání
-   potřebuje aspoň jeden commit) → Create.
-2. **Token jen pro data:** Settings → Developer settings → Personal access
-   tokens → **Fine-grained tokens** → Generate new token:
-   - Token name `nhl-data`, Expiration 1 rok
+Pořadí je důležité: **zveřejnění první.** Úlohy jsou na GitHubu od 29. 9.
+a v soukromém repozitáři spotřebovávají minuty Actions sdílené s MLB
+(a bez nastavení selhávají). Historie prověřena 2. 10. 2026: 15 commitů,
+0 tajemství.
+
+1. **Zveřejnit `NHL_project`:** Settings → úplně dole *Danger Zone* →
+   *Change repository visibility* → *Change visibility* → *Make public* →
+   potvrdit (GitHub chce opsat název repozitáře).
+2. **Datový repozitář:** vpravo nahoře **+** → *New repository* → název
+   `NHL_project-data` → **Private** → zaškrtnout **Add a README file**
+   (vydání potřebuje aspoň jeden commit) → *Create repository*.
+3. **Token jen pro data:** fotka vpravo nahoře → *Settings* → úplně dole
+   *Developer settings* → *Personal access tokens* → *Fine-grained tokens*
+   → *Generate new token*:
+   - Token name `nhl-data`, Expiration *Custom* → za rok
    - Repository access: **Only select repositories** → `NHL_project-data`
-   - Repository permissions → **Contents: Read and write**. Nic jiného.
-   - Zkopíruj ho (ukáže se jednou). Nikam ho nevkládej kromě kroků 3 a 4.
-3. **Secrets v `NHL_project`:** repozitář → Settings → Secrets and
-   variables → Actions → New repository secret, dvakrát:
-   - `NHL_DATA_TOKEN` = token z kroku 2
-   - `ODDS_API_KEY` = klíč The Odds API (stejný jako v `.env`)
-4. **Token na Macu** (pro `make db-up` / `make db-down`), v Terminálu:
-   `open -e ~/.zshrc`, na konec přidej dva řádky a ulož:
+   - Permissions → Repository permissions → **Contents: Read and write**
+     (*Metadata: Read-only* se přidá samo, to je v pořádku). Nic jiného.
+   - *Generate token* → zkopírovat (ukáže se jen jednou). Nechat okno
+     otevřené do konce kroku 5.
+4. **Secrets v `NHL_project`:** Settings → *Secrets and variables* →
+   *Actions* → *New repository secret*:
+   - Name `NHL_DATA_TOKEN`, Secret = token z kroku 3 → *Add secret*
+   - Name `ODDS_API_KEY`, Secret = klíč The Odds API. Do schránky ho
+     dostaneš bez zobrazení: `grep '^ODDS_API_KEY=' ~/NHL_project/.env | cut -d= -f2- | tr -d '\n' | pbcopy`,
+     pak Cmd+V do pole → *Add secret*
+5. **Token na Macu:** `open -e ~/.zshrc`, na konec souboru dva nové řádky
+   (bez uvozovek; token je jeden kus bez mezer), Cmd+S:
    ```
-   export NHL_DATA_TOKEN="sem_vloz_token"
-   export NHL_DB_RELEASE_REPO="MichalCernohorsky/NHL_project-data"
+   export NHL_DATA_TOKEN=sem_vloz_token_z_kroku_3
+   export NHL_DB_RELEASE_REPO=MichalCernohorsky/NHL_project-data
    ```
-5. **Zveřejnění kódu:** `NHL_project` → Settings → dole *Danger Zone* →
-   Change visibility → **Public**.
-6. **První nahrání databáze z Macu** (až doběhne stahování play-by-play),
-   v novém okně Terminálu: `cd ~/NHL_project`, `source .venv/bin/activate`,
-   `make db-up`.
-7. **Zkušební běh:** `NHL_project` → Actions → *Denni beh* → Run workflow.
-   Ověří, že NHL API z GitHubu funguje (NBA ho z cloudu blokuje, NHL by
-   nemělo — ověřuje se tady).
+   Ověření v novém okně Terminálu (vypíše jen `ok`):
+   `[ -n "$NHL_DATA_TOKEN" ] && echo ok || echo chybi`
+6. **První nahrání databáze z Macu:** `cd ~/NHL_project`,
+   `source .venv/bin/activate`, `make db-up`.
+7. **Zkušební běh:** `NHL_project` → *Actions* → *Denni beh* → *Run
+   workflow*. Ověří, že NHL API z GitHubu funguje (NBA ho z cloudu
+   blokuje, NHL by nemělo — ověřuje se tady).
 8. **Vypnutí Macu jako sběrače** až po zeleném kroku 7 a prvním zeleném
    běhu *Kurzy*: `make automation-uninstall`. Jinak by se kurzy stahovaly
    dvakrát a platily dvakrát kredity.

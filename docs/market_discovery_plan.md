@@ -451,3 +451,24 @@ verdiktu fáze 0.
 **Co D6 nemění:** vyhodnocení fáze 0 na 2025-26 (sekce 6) dál bere jen
 hráče s ≥ 10 zápasy v sezóně. Pravidlo 6.4, konstanty modelu, zamrazení
 před etapou A — beze změny.
+
+### Zamrazení naivního modelu střel (2. 10. 2026, před nákupem etapy A)
+
+`models/naive_sog.json`, **SHA-256 `87b23226a866a86c82b42086d6a691a7d3da56c0e73e7e28852485f0d9fb08c2`**.
+Kód `src/nhl_tool/naive_sog.py` (commit 4702a61, výklad předpisu
+`docs/naive_model.md` commitnutý před prvním výpočtem), odhad
+`scripts/fit_naive_sog.py` jen na 2023-24 + 2024-25 (77 910 řádků). Od teď
+se nemění; jiný otisk = někdo model přepočítal. Test to hlídá.
+
+Konstanty: tým 28,90 střel za 60 min na zápas; prior útočník 7,010 /
+obránce 4,124 střel na 60 min ledu; podíl prodloužení F 1,37 % / D 1,08 %;
+disperze k = 16,84 (věrohodnost NB −122 127,5 vs. Poisson −122 318,0).
+
+**Známá vlastnost, zapsaná před pohledem na 2025-26:** v tréninku model
+nadhodnocuje střely o 2,4 % (1,668 vs. 1,629 na zápas; zápasy 11–30
++3,3 %, 56+ +1,7 %). Čas na ledě sedí (poměr 0,9997); nadhodnocená je
+rychlost střelby, protože liga mezi tréninkovými sezónami střílela méně
+(79 463 → 74 179 střel, −6,7 %) a prior z minulé sezóny nese starší
+úroveň. Mezi 2024-25 a 2025-26 byl pokles 1,6 %, takže na validaci se
+čeká menší posun. **Neladí se** (6.2: „pevné teď, bez ladění"); posun
+k overům se projeví ve výsledku fáze 0 a v reportu se uvede.

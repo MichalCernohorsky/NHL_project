@@ -1,0 +1,33 @@
+{
+ "code_commit": "4702a61d3270816531076bf94f45071538d3a06b",
+ "fit_rows": 77910,
+ "fitted_at": "2026-10-02T20:13:40+00:00",
+ "league_team_shots": 28.903201219512194,
+ "loglik_nb": -122127.49766835335,
+ "loglik_poisson": -122317.96053340792,
+ "model": "naive_sog_v1",
+ "nb_k": 16.841764622458097,
+ "ot_ratio": {
+  "D": 0.01083446939800531,
+  "F": 0.013697632721414724
+ },
+ "params": {
+  "W_seconds": 10800,
+  "min_gp_prev_live": 20,
+  "min_gp_prior": 20,
+  "min_gp_season": 10,
+  "opp_shrink_games": 10,
+  "opp_window": 20,
+  "toi_window": 10
+ },
+ "prior_rate_per_s": {
+  "D": 0.0011455771532280336,
+  "F": 0.0019473306374165635
+ },
+ "spec": "docs/market_discovery_plan.md 6.2 + D3 + D6; docs/naive_model.md",
+ "target": "player shots on goal in 60 minutes (sog_reg)",
+ "trained_on": [
+  "2023-24",
+  "2024-25"
+ ]
+}

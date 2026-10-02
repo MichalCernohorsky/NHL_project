@@ -419,3 +419,16 @@ nevypsal; trh „střely týmu", který Tipsport vypisuje, The Odds API nemá.
 Suchý běh před zapnutím: dohnat 29. 9.–1. 10. = 16 snímků, **163 kreditů**;
 průběžně **~20 kreditů na zápas, ~145 na herní den, ~4 200 měsíčně,
 ~27 000 za základní část**.
+
+### D5 — tipy v dashboardu od fáze 0 (2. 10. 2026, před kódem)
+
+Na přání uživatele se tipy vypisují už teď (jako MLB/NBA; sázka je jen to,
+co uživatel označí „vsazeno"). Plný plán: `docs/tips_plan.md`. Tipy
+dává **naivní model ze sekce 6.2** se zamrazenými konstantami (odhad jen na
+2023-24 + 2024-25, otisk před etapou A) a **pravidlo ze sekce 6.4**.
+Živý snímek pro tipy (`snapshot_kind = 'live'`, ~200 kreditů měsíčně) je
+mimo předregistrované snímky.
+
+**Co D5 nemění:** verdikt fáze 0 se počítá jen z 2025-26 podle sekcí 3
+a 6. Záznam živých tipů ho neovlivní a podle něj se nic neladí; vykazuje
+se zvlášť.

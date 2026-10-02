@@ -169,3 +169,14 @@ def test_watcher_follows_the_wall_clock_through_system_sleep():
     g = {"game_id": 1, "start_time_utc": "2026-10-01T23:00:00Z"}
     assert odds_live.due_now([g], set(), clock["now"], "closing", 10, 20) == []
     assert odds_live.next_wakeup([g], set(), clock["now"], 10) is None
+
+
+def test_odds_key_from_environment_is_validated(monkeypatch):
+    import pytest
+    from nhl_tool.odds_client import OddsApiError, load_api_key
+    monkeypatch.setenv("ODDS_API_KEY", " abc123DEF \n")
+    assert load_api_key() == "abc123DEF"
+    monkeypatch.setenv("ODDS_API_KEY", "abc 123SECRET")
+    with pytest.raises(OddsApiError) as e:
+        load_api_key()
+    assert "SECRET" not in str(e.value)

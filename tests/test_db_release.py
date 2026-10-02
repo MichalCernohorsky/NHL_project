@@ -159,3 +159,13 @@ def test_token_with_pasted_whitespace_still_works(monkeypatch):
     monkeypatch.setenv("NHL_DATA_TOKEN", "tok_abc\n ")
     assert dr.token() == "tok_abc"
     assert "tok_abc" not in dr.scrub("error tok_abc")
+
+
+def test_token_with_junk_inside_is_reported_without_leaking(monkeypatch):
+    """Second cloud run (2. 10.): whitespace INSIDE the secret. The error must
+    say what is wrong, never show the value."""
+    monkeypatch.setenv("NHL_DATA_TOKEN", "export NHL_DATA_TOKEN=github_pat_SECRETPART")
+    with pytest.raises(dr.ReleaseError) as e:
+        dr.token()
+    msg = str(e.value)
+    assert "SECRETPART" not in msg and "mezera" in msg and "zacina 'github_pat_': ne" in msg

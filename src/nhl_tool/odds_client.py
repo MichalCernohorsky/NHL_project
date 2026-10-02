@@ -33,7 +33,13 @@ def load_api_key(env_path: Path | None = None) -> str:
     # environment; on the Mac it lives in .env. Never in a file in git.
     import os
     if os.environ.get("ODDS_API_KEY", "").strip():
-        return os.environ["ODDS_API_KEY"].strip()
+        key = os.environ["ODDS_API_KEY"].strip()
+        if not key.isascii() or not key.isalnum():
+            raise OddsApiError(
+                f"ODDS_API_KEY ma spatny tvar (delka {len(key)}, nepovolenych znaku "
+                f"{sum(not (c.isascii() and c.isalnum()) for c in key)}) - vloz do "
+                "secretu jen samotny klic")
+        return key
     env_path = env_path or ROOT / ".env"
     if not env_path.exists():
         raise OddsApiError(".env file not found - create it with ODDS_API_KEY=...")

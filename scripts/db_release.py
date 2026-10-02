@@ -65,10 +65,24 @@ def _raw_token() -> str:
     return (os.environ.get("NHL_DATA_TOKEN") or os.environ.get("GITHUB_TOKEN") or "").strip()
 
 
+def shape(value: str) -> str:
+    """What is wrong with a secret, without revealing it."""
+    bad = [c for c in value if not (c.isascii() and (c.isalnum() or c == "_"))]
+    kinds = sorted({"mezera" if c == " " else "odradkovani" if c in "\r\n"
+                    else "tabulator" if c == "\t" else "jiny znak" for c in bad})
+    return (f"delka {len(value)}, zacina 'github_pat_': "
+            f"{'ano' if value.startswith('github_pat_') else 'ne'}, "
+            f"nepovolenych znaku uvnitr: {len(bad)} ({', '.join(kinds) or '-'})")
+
+
 def token() -> str:
     t = _raw_token()
     if not t:
         raise ReleaseError("chybi token: nastav NHL_DATA_TOKEN (docs/cloud.md, krok 3)")
+    if not all(c.isascii() and (c.isalnum() or c == "_") for c in t):
+        # Without this, requests fails later with an opaque header error.
+        raise ReleaseError("NHL_DATA_TOKEN ma spatny tvar (" + shape(t) + "). "
+                           "Vloz do secretu jen samotny token (docs/cloud.md, krok 4).")
     return t
 
 

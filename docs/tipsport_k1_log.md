@@ -52,8 +52,8 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | 2. 10. | NYR@DET | Fox Adam | 1.5 | 1.84 | 1.84 | 8.70 |
 | 2. 10. | NYR@DET | Zibanejad Mika | 2.5 | 1.98 | 1.72 | 8.64 |
 
-Průběžně (36 dvojic, 2 dny): medián marže **1.72 %**, rozsah
-1.48–2.26 %. Pro D1 se *m* fixuje až po 3 herních dnech.
+Průběžně (36 dvojic, 2 dny): medián marže **8.75 %**, rozsah
+8.64–8.82 %. Pro D1 se *m* fixuje až po 3 herních dnech.
 
 Týmové střely na branku (jen kontext, nesází se): FLA@CAR 1,88/1,84 a
 1,80/1,92 (7,5–7,6 %), MTL@TOR 1,85/1,86 (7,8 %).

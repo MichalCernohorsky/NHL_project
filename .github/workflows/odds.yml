@@ -14,6 +14,12 @@ on:
   schedule:
     - cron: "*/10 13-23,0-5 * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto = podle planu; check = jen overit klic (zdarma)"
+        type: choice
+        options: [auto, check]
+        default: auto
 
 concurrency:
   group: nhl-db
@@ -33,7 +39,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Je co ocenit?
         id: gate
-        run: python3 scripts/odds_due.py
+        env: { MODE: "${{ inputs.mode }}" }
+        run: |
+          if [ "$MODE" = "check" ]; then echo "due=check" >> "$GITHUB_OUTPUT"
+          else python3 scripts/odds_due.py; fi
       - uses: actions/setup-python@v5
         if: steps.gate.outputs.due != 'none'
         with: { python-version: "3.12", cache: pip }
@@ -56,6 +65,10 @@ jobs:
         run: >-
           python scripts/collect_odds.py closing --early-minutes 20 --repeat
           --changed-flag data/.changed
+      - name: Kontrola klice (zdarma)
+        if: steps.gate.outputs.due == 'check'
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: python scripts/collect_odds.py check
       - name: Ulozeni databaze
         if: steps.gate.outputs.due != 'none' && hashFiles('data/.changed') != ''
         env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }

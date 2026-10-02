@@ -50,3 +50,13 @@ def test_daily_never_uploads_after_a_failed_download():
     steps = {s.get("name"): s for s in wf["jobs"]["daily"]["steps"]}
     assert steps["Stazeni databaze"]["id"] == "down"
     assert "steps.down.outcome == 'success'" in steps["Ulozeni databaze"]["if"]
+
+
+def test_manual_key_check_spends_no_credits():
+    wf = yaml.safe_load((WF / "odds.yml").read_text())
+    trig = wf[True] if True in wf else wf["on"]          # yaml reads 'on' as True
+    assert trig["workflow_dispatch"]["inputs"]["mode"]["options"] == ["auto", "check"]
+    steps = {s.get("name"): s for s in wf["jobs"]["odds"]["steps"]}
+    assert steps["Kontrola klice (zdarma)"]["run"].endswith("collect_odds.py check")
+    # the check never uploads: nothing writes data/.changed
+    assert "changed-flag" not in steps["Kontrola klice (zdarma)"]["run"]

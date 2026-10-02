@@ -45,7 +45,8 @@ def print_stats(kind, stats, client):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("kind", choices=("morning", "closing", "status"))
+    ap.add_argument("kind", choices=("morning", "closing", "status", "check"),
+                    help="check = verify the API key with a free call (no credits)")
     ap.add_argument("--watch", action="store_true",
                     help="closing: keep running until every game of the day is priced")
     ap.add_argument("--date", help="ET game date (default: today in US/Eastern)")
@@ -75,6 +76,10 @@ def main():
 
     from nhl_tool.odds_client import OddsClient
     client = OddsClient()
+    if args.kind == "check":
+        client.get("/sports")      # free endpoint: proves the key, costs nothing
+        print(f"klic The Odds API funguje | zbyva {client.last_remaining:.0f} kreditu")
+        return
     minutes, window = oc["closing_minutes_before_start"], oc["closing_window_minutes"]
     print(f"{game_date}: {len(games)} zapasu v rozpisu | trhy {', '.join(oc['markets'])}")
     while True:

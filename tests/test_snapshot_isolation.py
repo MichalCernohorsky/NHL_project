@@ -18,6 +18,8 @@ ALL_KINDS_ALLOWED = {
     # release manifest: newest snapshot time and row count, a freshness
     # check of the file - no analysis
     "scripts/db_release.py",
+    # repairs player_id on rows of every snapshot kind, analyses nothing
+    "scripts/rematch_odds_players.py",
 }
 
 PINNED = re.compile(r"snapshot_kind\s*(=|IN|IS)|snapshot_time\s*=\s*\?", re.I)

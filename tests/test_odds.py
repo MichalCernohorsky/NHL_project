@@ -180,3 +180,62 @@ def test_odds_key_from_environment_is_validated(monkeypatch):
     with pytest.raises(OddsApiError) as e:
         load_api_key()
     assert "SECRET" not in str(e.value)
+
+
+def test_roster_matches_a_player_who_has_not_played_for_the_team(conn):
+    """Summer trade / injured star: no box score for this team yet, but on
+    the published roster - must match (48 live names were unmatched)."""
+    from nhl_tool import rosters
+    _seed(conn)
+    payload = {"forwards": [{"id": 8477493, "firstName": {"default": "Aleksander"},
+                             "lastName": {"default": "Barkov"}, "positionCode": "C",
+                             "shootsCatches": "L", "birthDate": "1995-09-02"}],
+               "defensemen": [], "goalies": []}
+    rosters.store(conn, "2025-26", 17, rosters.parse_roster(payload), "2025-10-09")
+    lookup = build_roster_lookup(conn, 2025020010)
+    assert lookup.get("aleksander barkov") == 8477493
+    assert lookup.get("andrew copp") == 8477429          # box-score players still there
+
+
+def test_rematch_fills_only_missing_ids(conn, tmp_path, monkeypatch):
+    import sqlite3
+
+    import rematch_odds_players as rm
+    from nhl_tool import rosters
+    _seed(conn)
+    insert_odds_rows(conn, [{"bookmaker": "dk", "player_name": "Aleksander Barkov",
+                             "side": "over", "line": 2.5, "price": 1.9}],
+                     event_id="e1", game_id=2025020010, market="player_shots_on_goal",
+                     snapshot_time="2025-10-09T14:00:00Z", snapshot_kind="morning", roster={})
+    rosters.store(conn, "2025-26", 17, rosters.parse_roster(
+        {"forwards": [{"id": 8477493, "firstName": {"default": "Aleksander"},
+                       "lastName": {"default": "Barkov"}}]}), "2025-10-09")
+    conn.commit()
+    db = tmp_path / "nhl.db"
+    disk = sqlite3.connect(db)
+    conn.backup(disk)
+    disk.close()
+    monkeypatch.setattr(rm, "resolve_db_path", lambda c: db)
+    monkeypatch.setattr(rm, "load_config", lambda: {})
+    rm.main()
+    check = sqlite3.connect(db)
+    assert check.execute("SELECT player_id FROM odds WHERE player_name_raw = 'Aleksander Barkov'"
+                         " AND snapshot_kind = 'morning'").fetchone()[0] == 8477493
+
+
+def test_resolve_player_nicknames_and_ambiguity():
+    from nhl_tool.odds_import import resolve_player
+    lookup = {"john-jason peterka": 1, "nicholas paul": 2, "thomas novak": 3,
+              "egor chinakhov": 4, "john (jack) roslovic": 5, "paul cotter": 6,
+              "elias pettersson": None, "marcus pettersson": 7,
+              "brady tkachuk": 8, "matthew tkachuk": 9}
+    assert resolve_player(lookup, "JJ Peterka") == 1
+    assert resolve_player(lookup, "Nick Paul") == 2
+    assert resolve_player(lookup, "Tommy Novak") == 3
+    assert resolve_player(lookup, "Yegor Chinakhov") == 4
+    assert resolve_player(lookup, "Jack Roslovic") == 5
+    assert resolve_player(lookup, "Elias Pettersson") is None      # two players, same name
+    assert resolve_player(lookup, "Erik Pettersson") is None       # surname of an ambiguous name
+    assert resolve_player(lookup, "Max Tkachuk") is None           # surname not unique
+    assert resolve_player(lookup, "Brady Tkachuk") == 8            # exact still wins
+    assert resolve_player(lookup, "Zach Novak") is None            # initial differs

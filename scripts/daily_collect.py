@@ -28,10 +28,12 @@ from nhl_tool.config import load_config
 # (name, script, takes --season)
 STEPS = [
     ("schedule", "backfill_schedule.py", True),
+    ("rosters", "backfill_rosters.py", True),
     ("boxscores", "backfill_boxscores.py", True),
     ("toi", "backfill_toi.py", True),
     ("players", "backfill_players.py", False),
     ("pbp", "backfill_pbp.py", True),
+    ("rematch", "rematch_odds_players.py", False),
 ]
 
 

@@ -87,7 +87,9 @@ def find_event(events, home: str, away: str, start_utc: str | None,
 def build_roster_lookup(conn, game_id: int) -> dict[str, int]:
     """Normalized full name -> player_id over everyone who appeared for
     either team of the game in that season or the previous one (box
-    scores), so rookies and trades are covered once they have played."""
+    scores), plus everyone listed on either team's roster that season
+    (table rosters: summer trades, injured stars, rookies before their
+    debut - 48 of the first live names were unmatched without it)."""
     g = conn.execute("SELECT season, home_team_id, away_team_id FROM games"
                      " WHERE game_id = ?", (game_id,)).fetchone()
     if g is None:
@@ -96,14 +98,19 @@ def build_roster_lookup(conn, game_id: int) -> dict[str, int]:
     seasons = (g["season"], f"{start - 1}-{str(start)[2:]}")
     rows = conn.execute(
         """SELECT DISTINCT p.player_id, p.full_name FROM players p
-           JOIN (SELECT player_id, team_id, game_id FROM player_game_logs
-                 UNION ALL
-                 SELECT player_id, team_id, game_id FROM goalie_game_logs) l
-             ON l.player_id = p.player_id
-           JOIN games x ON x.game_id = l.game_id
-           WHERE l.team_id IN (?, ?) AND x.season IN (?, ?)
-             AND p.full_name IS NOT NULL""",
-        (g["home_team_id"], g["away_team_id"], *seasons)).fetchall()
+           JOIN (SELECT l.player_id FROM (
+                     SELECT player_id, team_id, game_id FROM player_game_logs
+                     UNION ALL
+                     SELECT player_id, team_id, game_id FROM goalie_game_logs) l
+                   JOIN games x ON x.game_id = l.game_id
+                  WHERE l.team_id IN (?, ?) AND x.season IN (?, ?)
+                 UNION
+                 SELECT r.player_id FROM rosters r
+                  WHERE r.team_id IN (?, ?) AND r.season = ?) m
+             ON m.player_id = p.player_id
+           WHERE p.full_name IS NOT NULL""",
+        (g["home_team_id"], g["away_team_id"], *seasons,
+         g["home_team_id"], g["away_team_id"], g["season"])).fetchall()
     lookup, ambiguous = {}, set()
     for r in rows:
         key = normalize_name(r["full_name"])
@@ -111,8 +118,39 @@ def build_roster_lookup(conn, game_id: int) -> dict[str, int]:
             ambiguous.add(key)
         lookup[key] = r["player_id"]
     for key in ambiguous:
-        del lookup[key]
+        # Kept as None (not deleted): two players share the name, e.g. the two
+        # Elias Petterssons of Vancouver. resolve_player must not fall back to
+        # a surname match for them either.
+        lookup[key] = None
     return lookup
+
+
+def _first_compatible(a: str, b: str) -> bool:
+    """Book vs NHL first names: JJ / John-Jason, Nick / Nicholas, Tommy /
+    Thomas share the initial; Yegor / Egor, Yevgeni / Evgeni differ only by
+    the transliterated Ye- of the Cyrillic E."""
+    if not a or not b:
+        return False
+    strip = lambda x: x[1:] if x.startswith("y") and len(x) > 2 else x  # noqa: E731
+    return a[0] == b[0] or strip(a)[0] == strip(b)[0]
+
+
+def resolve_player(lookup: dict, name: str) -> int | None:
+    """Exact normalized name first. Otherwise a surname that is unique among
+    the two teams' players with a compatible first name - never when that
+    surname belongs to an ambiguous full name."""
+    key = normalize_name(name)
+    if key in lookup:
+        return lookup[key]
+    parts = key.split(" ")
+    if len(parts) < 2:
+        return None
+    first, last = parts[0], parts[-1]
+    same = [(k, pid) for k, pid in lookup.items() if k.split(" ")[-1] == last]
+    if any(pid is None for _, pid in same):
+        return None
+    ids = {pid for k, pid in same if _first_compatible(first, k.split(" ")[0])}
+    return ids.pop() if len(ids) == 1 and len({pid for _, pid in same}) == 1 else None
 
 
 def insert_odds_rows(conn, rows, *, event_id: str, game_id: int | None, market: str,
@@ -121,7 +159,7 @@ def insert_odds_rows(conn, rows, *, event_id: str, game_id: int | None, market: 
     """-> (rows inserted, names that matched no player)."""
     unmatched, inserted = set(), 0
     for r in rows:
-        pid = roster.get(normalize_name(r["player_name"]))
+        pid = resolve_player(roster, r["player_name"])
         if pid is None:
             unmatched.add(r["player_name"])
         cur = conn.execute(

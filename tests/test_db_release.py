@@ -151,3 +151,11 @@ def test_corrupt_download_never_replaces_the_file(gh):
 
 def test_token_is_scrubbed(gh):
     assert "tok_secret_123" not in dr.scrub("HTTP 401 with tok_secret_123 inside")
+
+
+def test_token_with_pasted_whitespace_still_works(monkeypatch):
+    """First cloud run (2. 10.): the secret carried a trailing newline and
+    requests rejected the Authorization header."""
+    monkeypatch.setenv("NHL_DATA_TOKEN", "tok_abc\n ")
+    assert dr.token() == "tok_abc"
+    assert "tok_abc" not in dr.scrub("error tok_abc")

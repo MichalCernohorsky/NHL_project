@@ -31,13 +31,16 @@ jobs:
         with: { python-version: "3.12", cache: pip }
       - run: pip install -q -r requirements.txt
       - name: Stazeni databaze
+        id: down
         env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
         run: python scripts/db_release.py down --force
       - name: Migrace schematu
         run: python scripts/migrate.py
       - name: Denni beh
         run: python scripts/daily_collect.py
+      # Also after a failed daily step (keeps what was downloaded), but never
+      # when the download itself failed: there is nothing to upload then.
       - name: Ulozeni databaze
-        if: always()
+        if: always() && steps.down.outcome == 'success'
         env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
         run: python scripts/db_release.py up

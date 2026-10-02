@@ -59,15 +59,21 @@ class ReleaseError(Exception):
     pass
 
 
+def _raw_token() -> str:
+    # A secret pasted into GitHub's form often carries a trailing newline or
+    # space; requests then rejects the whole header (first cloud run, 2. 10.).
+    return (os.environ.get("NHL_DATA_TOKEN") or os.environ.get("GITHUB_TOKEN") or "").strip()
+
+
 def token() -> str:
-    t = os.environ.get("NHL_DATA_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    t = _raw_token()
     if not t:
         raise ReleaseError("chybi token: nastav NHL_DATA_TOKEN (docs/cloud.md, krok 3)")
     return t
 
 
 def scrub(text: str) -> str:
-    t = os.environ.get("NHL_DATA_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    t = _raw_token()
     return text.replace(t, "***TOKEN***") if t else text
 
 

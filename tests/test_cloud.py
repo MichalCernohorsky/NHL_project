@@ -43,3 +43,10 @@ def test_odds_job_spends_nothing_when_the_gate_says_none():
         if "ODDS_API_KEY" in str(s.get("env", "")):
             assert "steps.gate.outputs.due ==" in s["if"]
     assert "--repeat" in str(steps) and "--early-minutes 20" in str(steps)
+
+
+def test_daily_never_uploads_after_a_failed_download():
+    wf = yaml.safe_load((WF / "daily.yml").read_text())
+    steps = {s.get("name"): s for s in wf["jobs"]["daily"]["steps"]}
+    assert steps["Stazeni databaze"]["id"] == "down"
+    assert "steps.down.outcome == 'success'" in steps["Ulozeni databaze"]["if"]

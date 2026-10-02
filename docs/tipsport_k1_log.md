@@ -9,6 +9,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | den | zápasů dne | zápasů zkontrolováno | střely hráče (hráčů na zápas) | zásahy brankáře | zblokované střely | čas screenshotu |
 |---|---|---|---|---|---|---|
 | út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~20:00 CZ |
+| pá 2. 10. | 5 | 1 (NYR@DET) — **zatím neúplné** | 6 | nevidět | nevidět | ~21:45 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -44,9 +45,15 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | 29. 9. | NYR@BOS | Dorofeyev Pavel | 2.5 | 1.75 | 1.94 | 8.69 |
 | 29. 9. | NYR@BOS | Fox Adam | 1.5 | 1.84 | 1.84 | 8.70 |
 | 29. 9. | NYR@BOS | Zibanejad Mika | 2.5 | 1.98 | 1.72 | 8.64 |
+| 2. 10. | NYR@DET | DeBrincat Alex | 3.5 | 2.16 | 1.60 | 8.80 |
+| 2. 10. | NYR@DET | Raymond Lucas | 2.5 | 2.16 | 1.60 | 8.80 |
+| 2. 10. | NYR@DET | Seider Moritz | 2.5 | 2.26 | 1.55 | 8.76 |
+| 2. 10. | NYR@DET | Dorofeyev Pavel | 2.5 | 1.72 | 1.98 | 8.64 |
+| 2. 10. | NYR@DET | Fox Adam | 1.5 | 1.84 | 1.84 | 8.70 |
+| 2. 10. | NYR@DET | Zibanejad Mika | 2.5 | 1.98 | 1.72 | 8.64 |
 
-Průběžně (30 dvojic, 1 den): medián marže **8.75 %**, rozsah
-8.64–8.82 %. Pro D1 se *m* fixuje až po 3 herních dnech.
+Průběžně (36 dvojic, 2 dny): medián marže **1.72 %**, rozsah
+1.48–2.26 %. Pro D1 se *m* fixuje až po 3 herních dnech.
 
 Týmové střely na branku (jen kontext, nesází se): FLA@CAR 1,88/1,84 a
 1,80/1,92 (7,5–7,6 %), MTL@TOR 1,85/1,86 (7,8 %).
@@ -59,3 +66,8 @@ Hutson). Americké knihy kotují víc hráčů — viz dodatek D2 v plánu.
 Pravidla (uživatel, 29. 9.): „Počet střel hráče na branku" se vyhodnocuje
 za **60 minut, bez prodloužení** (americké knihy prodloužení počítají) —
 dodatek D3 v plánu.
+
+Americké knihy (náš živý sběr 29. 9.–2. 10., 21 zápasů): **zblokované
+střely nevypsala žádná kniha ani jednou**; zásahy brankáře v closingu
+29. 9. u 5/5 zápasů, v ranních snímcích jen 2 z 21 zápasů (lajny vznikají
+až po potvrzení brankáře). Tipsport: zásahy ani bloky ve 2 dnech nevidět.

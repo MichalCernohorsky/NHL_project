@@ -5,14 +5,14 @@ evidence (docs/tipsport_k1_log.md, reports), never computed from odds on
 the fly. Update together with the plan and the log, in the same commit.
 """
 
-UPDATED = "29. 9. 2026"
+UPDATED = "2. 10. 2026"
 
 # (id, criterion, status text, state: ok / progress / wait / fail)
 CRITERIA = [
     ("K1", "Tipsport vypisuje trh",
-     "Střely hráče: den 1 ze 3 splněn (5/5 zápasů, 6 hráčů). "
-     "Zásahy brankáře a zblokované střely zatím nevidět; bloky 29. 9. "
-     "nevypsala ani žádná americká kniha.", "progress"),
+     "Střely hráče: den 1 splněn (5/5 zápasů, 6 hráčů), den 2 rozpracovaný "
+     "(1/5 zápasů, 6 hráčů). Zásahy brankáře v Tipsportu nevidět; zblokované "
+     "střely nevypsal nikdo, ani americké knihy (21 zápasů).", "progress"),
     ("K2", "Data zdarma a denně",
      "Splněno: 3 sezóny (3 936 zápasů) box score, čas na ledě i v přesilovce, "
      "střely za 60 min z play-by-play, vše ověřeno proti box score, 0 chyb.", "ok"),
@@ -23,4 +23,4 @@ CRITERIA = [
     ("K5", "≥ 3 sázky na herní den (přepočet na 6 hráčů, D2)", "Po etapě A.", "wait"),
 ]
 
-TIPSPORT_MARGIN = "8,75 % (medián 30 dvojic, 29. 9.)"
+TIPSPORT_MARGIN = "8,75 % (medián 36 dvojic, 29. 9. a 2. 10.)"

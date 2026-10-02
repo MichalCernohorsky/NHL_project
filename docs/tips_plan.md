@@ -74,3 +74,26 @@ a kurz, ne za lajnu tipu. Všechny tipy se ukládají a vyhodnocují, i nevsazen
 | ~6. 10. | naivní model + zamrazení (potřeba i pro fázi 0, před etapou A) |
 | ~10. 10. | denní predikce, živý snímek, tipy, stránka Tipy dne |
 | ~14. 10. | Vsazeno / Moje sázky / vyhodnocení / ramena |
+
+## 7. Varování a kontext u tipu (2. 10. 2026, před prvním vyhodnoceným tipem)
+
+**Zkouška výpočtu** na ranním snímku 2. 10. (5 zápasů, 64 hráčů s lajnou
+amerických knih): hrana ≥ 3 p.b. u 45 hráčů, tipů podle pravidla 43,
+z toho 11 s hranou nad 10 p.b.; skoro všechno „méně". Příčina (ověřeno
+na datech, není to chyba kódu): na začátku sezóny stojí naivní model jen
+na minulé sezóně, takže hráč s loňským propadem (Seguin: zranění, 1,07
+střely/zápas proti 2,30 předloni) dostane nízké číslo, kterému trh nevěří.
+
+Dvě doplnění **zobrazení**, ne pravidla (rozhodnuto bez pohledu na
+jakýkoli výsledek tipu):
+
+- **⚠ Velká neshoda s trhem** u tipu s hranou > 10 p.b. Důvod z NBA
+  (`edge_categories`, closing 2025-26): v pásmu hrany > 10 p.b. model
+  tvrdil 51,7 %, trefil 38,6 %. U NHL se to měří zvlášť (tipy s varováním
+  vs. bez), nefiltruje se.
+- **Kontext:** u tipu střely za 60 minut na zápas v minulé a předminulé
+  sezóně, aby byl vidět případ „loni zraněný".
+
+Kapacita: tipů bývá víc, než lze vsadit; Tipsport ale vypisuje jen
+6 hráčů na zápas a „minimální kurz" vyřadí sázky, kde marže sní hranu.
+Strop počtu tipů se nezavádí (byl by to další nevalidovaný filtr).

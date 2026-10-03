@@ -1,6 +1,7 @@
 """Tipy dne - tips of the frozen naive model per game (docs/tips_plan.md),
-in the MLB "Přehled dne" look: balance cards, then game cards with their
-tips. Read-only; marking a tip as bet comes with the next step (Vsazeno)."""
+in the MLB "Přehled dne" look: balance cards (all tips / TOP / my bets),
+then game cards with their tips. 'Rozbor zápasu →' under a card opens the
+game page, where a tip is confirmed with ✅ Vsazeno."""
 import html
 import sys
 from datetime import datetime
@@ -12,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 import pandas as pd
 import streamlit as st
 
-from dashboard import data
+from dashboard import bets, data, nav
 from dashboard.hero import hero, team_logo, ticker
 from dashboard.theme import section, setup_page
 from nhl_tool import naive_sog as ns
@@ -21,7 +22,8 @@ from nhl_tool.stats import roi_ci
 
 setup_page("Tipy dne")
 CZ, ET = ZoneInfo("Europe/Prague"), ZoneInfo("America/New_York")
-WARN_EDGE = 0.10       # docs/tips_plan.md section 7 (display only)
+WARN_EDGE = tipmod.WARN_EDGE   # docs/tips_plan.md section 7 (display only)
+MIN_DAYS_CI = 5                # no bootstrap interval from fewer game days
 
 if not data.db_path().exists():
     st.error(f"Databáze {data.db_path()} tu není.")
@@ -72,6 +74,11 @@ st.markdown("""
 .gcard .pct{width:44px;text-align:right;color:#5a6572;font-size:12px;flex:none}
 .gcard .res{flex:none;font-weight:750;font-size:12px;width:62px;text-align:right}
 .gcard .res.win{color:#1e7a46}.gcard .res.loss{color:#b3403a}.gcard .res.void{color:#5a6572}
+.gcard .star{flex:none;width:16px;color:#c8102e;font-size:12px;text-align:center}
+.gcard .stub{display:flex;align-items:center;gap:8px;margin:0 4px 6px 80px;padding:4px 10px;
+  background:#e8f4ee;border:1px dashed #bfe0cf;border-radius:8px;font-size:11.5px;color:#1e7a46}
+.gcard.top{border-top:3px solid #c8102e}
+div[data-testid="stButton"] > button[kind="tertiary"]{color:#2E5FB7;font-weight:650;padding:2px 4px}
 .gcard .none{padding:10px 16px;color:#5a6572;font-size:12.5px;border-top:1px solid #e2e6ea}
 .naive{background:#fdf3e1;border:1px solid #f3d9a6;color:#7a5410;border-radius:12px;
   padding:10px 14px;font-size:13px;margin:2px 0 12px}
@@ -115,22 +122,49 @@ def kpi(tag, big, rows, cls=""):
             f'<span class="big{cls}">{big}</span><div class="row">{cells}</div></div>')
 
 
-if rec.empty:
-    model_card = kpi("Model celkem · papír", "–", ["zatím žádný vyhodnocený tip"])
-else:
-    roi, lo, hi = roi_ci(rec)
-    ci = (f"95% CI {cz(lo * 100)} až {cz(hi * 100)} %" if len(rec) >= 30
-          else "interval až od 30 tipů")
-    model_card = kpi("Model celkem · papír", f"{'+' if roi > 0 else ''}{cz(roi * 100)} %",
-                     [f"<b>{len(rec)}</b> tipů", f"výhry <b>{(rec.outcome == 'win').mean() * 100:.0f} %</b>",
-                      f"zisk <b>{cz(rec.profit_units.sum())} j.</b>", ci],
-                     " up" if roi > 0 else " dn" if roi < 0 else "")
+def record_card(tag, d, empty):
+    if d.empty:
+        return kpi(tag, "–", [empty])
+    roi, lo, hi = roi_ci(d)
+    # The interval resamples game DAYS; from one day it would collapse to a
+    # single value and look like certainty (NBA pulled-lines lesson).
+    n_days = d["game_date"].nunique()
+    ci = (f"95% CI {cz(lo * 100)} až {cz(hi * 100)} %" if n_days >= MIN_DAYS_CI
+          else f"interval až od {MIN_DAYS_CI} herních dnů (zatím {n_days})")
+    return kpi(tag, f"{'+' if roi > 0 else ''}{cz(roi * 100)} %",
+               [f"<b>{len(d)}</b> tipů", f"výhry <b>{(d.outcome == 'win').mean() * 100:.0f} %</b>",
+                f"zisk <b>{cz(d.profit_units.sum())} j.</b>", ci],
+               " up" if roi > 0 else " dn" if roi < 0 else "")
+
+
+if not st.session_state.get("_bets_pulled"):
+    bets.sync_pull()
+    st.session_state["_bets_pulled"] = True
+my_bets = bets.active_bets()
+mine = {b["tip_id"]: b for b in my_bets if b.get("tip_id")}
+my_profit, my_staked, my_done = 0.0, 0.0, 0
+for b in my_bets:
+    f = data.bet_facts(b["game_id"], b["player_id"])
+    if f.get("final"):
+        out, pr = bets.settle(b, f["actual"], f["played"])
+        if out in ("win", "loss"):
+            my_profit, my_staked, my_done = my_profit + pr, my_staked + b["stake"], my_done + 1
+my_card = (kpi("Moje vsazené", f"{'+' if my_profit > 0 else ''}{my_profit:,.0f} Kč".replace(",", " "),
+               [f"<b>{my_done}</b> vyhodnocených", f"ROI <b>{cz(my_profit / my_staked * 100)} %</b>",
+                f"tiketů celkem <b>{len(my_bets)}</b>"],
+               " up" if my_profit > 0 else " dn" if my_profit < 0 else "")
+           if my_done else
+           kpi("Moje vsazené", str(len(my_bets)) if my_bets else "–",
+               ["tiketů čeká na výsledek" if my_bets else "zatím žádný tiket"]))
 cards = [
     kpi("Tipy dne", str(len(play)),
-        [f"⚠ velká neshoda <b>{n_warn}</b>",
+        [f"⭐ TOP <b>{int(play['arm_top'].sum()) if not play.empty else 0}</b>",
+         f"⚠ velká neshoda <b>{n_warn}</b>",
          f"hráčů s lajnou <b>{df['player_id'].nunique() if not df.empty else 0}</b>"]),
-    model_card,
-    kpi("Moje sázky", "–", ["✅ Vsazeno přijde v dalším kroku (~14. 10.)"]),
+    record_card("Všechny tipy · papír", rec, "zatím žádný vyhodnocený tip"),
+    record_card("⭐ TOP · papír", rec[rec["arm_top"] == 1] if not rec.empty else rec,
+                "zatím žádný vyhodnocený TOP"),
+    my_card,
     kpi("Kurzy", cz_time(snap) if snap else "–",
         [f"snímek <b>{df['snapshot_kind'].iloc[0] if not df.empty else '–'}</b>",
          "americké knihy, převod na 60 min"]),
@@ -142,7 +176,8 @@ st.markdown(
     'jednoduchý model (loňské a letošní střely, čas na ledě, soupeř). Jestli trh porazí, '
     'ukáže až verdikt fáze 0. Na začátku sezóny stojí hlavně na loňsku. '
     '<b>Hraj jen za kurz ≥ min. kurz</b> — pod ním marže Tipsportu sní hranu. '
-    '⚠ = model se s trhem rozchází o víc než 10 p.b.; v NBA byly takové tipy nejhorší.</div>',
+    '⚠ = model se s trhem rozchází o víc než 10 p.b.; v NBA byly takové tipy nejhorší. '
+    'Důvody tipu a ✅ Vsazeno najdeš v <b>Rozboru zápasu</b> pod kartou.</div>',
     unsafe_allow_html=True)
 
 # ------------------------------------------------------------- game cards
@@ -165,28 +200,36 @@ def tip_row(r) -> str:
         res = f'<span class="res {r.outcome}">{txt}{shots}</span>'
     minp = (f'<span class="minp">min. kurz<b>{cz(r.tipsport_min_price, 2)}</b></span>'
             if pd.notna(r.tipsport_min_price) else "")
-    return (f'<div class="tip"><span class="chip {r.side}">{"VÍCE" if r.side == "over" else "MÉNĚ"}</span>'
+    star = '<span class="star" title="TOP tip dne">⭐</span>' if r.arm_top else '<span class="star"></span>'
+    stub = ""
+    if r.tip_id in mine:
+        b = mine[r.tip_id]
+        stub = (f'<div class="stub">🎟️ <b>vsazeno</b> · {line_txt(b["side"], b["line"])} @ '
+                f'{cz(b["price"], 2)} · {b["stake"]:,.0f} Kč · {html.escape(str(b["book"]))}</div>'
+                ).replace(",", " ")
+    return (f'<div class="tip">{star}<span class="chip {r.side}">{"VÍCE" if r.side == "over" else "MÉNĚ"}</span>'
             f'<span class="lbl"><b>{html.escape(str(r.player_name))}</b> '
             f'<span style="color:#5a6572">{r.tym or ""}</span> · <b>{line_txt(r.side, r.line)}</b>{warn}'
             f'<small>model {cz(r.p_model * 100)} % · trh {cz(r.p_market * 100)} % · '
             f'čeká {cz(r.mu_60, 2)} střely{" · " + " · ".join(ctx) if ctx else ""}</small></span>'
             f'{minp}<span class="ebar"><i class="{"w" if r.edge > WARN_EDGE else ""}" '
             f'style="width:{width:.0f}%"></i></span>'
-            f'<span class="pct">+{cz(r.edge * 100)}</span>{res}</div>')
+            f'<span class="pct">+{cz(r.edge * 100)}</span>{res}</div>{stub}')
 
 
 def card(g) -> str:
     sub = by_game.get(g.game_id)
     if sub is not None and not sub.empty:
         body = ('<div class="tips">' + "".join(tip_row(r) for r in sub.sort_values(
-            "edge", ascending=False).itertuples()) + "</div>")
+            ["arm_top", "edge"], ascending=False).itertuples()) + "</div>")
     elif g.game_id in with_lines:
         body = '<div class="none">Model dnes bez tipu.</div>'
     else:
         body = '<div class="none">Zatím bez lajn amerických knih.</div>'
     score = (f"{g.away_score} : {g.home_score}" if g.game_state in ("OFF", "FINAL")
              else cz_time(g.start_time_utc))
-    return (f'<div class="gcard{" has" if sub is not None else ""}"><div class="ghead">'
+    cls = " top" if sub is not None and sub["arm_top"].any() else " has" if sub is not None else ""
+    return (f'<div class="gcard{cls}"><div class="ghead">'
             f'<div class="team">{team_logo(g.a_ab, 26, light=True)}{g.a_ab}'
             f'<small><span class="side">hosté</span></small></div>'
             f'<div class="mid"><b>{score}</b>{"konec" if g.game_state in ("OFF", "FINAL") else "čas CZ"}</div>'
@@ -194,14 +237,18 @@ def card(g) -> str:
             f'<small><span class="side">domácí</span></small></div></div>{body}</div>')
 
 
-section("Zápasy a tipy", "seřazeno podle začátku · pruh = hrana proti trhu (plný = 20 p.b.)")
+section("Zápasy a tipy", "⭐ TOP tip dne (max. 3, bez varování, jeden na zápas) · pruh = hrana "
+        "proti trhu (plný = 20 p.b.) · červená linka = zápas s TOP tipem")
 if games.empty:
     st.info("V tento den se nehraje.")
 rows = list(games.itertuples())
 for i in range(0, len(rows), 2):
     cols = st.columns(2)
     for col, g in zip(cols, rows[i:i + 2]):
-        col.markdown(card(g), unsafe_allow_html=True)
+        with col:
+            st.markdown(card(g), unsafe_allow_html=True)
+            if st.button("Rozbor zápasu →", key=f"go_{g.game_id}", type="tertiary"):
+                nav.goto("rozbor", game_id=int(g.game_id))
 
 # ------------------------------------------------------------- calculator
 if not df.empty:

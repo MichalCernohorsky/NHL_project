@@ -69,14 +69,14 @@ button[data-testid="stBaseButton-pillsActive"] span { color: #fff; }
 .metric-footnote { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
 /* KPI balance cards (MLB kpi) */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 4px 0 10px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 10px; }
 @media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .kpis { grid-template-columns: 1fr; } }
 .kpi { background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--navy); border-radius: 14px;
-    padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 2px; min-height: 120px;
+    padding: 14px 15px 12px; display: flex; flex-direction: column; gap: 2px; min-height: 120px;
     font-variant-numeric: tabular-nums; }
 .kpi .tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
-.kpi .big { font-size: 28px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); }
+.kpi .big { font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); }
 .kpi .big.up { color: var(--over); } .kpi .big.dn { color: var(--under); }
 .kpi .row { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: 12.5px; margin-top: auto; }
 .kpi .row b { color: var(--ink); font-weight: 650; }
@@ -102,3 +102,7 @@ button[data-testid="stBaseButton-pillsActive"] span { color: #fff; }
 .plain-table th { text-align: left; color: var(--muted); font-weight: 650; font-size: .72rem; text-transform: uppercase;
     letter-spacing: .06em; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #f7f9fb; }
 .plain-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink); }
+
+/* Rozbor zápasu is opened from a game card, not from the menu (as the MLB
+   Schvalování page): registered, but its link is hidden. */
+div[data-testid="stSidebarNav"] a[href$="/rozbor"] { display: none; }

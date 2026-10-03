@@ -34,6 +34,8 @@ def main():
     day = args.date or today.isoformat()
     settled = tips.settle(conn, (today - timedelta(days=1)).isoformat())
     res = tips.build(conn, day, kind=args.kind, margin=cfg["odds"]["tipsport_margin"])
+    for (d,) in conn.execute("SELECT DISTINCT game_date FROM tips WHERE f_rate_60 IS NULL").fetchall():
+        tips.store_factors(conn, d)        # tips built before the factor columns existed
     print(f"{day} ({args.kind}): zapasu s lajnami {res['games']}, kandidatu {res['candidates']},"
           f" novych {res['inserted']}, TIPU {res['playable']}, TOP {res['top']}"
           f" | vyhodnoceno {settled}")

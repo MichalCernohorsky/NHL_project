@@ -134,3 +134,18 @@ tipu) **→ Moje sázky** (tiket: lajna, sázkovka, kurz, vklad v Kč).
   hráč bez času na ledě = vrácený vklad; celočíselná lajna = možný push.
 - **Bilance TY** (Kč i jednotky) vedle ramene MODEL; v Tipech dne
   i v Moje sázky.
+
+## 10. Stav (3. 10. 2026)
+
+Hotovo a otestováno: Tipy dne (karty, ⭐ TOP, ⚠, bilance všech tipů / TOP /
+moje vsazené), **Rozbor zápasu** (✅ Vsazeno / ❌ Ne se zámkem, rozdělení,
+kurzy knih, „Tip by vyšel…", 🧩 Proč model tipuje, trendy, Co ovlivňuje
+dnešek, shrnutí, vysvětlivky, navigace mezi zápasy), **Moje sázky** (fronta,
+formulář tiketu s verdiktem SÁZEJ / NESÁZEJ, log, bilance). Faktory tipu
+(rychlost střelby, čas na ledě, soupeř) se ukládají s tipem (migrace 0007).
+
+Interval spolehlivosti se zobrazuje až od 5 herních dnů: převzorkují se
+dny, z jednoho dne by interval splynul do jedné hodnoty.
+
+Zbývá: nasazení na Streamlit Community Cloud (heslo, databáze ze
+soukromého vydání, zápis tiketů přes token), spolehlivé denní spouštění.

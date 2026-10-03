@@ -279,6 +279,116 @@ def model_record() -> pd.DataFrame:
     """Settled playable tips (MODEL arm, paper), one row per tip."""
     if not _has_table("tips"):
         return pd.DataFrame()
-    return q("""SELECT game_date, edge, outcome, profit_units FROM tips
+    return q("""SELECT game_date, edge, arm_top, outcome, profit_units FROM tips
                 WHERE playable = 1 AND outcome IN ('win', 'loss')
                 ORDER BY game_date""")
+
+
+# ------------------------------------------------------------ game page
+
+def game(game_id: int) -> pd.Series | None:
+    df = q("""SELECT g.*, h.abbreviation AS h_ab, h.full_name AS h_name,
+                     a.abbreviation AS a_ab, a.full_name AS a_name
+              FROM games g JOIN teams h ON h.team_id = g.home_team_id
+              JOIN teams a ON a.team_id = g.away_team_id WHERE g.game_id = ?""", (int(game_id),))
+    return None if df.empty else df.iloc[0]
+
+
+def tip_books(game_id: int, player_id: int, kind: str, snapshot_time: str) -> pd.DataFrame:
+    """Every book's line and prices for the player in the tip's own snapshot."""
+    return q("""SELECT o.bookmaker AS kniha, o.line AS lajna,
+                       MAX(CASE WHEN o.side = 'over' THEN o.price END) AS vice,
+                       MAX(CASE WHEN o.side = 'under' THEN o.price END) AS mene
+                FROM odds o
+                WHERE o.game_id = ? AND o.player_id = ? AND o.market = 'player_shots_on_goal'
+                  AND o.snapshot_kind = ? AND o.snapshot_time = ?
+                GROUP BY o.bookmaker, o.line ORDER BY o.line, o.bookmaker""",
+             (int(game_id), int(player_id), kind, snapshot_time))
+
+
+def player_recent(player_id: int, before_date: str, n: int = 15) -> pd.DataFrame:
+    """Last n regular-season games before a date, oldest first."""
+    df = q("""SELECT g.game_date AS datum, g.season,
+                     CASE WHEN p.team_id = g.home_team_id THEN 'vs ' || a.abbreviation
+                          ELSE '@ ' || h.abbreviation END AS souper,
+                     (p.toi_s - COALESCE(p.ot_toi_s, 0)) / 60.0 AS toi,
+                     p.pp_toi_s / 60.0 AS pp_toi, p.sog_reg AS strely_60, p.sog AS strely
+              FROM player_game_logs p JOIN games g USING (game_id)
+              JOIN teams h ON h.team_id = g.home_team_id
+              JOIN teams a ON a.team_id = g.away_team_id
+              WHERE p.player_id = ? AND g.season_type = 'regular' AND g.game_date < ?
+                AND p.toi_s > 0 AND p.sog_reg IS NOT NULL
+              ORDER BY g.game_date DESC LIMIT ?""", (int(player_id), before_date, n))
+    return df.iloc[::-1].reset_index(drop=True)
+
+
+def player_shots_history(player_id: int, before_date: str) -> pd.DataFrame:
+    """Every regular-season game before a date: season + 60-minute shots."""
+    return q("""SELECT g.season, g.game_date, p.sog_reg AS s
+                FROM player_game_logs p JOIN games g USING (game_id)
+                WHERE p.player_id = ? AND g.season_type = 'regular' AND g.game_date < ?
+                  AND p.toi_s > 0 AND p.sog_reg IS NOT NULL
+                ORDER BY g.game_date DESC""", (int(player_id), before_date))
+
+
+def pos_avg_toi_min() -> dict:
+    """League average regulation ice time per game by position group in the
+    training seasons - only a display baseline for 'what lifts / lowers'."""
+    df = q("""SELECT CASE WHEN p.position = 'D' THEN 'D' ELSE 'F' END AS grp,
+                     AVG(p.toi_s - COALESCE(p.ot_toi_s, 0)) / 60.0 AS toi
+              FROM player_game_logs p JOIN games g USING (game_id)
+              WHERE g.season IN ('2023-24', '2024-25') AND g.season_type = 'regular'
+                AND p.toi_s > 0 GROUP BY 1""")
+    return dict(zip(df["grp"], df["toi"]))
+
+
+def played_previous_day(team_id: int, game_date: str) -> bool:
+    df = q("""SELECT 1 FROM games WHERE game_date = date(?, '-1 day') AND season_type = 'regular'
+              AND ? IN (home_team_id, away_team_id) LIMIT 1""", (game_date, int(team_id)))
+    return not df.empty
+
+
+def team_shots_allowed(team_id: int, season: str, before_date: str) -> tuple[float | None, int]:
+    """(regulation shots allowed per game, games) this season before a date."""
+    df = q("""SELECT AVG(s) AS m, COUNT(*) AS n FROM (
+                SELECT g.game_id, SUM(p.sog_reg) AS s
+                FROM player_game_logs p JOIN games g USING (game_id)
+                WHERE g.season = ? AND g.season_type = 'regular' AND g.game_date < ?
+                  AND ? IN (g.home_team_id, g.away_team_id) AND p.team_id != ?
+                GROUP BY g.game_id)""", (season, before_date, int(team_id), int(team_id)))
+    n = int(df["n"][0] or 0)
+    return (float(df["m"][0]) if n else None), n
+
+
+# ------------------------------------------------------------ my bets
+
+def tips_by_ids(tip_ids: list[str]) -> pd.DataFrame:
+    if not tip_ids or not _has_table("tips"):
+        return pd.DataFrame()
+    marks = ",".join("?" * len(tip_ids))
+    return q(f"""SELECT t.*, tm.abbreviation AS tym, op.abbreviation AS souper
+                 FROM tips t LEFT JOIN teams tm ON tm.team_id = t.team_id
+                 LEFT JOIN teams op ON op.team_id = t.opp_id
+                 WHERE t.tip_id IN ({marks})""", tuple(tip_ids))
+
+
+def bet_facts(game_id: int, player_id: int) -> dict:
+    """What a ticket needs to be settled: the game's state and the player's
+    60-minute shots (None until the play-by-play counts are loaded)."""
+    df = q("""SELECT g.game_state, g.game_date, g.start_time_utc,
+                     h.abbreviation AS h_ab, a.abbreviation AS a_ab,
+                     p.sog_reg, p.toi_s,
+                     EXISTS (SELECT 1 FROM backfill_state b WHERE b.task = 'pbp'
+                             AND b.key = CAST(g.game_id AS TEXT) AND b.status = 'done') AS counted
+              FROM games g JOIN teams h ON h.team_id = g.home_team_id
+              JOIN teams a ON a.team_id = g.away_team_id
+              LEFT JOIN player_game_logs p ON p.game_id = g.game_id AND p.player_id = ?
+              WHERE g.game_id = ?""", (int(player_id), int(game_id)))
+    if df.empty:
+        return {}
+    r = df.iloc[0]
+    final = r["game_state"] in ("OFF", "FINAL") and bool(r["counted"])
+    played = pd.notna(r["toi_s"]) and r["toi_s"] > 0
+    return {"zapas": f'{r["a_ab"]} @ {r["h_ab"]}', "game_date": r["game_date"],
+            "start_time_utc": r["start_time_utc"], "final": final, "played": bool(played),
+            "actual": int(r["sog_reg"]) if final and played and pd.notna(r["sog_reg"]) else None}

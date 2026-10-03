@@ -58,9 +58,11 @@ def _today_with_tips(conn):
                 books=3, best_book="dk", best_price=1.9, sim_tipsport_price=1.84,
                 entry_live=1, gp_season=0, gp_prev=80, snapshot_kind="live",
                 snapshot_time=f"{today}T14:00:00Z", built_at=f"{today}T15:00:00Z")
-    rows = [dict(base, tip_id="a", player_id=8477429, player_name="Andrew Copp", line=1.5,
+    factors = dict(f_rate_60=5.2, f_prior_60=6.0, f_season_shots=3.0, f_season_toi_min=33.0,
+                   f_toi_l10_min=16.1, f_opp_factor=0.97, f_opp_mean=27.0, f_opp_n=2, pos_group="F")
+    rows = [dict(base, **factors, tip_id="a", player_id=8477429, player_name="Andrew Copp", line=1.5,
                  side="under", p_model=0.6, edge=0.10 - 1e-9, tipsport_min_price=1.75, playable=1,
-                 actual_60=1, outcome="win", profit_units=0.84, settled_at=today),
+                 arm_top=1, actual_60=1, outcome="win", profit_units=0.84, settled_at=today),
             dict(base, tip_id="b", player_id=8475279, player_name="Ben Chiarot", line=2.5,
                  side="over", p_model=0.65, edge=0.15, tipsport_min_price=1.61, playable=1),
             dict(base, tip_id="c", player_id=8475279, player_name="Ben Chiarot", line=2.5,
@@ -101,3 +103,40 @@ def test_tips_page_renders_cards_and_calculator(tmp_path, monkeypatch):
     assert "Andrew Copp" in page and "Ben Chiarot" in page
     assert "⚠" in page and "✅" in page                 # warning and a settled win
     assert "splňuje pravidlo" in page                   # calculator verdict rendered
+
+
+def test_game_page_shows_reasons_and_decision_rows(tmp_path, monkeypatch):
+    """Rozbor zápasu: tip rows, the 'why' breakdown for a tip with stored
+    factors, and no crash for one without (older record)."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    path = tmp_path / "nhl.db"
+    _build_db(path, True)
+    monkeypatch.setenv("NHL_DASHBOARD_DB", str(path))
+    at = AppTest.from_file(str(ROOT / "dashboard" / "views" / "6_Rozbor_zapasu.py"),
+                           default_timeout=30)
+    at.session_state["game_id"] = 2026029999
+    at.run()
+    assert not at.exception, [e.value for e in at.exception]
+    page = " ".join(m.value for m in at.markdown) + " ".join(c.value for c in at.caption)
+    assert "Andrew Copp" in page and "⭐ TOP" in page
+    assert "Proč model tipuje" in page and "Střelba hráče" in page
+    assert "není uložený" in page                        # the tip without factors
+    assert "zamčeno" in page or "vyšel" in page          # game finished: locked / settled
+
+
+def test_my_bets_page_with_a_ticket(tmp_path, monkeypatch):
+    from dashboard import bets
+    path = tmp_path / "nhl.db"
+    _build_db(path, True)
+    monkeypatch.setenv("NHL_DASHBOARD_DB", str(path))
+    tip = {"tip_id": "a", "game_id": 2026029999, "game_date": "2099-01-01",
+           "start_time_utc": "2099-01-01T00:00:00Z", "player_id": 8477429,
+           "player_name": "Andrew Copp", "side": "under"}
+    bets.decide(tip, "bet")
+    bets.save_bet(tip, 1.5, 1.80, 200, "Tipsport")
+    at = AppTest.from_file(str(ROOT / "dashboard" / "views" / "7_Moje_sazky.py"),
+                           default_timeout=30).run()
+    assert not at.exception, [e.value for e in at.exception]
+    page = " ".join(m.value for m in at.markdown)
+    assert "Andrew Copp" in page and "200 Kč" in page

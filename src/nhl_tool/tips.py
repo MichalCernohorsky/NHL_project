@@ -116,7 +116,41 @@ def predict(conn, model: dict, game_date: str, players: pd.DataFrame) -> pd.Data
     f = ns.features(pd.concat([hist, virt], ignore_index=True), constants(model))
     f = f.merge(virt[["game_id", "player_id"]], on=["game_id", "player_id"])
     return f[["game_id", "player_id", "team_id", "opp_id", "group", "mu_60",
-              "entry_live", "gp_before", "prev_gp"]]
+              "entry_live", "gp_before", "prev_gp", "r", "r_prior", "S_before",
+              "T_before", "toi_l10", "o", "opp_mean", "opp_n"]]
+
+
+FACTOR_COLS = ("f_rate_60", "f_prior_60", "f_season_shots", "f_season_toi_min",
+               "f_toi_l10_min", "f_opp_factor", "f_opp_mean", "f_opp_n", "pos_group")
+
+
+def factor_values(row) -> tuple:
+    """The stored explanation of a prediction row (see migration 0007)."""
+    nan = lambda v: None if v is None or (isinstance(v, float) and math.isnan(v)) else v  # noqa: E731
+    return (float(row.r) * 3600, float(row.r_prior) * 3600, float(row.S_before),
+            float(row.T_before) / 60, float(row.toi_l10) / 60, float(row.o),
+            nan(float(row.opp_mean)) if row.opp_mean is not None else None,
+            int(row.opp_n) if not math.isnan(float(row.opp_n)) else 0, row.group)
+
+
+def store_factors(conn, game_date: str, model_path: Path = MODEL_FILE) -> int:
+    """Fill the factor columns of the day's tips that lack them. The values
+    depend only on history before the day, so this is repeatable and also
+    fills tips built before the columns existed."""
+    need = pd.read_sql_query(
+        "SELECT DISTINCT game_id, player_id FROM tips WHERE game_date = ? AND f_rate_60 IS NULL",
+        conn, params=(game_date,))
+    if need.empty:
+        return 0
+    pred = predict(conn, load_model(model_path), game_date, need)
+    n = 0
+    for r in pred.itertuples(index=False):
+        n += conn.execute(
+            f"""UPDATE tips SET {", ".join(c + " = ?" for c in FACTOR_COLS)}
+                WHERE game_date = ? AND game_id = ? AND player_id = ? AND f_rate_60 IS NULL""",
+            (*factor_values(r), game_date, int(r.game_id), int(r.player_id))).rowcount
+    conn.commit()
+    return n
 
 
 # ----------------------------------------------------------------- build
@@ -228,6 +262,7 @@ def build(conn, game_date: str, kind: str = "live", model_path: Path = MODEL_FIL
     n = store(conn, cand, model["model"], game_date, kind)
     conn.commit()
     top = mark_top(conn, game_date)
+    store_factors(conn, game_date, model_path)
     return {"games": int(lines["game_id"].nunique()) if not lines.empty else 0,
             "candidates": int(len(cand)), "inserted": n,
             "playable": int(cand["playable"].sum()) if not cand.empty else 0, "top": top}

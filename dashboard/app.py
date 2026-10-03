@@ -31,13 +31,23 @@ with st.sidebar:
         meta = (f'<span class="dot{" stale" if age > 30 else ""}">●</span> '
                 f"databáze stará {age:.0f} h")
     st.markdown(f'<div class="side-meta">Fáze 0 · výběr trhu<br>{meta}<br>'
-                "🔒 jen pro čtení</div>", unsafe_allow_html=True)
+                "✎ tikety se zálohují na GitHub</div>", unsafe_allow_html=True)
+
+from dashboard import nav
+
+P = {
+    "tipy": st.Page(str(PAGES / "0_Tipy_dne.py"), title="Tipy dne",
+                    icon=":material/sports_hockey:", default=True),
+    "sazky": st.Page(str(PAGES / "7_Moje_sazky.py"), title="Moje sázky",
+                     icon=":material/confirmation_number:", url_path="moje-sazky"),
+    # opened from a game card; hidden in the menu by CSS (assets/style.css)
+    "rozbor": st.Page(str(PAGES / "6_Rozbor_zapasu.py"), title="Rozbor zápasu",
+                      icon=":material/query_stats:", url_path="rozbor"),
+}
+nav.PAGES.update(P)
 
 st.navigation({
-    "Sázení": [
-        st.Page(str(PAGES / "0_Tipy_dne.py"), title="Tipy dne",
-                icon=":material/sports_hockey:", default=True),
-    ],
+    "Sázení": [P["tipy"], P["sazky"], P["rozbor"]],
     "Projekt": [
         st.Page(str(PAGES / "1_Prehled.py"), title="Přehled",
                 icon=":material/dashboard:", url_path="prehled"),

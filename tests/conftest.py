@@ -15,6 +15,16 @@ def load_fixture(name: str):
         return json.load(f)
 
 
+@pytest.fixture(autouse=True)
+def _no_real_github(monkeypatch, tmp_path):
+    """No test may reach the user's real data repository: the token the
+    Mac's shell exports (docs/cloud.md step 5) is removed for every test,
+    and the bets store writes into a temporary directory."""
+    for name in ("NHL_DATA_TOKEN", "GITHUB_TOKEN", "GH_TOKEN", "NHL_DB_RELEASE_REPO"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("NHL_BETS_DIR", str(tmp_path / "bets"))
+
+
 @pytest.fixture
 def conn():
     """Fresh in-memory database with every migration applied."""

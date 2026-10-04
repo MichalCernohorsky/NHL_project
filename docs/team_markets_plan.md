@@ -225,3 +225,38 @@ Poznámky k odhadu (jen trénovací data):
 
 Od této chvíle se konstanty nemění. Vyhodnocení na 2025-26 proběhne
 jednou (`scripts/report_team_stage1.py`).
+
+### Dodatek T-3 — užší rozdělení pro tresty týmu (4. 10. 2026, se souhlasem uživatele, před novým odhadem)
+
+**Proč.** Etapa 1 (`docs/team_stage1_report.md`) ukázala, že model trestů
+týmu (T-T) nadhodnocuje „více": v pásmech kalibrace o 1–4 p.b. Příčina je
+vidět už v **trénovacích** sezónách: počty trestů týmu mají menší rozptyl
+než průměr (Pearsonův rozptyl 0,82; hrubý poměr rozptyl / průměr 0,88),
+u lajny 3.5 model čekal „více" ve 43,2 %, skutečnost 39,6 %, u 4.5 25,3 %
+proti 21,8 %. Negativně binomické rozdělení umí jen rozptyl **větší** než
+průměr; odhad proto skončil na mezi (dodatek T-2) a model zůstal u
+Poissonova rozdělení, které je pro tresty příliš široké. Tři body jsou
+celý práh tipu — model by dával falešné tipy na „více".
+
+**Změna (jediná).** Pro trh T-T se negativně binomické rozdělení nahradí
+Conwayovým–Maxwellovým–Poissonovým (CMP) se stejným průměrem μ a jedním
+parametrem ν: ν = 1 je Poissonovo rozdělení, ν > 1 užší. ν se odhadne
+maximální věrohodností **jen na 2023-24 + 2024-25**. Stejně se odhadne
+vlastní ν pro oba základy Z0 a Z1, aby model nevyhrával jen lepším tvarem
+rozdělení.
+
+**Co se nemění.** Průměr μ (L_t, forma, w = 30, c = 0,6, h = 0,9675 ze
+zamrazeného `models/naive_team.json`), pravidlo počítání trestů (T-1),
+kritérium T1, lajny kalibrace, bootstrap, simulace nulového efektu. Trh
+střel týmu (S-T) zůstává beze změny. Trhy S-Z a T-Z etapou 1 skončily
+a nevrací se.
+
+**Co to stojí (nahlas).** Sezóna 2025-26 se u trhu T-T použije k ověření
+podruhé. První výsledek (T1 splněno s negativně binomickým rozdělením)
+zůstává v `docs/team_stage1_report.md`; nový se zapíše vedle něj do
+`docs/team_tt_v2_report.md`. Kdyby v2 kritérium T1 nesplnila, trh T-T
+končí — k první verzi se nevrací, protože o ní víme, že je špatně
+kalibrovaná.
+
+Nový soubor `models/naive_team_tt_v2.json` se po odhadu zamrazí otiskem
+(zapíše se sem níže) a teprve potom se spustí ověření.

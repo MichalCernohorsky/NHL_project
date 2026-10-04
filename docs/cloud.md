@@ -31,6 +31,16 @@ denní běh smí doběhnout s hodinovým zpožděním a okno 7 dní dožene
 i vynechaný den. Nákup je vypnutý, dokud uživatel neřekne „jeď"
 (`odds.hist_daily_enabled` v `config/config.yaml`).
 
+**Ruční spuštění denního běhu (4. 10. 2026):** ne dřív než ~11:30 UTC
+(7:30 ET). Živý snímek pro tipy se bere u každého zápasu jen jednou za den
+a ⭐ TOP se zapisuje při prvním sestavení tipů (docs/tips_plan.md, sekce 8)
+— běh ve 4–5 hodin ráno ET by tipy postavil na pár knihách a TOP vybral
+z neúplné nabídky. Zápas, který kurzy ještě nemá, se zkusí znovu při dalším
+běhu (prázdná odpověď nestojí kredit). Plánované běhy chodí se zpožděním:
+3. 10. dorazil běh z 10:30 UTC až ve 14:48 UTC.
+
+Hostovaný dashboard (Streamlit, od 4. 10. 2026): `docs/streamlit.md`.
+
 ## Nastavení (jednorázově, ~20 minut, dělá uživatel)
 
 Pořadí je důležité: **zveřejnění první.** Úlohy jsou na GitHubu od 29. 9.

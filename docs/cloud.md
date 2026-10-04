@@ -18,7 +18,7 @@ repozitáře kódu.
 
 | soubor | kdy (čas CZ) | co |
 |---|---|---|
-| `.github/workflows/daily.yml` | 12:30, záloha 15:30 a 19:30 | denní běh dat (jako `make daily`) + nákup včerejších snímků kurzů z archivu (`scripts/buy_snapshots.py`, dodatek D4 plánu) |
+| `.github/workflows/daily.yml` | 12:30, záloha 15:30 a 19:30 | denní běh dat (jako `make daily`; od 4. 10. i tresty, rozhodčí a záznam, zda jsou rozhodčí dnešních zápasů už známí) + nákup včerejších snímků kurzů z archivu (`scripts/buy_snapshots.py`, dodatek D4 plánu) |
 | `.github/workflows/odds.yml` | jen ručně | bezplatná kontrola klíče The Odds API |
 | `.github/workflows/tests.yml` | každý push | testy |
 

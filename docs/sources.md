@@ -65,7 +65,8 @@ Neoficiální dokumentace: https://github.com/Zmalski/NHL-API-Reference
 |---|---|
 | `api-web.nhle.com/v1/schedule/{YYYY-MM-DD}` | týden zápasů, `gameOutcome.lastPeriodType` (REG/OT/SO), hranice sezóny |
 | `api-web.nhle.com/v1/gamecenter/{id}/boxscore` | hráči: goals, assists, points, plusMinus, pim, hits, powerPlayGoals, sog, faceoffWinningPctg, toi „MM:SS", blockedShots, shifts, giveaways, takeaways; brankáři: saves, shotsAgainst, rozpad podle situací, toi, `starter`, decision. **Bez PP TOI a PP asistencí.** Jména zkrácená („J. Gibson"). |
-| `api-web.nhle.com/v1/gamecenter/{id}/right-rail` | `gameInfo.{home,away}Team.scratches` (id + plné jméno) |
+| `api-web.nhle.com/v1/gamecenter/{id}/right-rail` | `gameInfo.{home,away}Team.scratches` (id + plné jméno); `gameInfo.referees` a `linesmen` (jména) — u odehraných zápasů vždy, před zápasem prázdné, dokud NHL obsazení nezveřejní (4. 10. 2026 v 10:30 CZ prázdné i 8,5 h před začátkem; měří `scripts/probe_referees.py`) |
+| `api-web.nhle.com/v1/gamecenter/{id}/play-by-play` | události se třetinou; `typeDescKey = penalty`: `details.typeCode` (MIN menší, BEN lavice, MAJ větší, MIS osobní, GAM do konce utkání, MAT trest ve hře), `duration` v minutách (dvojitý menší = jedna událost s 4), `eventOwnerTeamId` = potrestaný tým. Trest ve hře má v událostech 5 minut, v box score 15 trestných minut. |
 | `api.nhle.com/stats/rest/en/skater/timeonice?isAggregate=false&isGame=true&limit=-1&cayenneExp=gameDate="YYYY-MM-DD" and gameTypeId=2` | EV / PP / SH / OT TOI v sekundách, plné jméno; jeden herní den na volání (~500 řádků) |
 | `api.nhle.com/stats/rest/en/goalie/summary?isGame=true…` | starty, zásahy, plné jméno brankáře |
 | `api-web.nhle.com/v1/player/{id}/landing` | jméno, pozice, držení hole, datum narození |

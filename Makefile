@@ -13,6 +13,8 @@ data:
 	python scripts/backfill_toi.py
 	python scripts/backfill_players.py
 	python scripts/backfill_pbp.py
+	python scripts/backfill_officials.py
+	python scripts/backfill_penalties.py
 
 # Live season, every morning (launchd 12:30 CZ): only what is new.
 daily:

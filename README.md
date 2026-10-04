@@ -31,7 +31,8 @@ pip install -r requirements.txt
 | 4 | `python scripts/backfill_toi.py` | EV / PP / SH / OT čas na ledě + plná jména | 1 request na herní den |
 | 5 | `python scripts/backfill_players.py` | jména, která zbyla (brankáři) | 1 request na hráče |
 | 6 | `python scripts/report.py` | co je v databázi | nic |
-| — | `make data` | kroky 2–5 najednou | |
+| — | `python scripts/backfill_penalties.py` / `backfill_officials.py` | tresty po událostech z play-by-play, rozhodčí odehraných zápasů (plán `docs/team_markets_plan.md`) | 1 request na zápas / nic (z cache) |
+| — | `make data` | kroky 2–5 + tresty a rozhodčí najednou | |
 | — | `python scripts/backfill_props.py --dry-run` | vzorek a cena nákupu kurzů | nic (bez klíče) |
 | — | `make odds-morning` / `make odds-closing` | živé snímky kurzů dne | ~3 kredity na zápas a snímek |
 | — | `make daily` | denní běh živé sezóny (v cloudu automaticky, `docs/cloud.md`) | jen NHL API |

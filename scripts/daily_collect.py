@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Daily run for the live season: schedule -> box scores -> TOI split ->
-names -> 60-minute counts. Idempotent and resumable: a second run the same
+names -> 60-minute counts -> penalties -> officials -> referee probe. Idempotent and resumable: a second run the same
 day downloads only what is new (finished games since the last run).
 
 Every step runs even when an earlier one failed (a failed TOI day must not
@@ -33,6 +33,11 @@ STEPS = [
     ("toi", "backfill_toi.py", True),
     ("players", "backfill_players.py", False),
     ("pbp", "backfill_pbp.py", True),
+    # team markets plan, step 2: penalty events, officials of finished games,
+    # and whether tonight's referees are already known
+    ("penalties", "backfill_penalties.py", True),
+    ("officials", "backfill_officials.py", True),
+    ("refprobe", "probe_referees.py", False),
     ("rematch", "rematch_odds_players.py", False),
 ]
 

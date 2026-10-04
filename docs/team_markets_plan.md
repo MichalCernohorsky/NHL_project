@@ -21,14 +21,14 @@ To je slabší důkaz než u střel hráčů a trvá déle (sekce 6).
 
 ## 2. Trhy
 
-Podle nabídky Tipsportu 4. 10. 2026 (WPG@DET, UTA@NYR):
+Podle nabídky Tipsportu 4. 10. 2026 (všech 5 zápasů dne, `docs/tipsport_k1_log.md`):
 
 | # | trh u Tipsportu | lajny 4. 10. | v plánu |
 |---|---|---|---|
-| S-T | Počet střel *týmu* na branku v zápasu | 24.5–26.5, jedna až dvě na tým | **ano** |
-| S-Z | Počet střel na branku v zápasu (oba týmy) | 49.5–54.5, šest lajn | **ano** |
-| T-Z | Počet dvouminutových trestů v zápasu | 5.5 / 6.5 / 7.5 | **ano** |
-| T-T | Počet dvouminutových trestů *týmu* | 3.5 | **ano** |
+| S-T | Počet střel *týmu* na branku v zápasu | 23.5–28.5, jedna až dvě na tým | **ano** |
+| S-Z | Počet střel na branku v zápasu (oba týmy) | šest lajn po jedné, 49.5–54.5 až 53.5–58.5 | **ano** |
+| T-Z | Počet dvouminutových trestů v zápasu | tři lajny, 5.5–7.5 nebo 6.5–8.5 | **ano** |
+| T-T | Počet dvouminutových trestů *týmu* | 3.5, jednou 4.5 | **ano** |
 | — | Kdo bude mít víc střel / trestů (1 / X / 2) | — | ne: marže 10,2–10,8 % |
 | — | Každý tým 3+ / 4+ trestů | — | ne: složená sázka, závislost týmů |
 | — | Počet využitých přesilovek | 0.5 / 1.5 | ne: jiný jev (góly), případně později |
@@ -95,8 +95,8 @@ Na sezóně 2025-26, kterou model neviděl, pro každý trh:
 - **Kritérium T1:** model je lepší než Z0 **i** Z1 a 95% interval rozdílu
   (bootstrap, seed 17, 10 000, převzorkují se herní dny) neobsahuje nulu.
 - **Kalibrace:** P(více než lajna) pro lajny, které Tipsport používá
-  (S-T 23.5–29.5, S-Z 49.5–54.5, T-Z 5.5–7.5, T-T 3.5): předpověď proti
-  skutečné četnosti v pěti pásmech.
+  (S-T 22.5–30.5, S-Z 48.5–59.5, T-Z 5.5–8.5, T-T 3.5 a 4.5): předpověď
+  proti skutečné četnosti v pěti pásmech.
 - **Simulace nulového efektu:** stejné vyhodnocení s promíchanými soupeři
   (model, který nic neví) — jak často by „prošel" T1 náhodou.
 
@@ -104,9 +104,10 @@ Trh, který T1 nesplní, **končí** — model, který neporazí průměr týmu,
 nemá co nabídnout proti sázkovce. Výsledek „nic neprošlo" je platný.
 
 **Co etapa 1 neříká:** nic o zisku. Porazit průměr týmu neznamená porazit
-Tipsport. Pozorování ze 4. 10., že kurzy na tresty jsou v obou zápasech
-skoro stejné, je důvod trh zkoumat, ne důkaz, že Tipsport oceňuje naslepo
-(2 zápasy, jeden den).
+Tipsport. Tipsport týmové trhy mezi zápasy rozlišuje (4. 10.: lajny střel
+týmu 23.5–28.5, trestů v zápasu 5.5–7.5 i 6.5–8.5, FLA s lajnou trestů
+4.5) — neoceňuje je naslepo. Domněnka z prvních dvou zápasů, že kurzy na
+tresty jsou všude stejné, se na pěti zápasech nepotvrdila.
 
 ## 6. Etapa 2 — dopředný test za kurzy Tipsportu
 

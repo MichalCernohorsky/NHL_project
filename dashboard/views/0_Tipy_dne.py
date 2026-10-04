@@ -16,6 +16,7 @@ import streamlit as st
 from dashboard import bets, data, nav
 from dashboard.hero import hero, team_logo, ticker
 from dashboard.theme import section, setup_page
+from nhl_tool import explain
 from nhl_tool import naive_sog as ns
 from nhl_tool import tips as tipmod
 from nhl_tool.stats import roi_ci
@@ -66,6 +67,8 @@ st.markdown("""
 .gcard .lbl{flex:1 1 auto;min-width:0}
 .gcard .lbl small{display:block;color:#5a6572;font-size:11.5px;margin-top:1px}
 .gcard .warn{color:#b7791f;font-weight:700;font-size:11px;margin-left:4px}
+.gcard .why{color:#8b8f9e}.gcard .why b{font-weight:650}
+.gcard .why .up{color:#1e7a46}.gcard .why .dn{color:#b3403a}
 .gcard .minp{flex:none;text-align:right;font-size:11px;color:#5a6572;line-height:1.2}
 .gcard .minp b{display:block;font-size:15px;color:#0c1c33}
 .gcard .ebar{width:58px;height:7px;background:#f4f6f9;border-radius:4px;overflow:hidden;flex:none}
@@ -177,12 +180,35 @@ st.markdown(
     'ukáže až verdikt fáze 0. Na začátku sezóny stojí hlavně na loňsku. '
     '<b>Hraj jen za kurz ≥ min. kurz</b> — pod ním marže Tipsportu sní hranu. '
     '⚠ = model se s trhem rozchází o víc než 10 p.b.; v NBA byly takové tipy nejhorší. '
-    'Důvody tipu a ✅ Vsazeno najdeš v <b>Rozboru zápasu</b> pod kartou.</div>',
+    'Řádek „proč“ ukazuje, o kolik procentních bodů zvedá nebo sráží tip střelba hráče, '
+    'čas na ledě a soupeř. Celý rozklad a ✅ Vsazeno najdeš v <b>Rozboru zápasu</b> pod kartou.</div>',
     unsafe_allow_html=True)
 
 # ------------------------------------------------------------- game cards
 by_game = dict(list(play.groupby("game_id"))) if not play.empty else {}
 with_lines = set(df["game_id"]) if not df.empty else set()
+
+
+TOI_POS = data.pos_avg_toi_min() if not play.empty else {}
+
+
+def why_line(r) -> str:
+    """How much each model input moves the tip's probability against the
+    average player of the position (exact Shapley, tips plan 11)."""
+    if pd.isna(getattr(r, "f_rate_60", None)):
+        return ""
+    grp = r.pos_group if isinstance(r.pos_group, str) else "F"
+    ex = explain.tip_contributions(
+        rate_60=r.f_rate_60, toi_min=r.f_toi_l10_min, opp_factor=r.f_opp_factor,
+        base_rate_60=model["prior_rate_per_s"][grp] * 3600,
+        base_toi_min=TOI_POS.get(grp, 16.0), line=float(r.line), side=r.side, k=k)
+    bits = []
+    for key, name in (("rate", "střelba"), ("toi", "led"), ("opp", "soupeř")):
+        v = ex["p_parts"][key] * 100
+        bits.append(f'{name} <b class="{"up" if v >= 0 else "dn"}">'
+                    f'{"+" if v >= 0 else "−"}{cz(abs(v))}</b>')
+    return ('<small class="why" title="O kolik procentních bodů zvedá / sráží pravděpodobnost '
+            f'tipu proti průměrnému hráči pozice">proč: {" · ".join(bits)} p.b.</small>')
 
 
 def tip_row(r) -> str:
@@ -211,7 +237,8 @@ def tip_row(r) -> str:
             f'<span class="lbl"><b>{html.escape(str(r.player_name))}</b> '
             f'<span style="color:#5a6572">{r.tym or ""}</span> · <b>{line_txt(r.side, r.line)}</b>{warn}'
             f'<small>model {cz(r.p_model * 100)} % · trh {cz(r.p_market * 100)} % · '
-            f'čeká {cz(r.mu_60, 2)} střely{" · " + " · ".join(ctx) if ctx else ""}</small></span>'
+            f'čeká {cz(r.mu_60, 2)} střely{" · " + " · ".join(ctx) if ctx else ""}</small>'
+            f'{why_line(r)}</span>'
             f'{minp}<span class="ebar"><i class="{"w" if r.edge > WARN_EDGE else ""}" '
             f'style="width:{width:.0f}%"></i></span>'
             f'<span class="pct">+{cz(r.edge * 100)}</span>{res}</div>{stub}')

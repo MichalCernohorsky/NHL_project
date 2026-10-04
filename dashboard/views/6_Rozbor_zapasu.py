@@ -20,6 +20,7 @@ import streamlit as st
 from dashboard import bets, data, nav
 from dashboard.hero import team_logo
 from dashboard.theme import setup_page
+from nhl_tool import explain
 from nhl_tool import naive_sog as ns
 from nhl_tool import tips as tipmod
 
@@ -68,6 +69,11 @@ def chip(text, fg, bg, bd):
 
 def cz(x, d=1):
     return "–" if x is None or pd.isna(x) else f"{x:.{d}f}".replace(".", ",")
+
+
+def sgn(x, d=1):
+    """Signed Czech number: +1,2 / −0,4."""
+    return ("+" if x >= 0 else "−") + cz(abs(x), d)
 
 
 def side_cz(side):
@@ -301,27 +307,52 @@ else:
             r_pos = model["prior_rate_per_s"][grp] * 3600
             t_pos = toi_pos.get(grp, 16.0)
             if has_factors:
-                mu0 = r_pos / 60 * t_pos
-                c_rate = mu0 * (r.f_rate_60 / r_pos - 1)
-                c_toi = r.f_rate_60 / 60 * t_pos * (r.f_toi_l10_min / t_pos - 1)
-                c_opp = r.f_rate_60 / 60 * r.f_toi_l10_min * (r.f_opp_factor - 1)
-                a1, a2 = st.columns([1, 1.25])
+                ex = explain.tip_contributions(
+                    rate_60=r.f_rate_60, toi_min=r.f_toi_l10_min, opp_factor=r.f_opp_factor,
+                    base_rate_60=r_pos, base_toi_min=t_pos, line=float(r.line), side=r.side, k=k)
+                who = "obránce" if grp == "D" else "útočník"
+                bet = f"{side_cz(r.side)} {cz(r.line)}"
+                parts = [ex["p_parts"][f] * 100 for f in explain.FACTORS]
+                a1, a2 = st.columns([1.15, 1.1])
                 with a1:
-                    labels = ["Soupeř", "Čas na ledě", "Střelba hráče"]
-                    vals = [c_opp, c_toi, c_rate]
-                    figb = go.Figure(go.Bar(
-                        x=vals, y=labels, orientation="h",
-                        marker_color=[GREEN if v >= 0 else RED for v in vals],
-                        text=[f"{'+' if v >= 0 else ''}{cz(v, 2)}" for v in vals], textposition="outside",
-                        hovertemplate="%{y}: %{x:+.2f} střely<extra></extra>"))
-                    span = max(0.3, max(abs(v) for v in vals) * 1.45)
-                    figb.update_layout(height=210, showlegend=False, margin=dict(l=10, r=10, t=10, b=10))
-                    figb.update_xaxes(range=[-span, span], zeroline=True, zerolinecolor="#8b95a9",
-                                      title_text="střel proti průměrnému hráči pozice")
+                    figb = go.Figure(go.Waterfall(
+                        x=[f"Průměrný<br>{who}", *[explain.LABELS[f] for f in explain.FACTORS],
+                           "Model"],
+                        measure=["absolute", "relative", "relative", "relative", "total"],
+                        y=[ex["p_base"] * 100, *parts, 0],
+                        text=[f"{cz(ex['p_base'] * 100)} %",
+                              *[sgn(v) for v in parts],
+                              f"{cz(ex['p'] * 100)} %"],
+                        textposition="outside", cliponaxis=False,
+                        increasing=dict(marker=dict(color=GREEN)),
+                        decreasing=dict(marker=dict(color=RED)),
+                        totals=dict(marker=dict(color=NAVY)),
+                        connector=dict(line=dict(color="#c9d1dc", width=1)),
+                        hovertemplate="%{x}: %{text}<extra></extra>"))
+                    figb.add_hline(y=float(r.p_market) * 100, line_dash="dash", line_color="#D9822B",
+                                   annotation_text=f"trh {cz(r.p_market * 100)} %",
+                                   annotation_position="bottom right",
+                                   annotation_font=dict(color="#D9822B", size=12),
+                                   annotation_bgcolor="#ffffff", annotation_bordercolor="#D9822B",
+                                   annotation_borderpad=2)
+                    # zoom on the part of the scale where the steps happen
+                    levels = [ex["p_base"] * 100, *(ex["p_base"] * 100 + np.cumsum(parts)),
+                              float(r.p_market) * 100]
+                    figb.update_layout(height=300, showlegend=False,
+                                       margin=dict(l=10, r=10, t=24, b=10))
+                    figb.update_yaxes(range=[max(0, min(levels) - 14), min(100, max(levels) + 9)],
+                                      ticksuffix=" %", title_text=f"pravděpodobnost „{bet}“")
                     st.plotly_chart(figb, use_container_width=True, key=f"why_{r.tip_id}")
-                    st.caption(f"Průměrný {'obránce' if grp == 'D' else 'útočník'} by měl "
-                               f"{cz(mu0, 2)} střely; zelená predikci zvedá, červená sráží → "
-                               f"model čeká **{cz(r.mu_60, 2)}**.")
+                    mp = ex["mu_parts"]
+                    st.caption(
+                        f"Čti zleva: průměrný {who} by sázku „{bet}“ trefil v "
+                        f"{cz(ex['p_base'] * 100)} %. Zelená pravděpodobnost zvedá, červená sráží "
+                        f"(v procentních bodech) → model **{cz(ex['p'] * 100)} %**, trh "
+                        f"{cz(r.p_market * 100)} %, hrana **+{cz(r.edge * 100)} p.b.** "
+                        f"Ve střelách: průměr {cz(ex['mu_base'], 2)} · střelba "
+                        f"{sgn(mp['rate'], 2)} · led {sgn(mp['toi'], 2)} · soupeř "
+                        f"{sgn(mp['opp'], 2)} → {cz(ex['mu'], 2)}. Rozklad říká, odkud se "
+                        "číslo vzalo, ne že je správné.")
                 with a2:
                     w_prior = 100 * 180 / (r.f_season_toi_min + 180)
                     base = "loňská sezóna" if (r.gp_prev or 0) >= ns.MIN_GP_PRIOR else "průměr pozice"
@@ -435,6 +466,7 @@ with st.expander("ℹ️ Vysvětlivky"):
 **⭐ TOP** — nejvýš 3 tipy dne s největší hranou mezi tipy bez varování, jeden na zápas.
 **⚠ velká neshoda** — hrana nad 10 p.b.; v NBA byly tyhle tipy nejhorší.
 **Rozdělení** — jak pravděpodobný je každý počet střel; pásmo pokrývá 8 z 10 zápasů.
+**Proč model tipuje** — přesný rozklad (Shapleyho hodnoty): o kolik procentních bodů zvedá nebo sráží pravděpodobnost tipu střelba hráče, jeho čas na ledě a soupeř, proti průměrnému hráči téže pozice. Součet přesně sedí; neříká, že má model pravdu.
 
 *Všechna čísla jsou odhady modelu, ne jistoty. I tip s vysokou pravděpodobností pravidelně prohrává.*
 """)

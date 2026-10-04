@@ -103,6 +103,8 @@ def test_tips_page_renders_cards_and_calculator(tmp_path, monkeypatch):
     assert "Andrew Copp" in page and "Ben Chiarot" in page
     assert "⚠" in page and "✅" in page                 # warning and a settled win
     assert "splňuje pravidlo" in page                   # calculator verdict rendered
+    # contributions: only for the tip that has stored factors (Copp), in p.b.
+    assert page.count("proč: střelba") == 1 and "soupeř" in page
 
 
 def test_game_page_shows_reasons_and_decision_rows(tmp_path, monkeypatch):
@@ -122,6 +124,8 @@ def test_game_page_shows_reasons_and_decision_rows(tmp_path, monkeypatch):
     assert "Andrew Copp" in page and "⭐ TOP" in page
     assert "Proč model tipuje" in page and "Střelba hráče" in page
     assert "není uložený" in page                        # the tip without factors
+    # the waterfall's reading: from the average player of the position to the model
+    assert "průměrný útočník by sázku" in page and "Ve střelách: průměr" in page
     assert "zamčeno" in page or "vyšel" in page          # game finished: locked / settled
 
 

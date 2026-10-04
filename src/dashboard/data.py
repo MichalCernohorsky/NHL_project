@@ -59,6 +59,19 @@ def seasons() -> list[str]:
 
 # ------------------------------------------------------------ overview
 
+def default_season_index(seasons: list[str], min_game_days: int = 15) -> int:
+    """Statistics pages open on the newest season that already has enough
+    game days to describe anything; in October that is still last season."""
+    for i, season in enumerate(seasons):
+        n = q("""SELECT COUNT(DISTINCT g.game_date) AS n FROM games g
+                 WHERE g.season = ? AND g.season_type = 'regular'
+                   AND EXISTS (SELECT 1 FROM team_game_logs t WHERE t.game_id = g.game_id)""",
+              (season,))["n"][0]
+        if n >= min_game_days:
+            return i
+    return 0
+
+
 def coverage() -> pd.DataFrame:
     return q("""
         SELECT g.season AS sezona,
@@ -158,12 +171,49 @@ def player_games(player_id: int, season: str) -> pd.DataFrame:
                        p.sog AS strely, p.sog_reg AS strely_60,
                        p.blocked_shots AS bloky, p.blocked_shots_reg AS bloky_60,
                        p.goals AS goly, p.assists AS asistence, p.points AS body,
-                       p.hits AS hity, p.plus_minus AS plus_minus
+                       p.hits AS hity, p.plus_minus AS plus_minus, p.pim AS tm,
+                       (p.toi_s - COALESCE(p.ot_toi_s, 0)) / 60.0 AS toi_60,
+                       p.team_id = g.home_team_id AS doma,
+                       EXISTS (SELECT 1 FROM games y
+                               WHERE y.game_date = date(g.game_date, '-1 day')
+                                 AND y.season_type = 'regular'
+                                 AND p.team_id IN (y.home_team_id, y.away_team_id)) AS b2b,
+                       (SELECT SUM(z.sog_reg) FROM player_game_logs z
+                         WHERE z.game_id = p.game_id AND z.team_id = p.team_id) AS tym_strely_60
                 FROM player_game_logs p JOIN games g USING (game_id)
                 JOIN teams h ON h.team_id = g.home_team_id
                 JOIN teams a ON a.team_id = g.away_team_id
                 WHERE p.player_id = ? AND g.season = ? AND g.season_type = 'regular'
                 ORDER BY g.game_date""", (player_id, season))
+
+
+def player_seasons(player_id: int) -> pd.DataFrame:
+    """One row per regular season the player has in the database."""
+    return q("""SELECT g.season AS sezona, COUNT(*) AS zapasu,
+                       AVG(p.sog_reg) AS strely_60, AVG(p.toi_s) / 60.0 AS toi,
+                       AVG(p.pp_toi_s) / 60.0 AS pp_toi,
+                       SUM(p.sog_reg) * 3600.0
+                         / NULLIF(SUM(CASE WHEN p.sog_reg IS NOT NULL
+                                      THEN p.toi_s - COALESCE(p.ot_toi_s, 0) END), 0) AS na_60_ledu,
+                       SUM(p.goals) AS goly, SUM(p.assists) AS asistence, SUM(p.points) AS body,
+                       SUM(p.goals) * 100.0 / NULLIF(SUM(p.sog), 0) AS uspesnost,
+                       AVG(p.blocked_shots) AS bloky, AVG(p.hits) AS hity, SUM(p.pim) AS tm
+                FROM player_game_logs p JOIN games g USING (game_id)
+                WHERE p.player_id = ? AND g.season_type = 'regular' AND p.toi_s > 0
+                GROUP BY g.season ORDER BY g.season DESC""", (int(player_id),))
+
+
+def player_tips(player_id: int) -> pd.DataFrame:
+    """The model's tips on the player (latest snapshot per game), newest first."""
+    if not _has_table("tips"):
+        return pd.DataFrame()
+    return q("""SELECT t.game_date AS datum, op.abbreviation AS souper, t.side, t.line,
+                       t.p_model, t.p_market, t.edge, t.arm_top, t.actual_60, t.outcome
+                FROM tips t LEFT JOIN teams op ON op.team_id = t.opp_id
+                WHERE t.player_id = ? AND t.playable = 1
+                  AND t.snapshot_time = (SELECT MAX(x.snapshot_time) FROM tips x
+                                         WHERE x.game_id = t.game_id)
+                ORDER BY t.game_date DESC""", (int(player_id),))
 
 
 # ------------------------------------------------------------ goalies
@@ -229,6 +279,73 @@ def team_games(abbr: str, season: str) -> pd.DataFrame:
                 JOIN teams o ON o.team_id = op.team_id
                 WHERE t.abbreviation = ? AND g.season = ? AND g.season_type = 'regular'
                 ORDER BY g.game_date""", (abbr, season))
+
+
+_TEAM_GAME_60 = """
+    SELECT p.game_id, p.team_id,
+           SUM(p.sog_reg) AS s60,
+           SUM(CASE WHEN p.position = 'D' THEN p.sog_reg ELSE 0 END) AS s60_d,
+           SUM(CASE WHEN p.position != 'D' THEN p.sog_reg ELSE 0 END) AS s60_f,
+           SUM(p.pim) AS pim, SUM(p.hits) AS hits, SUM(p.blocked_shots_reg) AS blocks,
+           SUM(p.sog_reg IS NULL) AS missing
+    FROM player_game_logs p JOIN games g USING (game_id)
+    WHERE g.season = ? AND g.season_type = 'regular'
+    GROUP BY p.game_id, p.team_id"""
+
+
+def team_table_60(season: str) -> pd.DataFrame:
+    """Per team and game, 60 minutes only (how Tipsport settles): shots for
+    and against, shots allowed to forwards / defensemen, penalty minutes of
+    the skaters, hits, blocks. Games without play-by-play counts are left out."""
+    return q(f"""WITH tg AS ({_TEAM_GAME_60})
+                 SELECT t.abbreviation AS tym, COUNT(*) AS zapasu_60,
+                        AVG(me.s60) AS strely_pro_60, AVG(op.s60) AS strely_proti_60,
+                        AVG(op.s60_f) AS pousti_utocnikum, AVG(op.s60_d) AS pousti_obrancum,
+                        AVG(me.pim) AS tm, AVG(op.pim) AS tm_soupere,
+                        AVG(me.hits) AS hity, AVG(me.blocks) AS bloky
+                 FROM tg me JOIN tg op ON op.game_id = me.game_id AND op.team_id != me.team_id
+                 JOIN teams t ON t.team_id = me.team_id
+                 WHERE me.missing = 0 AND op.missing = 0
+                 GROUP BY me.team_id""", (season,))
+
+
+def team_games_60(abbr: str, season: str) -> pd.DataFrame:
+    return q(f"""WITH tg AS ({_TEAM_GAME_60})
+                 SELECT g.game_date AS datum,
+                        CASE WHEN me.team_id = g.home_team_id THEN 'vs ' ELSE '@ ' END
+                          || o.abbreviation AS souper,
+                        me.team_id = g.home_team_id AS doma,
+                        EXISTS (SELECT 1 FROM games y
+                                WHERE y.game_date = date(g.game_date, '-1 day')
+                                  AND y.season_type = 'regular'
+                                  AND me.team_id IN (y.home_team_id, y.away_team_id)) AS b2b,
+                        me.s60 AS strely_pro_60, op.s60 AS strely_proti_60,
+                        op.s60_f AS pousti_utocnikum, op.s60_d AS pousti_obrancum,
+                        me.pim AS tm, op.pim AS tm_soupere,
+                        g.last_period_type AS konec
+                 FROM tg me JOIN tg op ON op.game_id = me.game_id AND op.team_id != me.team_id
+                 JOIN games g ON g.game_id = me.game_id
+                 JOIN teams t ON t.team_id = me.team_id
+                 JOIN teams o ON o.team_id = op.team_id
+                 WHERE t.abbreviation = ? AND me.missing = 0 AND op.missing = 0
+                 ORDER BY g.game_date""", (season, abbr))
+
+
+def team_shooters(abbr: str, season: str) -> pd.DataFrame:
+    """Who shoots for the team: skaters by 60-minute shots per game."""
+    return q("""SELECT pl.full_name AS hrac, p.position AS pozice, COUNT(*) AS zapasu,
+                       AVG(p.sog_reg) AS strely_60, AVG(p.toi_s) / 60.0 AS toi,
+                       AVG(p.pp_toi_s) / 60.0 AS pp_toi,
+                       SUM(p.sog_reg) * 3600.0
+                         / NULLIF(SUM(CASE WHEN p.sog_reg IS NOT NULL
+                                      THEN p.toi_s - COALESCE(p.ot_toi_s, 0) END), 0) AS na_60_ledu,
+                       SUM(p.goals) AS goly
+                FROM player_game_logs p JOIN games g USING (game_id)
+                JOIN teams t ON t.team_id = p.team_id
+                JOIN players pl ON pl.player_id = p.player_id
+                WHERE t.abbreviation = ? AND g.season = ? AND g.season_type = 'regular'
+                  AND p.toi_s > 0
+                GROUP BY p.player_id ORDER BY strely_60 DESC""", (abbr, season))
 
 
 # ------------------------------------------------------------ tips

@@ -4,6 +4,7 @@ data/*
 
 # Secrets - the Odds API key and GitHub token live here and must never reach git
 .env
+.streamlit/secrets.toml
 
 # Logs written by the launchd jobs
 logs/

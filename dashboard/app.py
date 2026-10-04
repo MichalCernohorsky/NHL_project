@@ -5,7 +5,9 @@ Run:  make dashboard   (= streamlit run dashboard/app.py)
 Page scripts live in dashboard/views/, NOT dashboard/pages/ (a pages/
 folder next to the entrypoint makes Streamlit register it the old way
 first; see NBA_tool dashboard/Prehled_modelu.py). Tipy dne = tips of the frozen
-naive model (docs/tips_plan.md); marking a tip as bet comes next.
+naive model (docs/tips_plan.md). Hosted on Streamlit Community Cloud the app
+asks for a password first and fetches the database from the private data
+repository (docs/streamlit.md, src/dashboard/cloud.py).
 """
 import sys
 from pathlib import Path
@@ -14,17 +16,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import streamlit as st
 
-from dashboard import data
+from datetime import datetime, timezone
+
+from dashboard import cloud, data
 from dashboard.theme import ASSETS, ROUTER_FLAG, setup_page
 
 setup_page("NHL Props", app=True)
+cloud.gate()                 # hosted: nothing below renders without the password
+cloud.hosted_setup()
+db_state = cloud.ensure_db()
 st.session_state[ROUTER_FLAG] = True
 st.logo(str(ASSETS / "logo.svg"), size="large")
 
 PAGES = Path(__file__).resolve().parent / "views"
 
+if db_state["state"] == "error":
+    st.warning(f"Databázi se nepodařilo stáhnout: {db_state['error']}")
+
 with st.sidebar:
     age = data.age_hours()
+    if db_state.get("uploaded_at"):      # hosted: age of the upload, not of the download
+        up = datetime.fromisoformat(db_state["uploaded_at"])
+        age = (datetime.now(timezone.utc) - up).total_seconds() / 3600
     if age is None:
         meta = '<span class="dot stale">●</span> databáze chybí'
     else:

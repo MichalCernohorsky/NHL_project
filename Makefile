@@ -18,9 +18,10 @@ data:
 daily:
 	python scripts/daily_collect.py
 
-# Read-only dashboard (docs: README). Local only in phase 0.
+# Dashboard on the Mac. NHL_DASHBOARD_LOCAL=1 skips the password gate that
+# the hosted app enforces (docs/streamlit.md).
 dashboard:
-	streamlit run dashboard/app.py
+	NHL_DASHBOARD_LOCAL=1 streamlit run dashboard/app.py
 
 report:
 	python scripts/report.py

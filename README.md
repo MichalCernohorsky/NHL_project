@@ -37,7 +37,7 @@ pip install -r requirements.txt
 | — | `make daily` | denní běh živé sezóny (v cloudu automaticky, `docs/cloud.md`) | jen NHL API |
 | — | `python scripts/buy_snapshots.py --dry-run` | co by cloud koupil z archivu kurzů a za kolik | nic |
 | — | `make db-down` | stáhne aktuální databázi z cloudu (před dashboardem) | nic |
-| — | `make dashboard` | dashboard jen pro čtení: Přehled, Kurzy, Hráč, Brankáři, Týmy | nic |
+| — | `make dashboard` | dashboard na Macu: Tipy dne, Rozbor zápasu, Moje sázky, Přehled, Kurzy, Hráč, Brankáři, Týmy (databázi jen čte; tikety zapisuje do soukromého datového repozitáře). Hostovaná verze s heslem: `docs/streamlit.md` | nic |
 
 Všechny stahovací kroky jsou **resumable**: přerušení (Ctrl+C) nic
 neztratí, další spuštění pokračuje. Stažené JSON odehraných zápasů se

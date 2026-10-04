@@ -17,3 +17,24 @@ def test_approved_text_keeps_its_fingerprint():
     assert m, "fingerprint missing below the marker"
     assert hashlib.sha256(approved.encode()).hexdigest() == m.group(1)
     assert "schváleno uživatelem 4. 10. 2026" in approved
+
+
+def test_team_model_file_matches_the_fingerprint_in_the_plan():
+    import json
+    root = PLAN.parents[1]
+    tail = PLAN.read_text().split(MARK)[1]
+    m = re.search(r"`models/naive_team\.json`, \*\*SHA-256 `([0-9a-f]{64})`\*\*", tail)
+    assert m, "freeze note (amendment T-2) missing from the plan"
+    model = root / "models" / "naive_team.json"
+    assert hashlib.sha256(model.read_bytes()).hexdigest() == m.group(1)
+    assert json.loads(model.read_text())["trained_on"] == ["2023-24", "2024-25"]
+
+
+def test_team_fit_script_refuses_to_overwrite(monkeypatch, capsys):
+    import pytest
+
+    import fit_naive_team
+    monkeypatch.setattr("sys.argv", ["fit_naive_team.py"])
+    with pytest.raises(SystemExit):
+        fit_naive_team.main()
+    assert "zamrazeny" in capsys.readouterr().out

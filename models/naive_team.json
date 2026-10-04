@@ -1,0 +1,55 @@
+{
+ "model": "naive_team_v1",
+ "spec": "docs/team_markets_plan.md 4 + T-1; docs/team_models.md",
+ "target": "team shots on goal and two-minute penalties in 60 minutes",
+ "trained_on": [
+  "2023-24",
+  "2024-25"
+ ],
+ "window": 20,
+ "league_rows": 400,
+ "families": {
+  "shots": {
+   "league_mean_train": 28.903201219512194,
+   "h": 1.0197891324470247,
+   "w": 12,
+   "c": 0.6,
+   "k_team": 95.67331974125779,
+   "loglik_team": -16928.422976328195,
+   "rows": 5248,
+   "k_game": 527.6426172884105,
+   "baselines": {
+    "z0": {
+     "k_team": 61.29696406999323,
+     "k_game": 374.81747714863974
+    },
+    "z1": {
+     "k_team": 67.94592223965856,
+     "k_game": 440.35906894927507
+    }
+   }
+  },
+  "penalties": {
+   "league_mean_train": 3.3003048780487805,
+   "h": 0.9675023562246481,
+   "w": 30,
+   "c": 0.6,
+   "k_team": 4999.999999923692,
+   "loglik_team": -9965.401873973444,
+   "rows": 5248,
+   "k_game": 26.72268346093567,
+   "baselines": {
+    "z0": {
+     "k_team": 4999.999998362123,
+     "k_game": 22.324217118481002
+    },
+    "z1": {
+     "k_team": 4999.999998721809,
+     "k_game": 25.925198819765324
+    }
+   }
+  }
+ },
+ "git_commit": "6a4fae73e0c7f648b3e4afd54d2427b588ea275b",
+ "fitted_at": "2026-10-04T17:23:19+00:00"
+}

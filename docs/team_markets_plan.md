@@ -200,3 +200,28 @@ Pravidlo počítání v datech (`penalties`): jen `period_type = 'REG'`;
 osobní, do konce utkání, ve hře a trestné střílení se nepočítají.
 Všechny odpovědi se shodují s výchozími předpoklady sekce 2; nic dalšího
 se v plánu nemění.
+
+### Dodatek T-2 — zamrazení naivních týmových modelů (4. 10. 2026, před vyhodnocením na 2025-26)
+
+Odhad jen na 2023-24 + 2024-25 (`scripts/fit_naive_team.py`, výklad
+`docs/team_models.md`), po 5 248 týmových řádcích na rodinu. Soubor
+`models/naive_team.json`, **SHA-256 `0ffa901a3917c35f511e8db597376e7479cfebd6859ece90f6fc692bdf97ef6d`**. Hlídá ho
+`tests/test_team_plan.py`; skript ho odmítne přepsat.
+
+| rodina | liga na tým a zápas | domácí faktor h | w | c | k tým | k zápas |
+|---|---|---|---|---|---|---|
+| střely | 28,903 | 1,0198 | 12 | 0,6 | 95,67 | 527,64 |
+| tresty | 3,300 | 0,9675 | 30 | 0,6 | 5000,00 | 26,72 |
+
+Poznámky k odhadu (jen trénovací data):
+
+- U trestů týmu vyšel rozptyl k na horní mezi hledání (5 000). To znamená,
+  že tresty jednoho týmu se chovají jako Poissonovo rozdělení (bez
+  nadbytečného rozptylu); mez není laděný parametr.
+- Průměr předpovědi je v tréninku mírně nad skutečností: střely 29,07
+  proti 28,90 (+0,6 %), tresty 3,37 proti 3,30 (+2,1 %). Plyne to ze
+  součinu dvou stažených faktorů; neupravuje se.
+- Ligový průměr střel 28,90 se shoduje s konstantou modelu střel hráčů.
+
+Od této chvíle se konstanty nemění. Vyhodnocení na 2025-26 proběhne
+jednou (`scripts/report_team_stage1.py`).

@@ -260,3 +260,29 @@ kalibrovaná.
 
 Nový soubor `models/naive_team_tt_v2.json` se po odhadu zamrazí otiskem
 (zapíše se sem níže) a teprve potom se spustí ověření.
+
+### Dodatek T-3a — užší rozdělení nestačí; ověření se nespustilo (4. 10. 2026)
+
+Odhad CMP na trénovacích sezónách dal ν = 1,272 (základy 1,220 a 1,210).
+Kontrola **na trénovacích datech**, ještě před zamrazením a před
+jakýmkoli ověřením na 2025-26:
+
+| lajna | sezóna | skutečnost „více" | verze 1 (Poisson) | CMP |
+|---|---|---|---|---|
+| 3.5 | 2023-24 | 43,3 % | 47,1 % | 47,7 % |
+| 3.5 | 2024-25 | 35,9 % | 39,3 % | 39,1 % |
+| 4.5 | 2023-24 | 24,2 % | 28,6 % | 27,2 % |
+| 4.5 | 2024-25 | 19,3 % | 22,1 % | 20,3 % |
+
+Užší rozdělení pomohlo jen u vyšší lajny; u lajny 3.5, kterou Tipsport
+používá nejčastěji, zůstalo nadhodnocení „více" o 3–4 p.b. V pěti pásmech
+podle předpovědi je CMP v nejvyšším pásmu vedle o 8 p.b. (předpověď 59 %,
+skutečnost 51 %). Příčina tedy není jen šířka rozdělení: skutečné počty
+mají ostřejší vrchol u 2–3 trestů a delší pravý ocas, a model je ve svých
+rozdílech mezi týmy příliš sebejistý.
+
+**Důsledek.** Předpoklad dodatku T-3 byl neúplný. Soubor
+`models/naive_team_tt_v2.json` se **nezamrazil** a ověření na 2025-26 se
+**nespustilo** — sezóna 2025-26 tedy zůstává u trhu T-T použitá jen jednou.
+O dalším postupu u trhu T-T rozhodne uživatel (nový dodatek, nebo konec
+trhu). Trh S-T se tím nemění.

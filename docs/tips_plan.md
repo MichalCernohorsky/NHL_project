@@ -147,5 +147,31 @@ formulář tiketu s verdiktem SÁZEJ / NESÁZEJ, log, bilance). Faktory tipu
 Interval spolehlivosti se zobrazuje až od 5 herních dnů: převzorkují se
 dny, z jednoho dne by interval splynul do jedné hodnoty.
 
-Zbývá: nasazení na Streamlit Community Cloud (heslo, databáze ze
-soukromého vydání, zápis tiketů přes token), spolehlivé denní spouštění.
+Nasazení na Streamlit Community Cloud: hotovo 4. 10. 2026
+(`docs/streamlit.md`). Zbývá: spolehlivé denní spouštění.
+
+## 11. Rozklad tipu na příspěvky atributů; popisné statistiky (4. 10. 2026, před kódem)
+
+Na přání uživatele („jak jednotlivé atributy přispívají ke vstupu pro
+sázku, jako v MLB"). **Jen zobrazení** — pravidlo tipu, ⭐ TOP ani
+vyhodnocení se nemění.
+
+- **Co se rozkládá:** pravděpodobnost tipované strany na lajně tipu
+  (p_model). Výchozí bod je „průměrný hráč pozice": prior střelby pozice
+  ze zamrazeného modelu, průměrný čas na ledě pozice v trénovacích
+  sezónách, soupeř 1,000. Atributy naivního modelu jsou tři: střelba
+  hráče, čas na ledě, soupeř.
+- **Jak:** přesné Shapleyho hodnoty — průměr přes všech 6 pořadí, v nichž
+  se atributy mění z průměru na skutečnost. Součet příspěvků = p_model −
+  p_výchozí a na pořadí nezáleží. NBA / MLB totéž odhadují metodou SHAP
+  nad modelem s desítkami atributů; tady jsou tři, takže jde o přesný
+  výpočet. Stejně se rozkládá i očekávaný počet střel.
+- **Kde:** Rozbor zápasu (graf „od průměrného hráče k tipu", vedle trh
+  a hrana) a krátký řádek u každého tipu na kartě Tipy dne.
+- **Co to není:** příčina ani důkaz hrany. Říká jen, odkud se číslo
+  v modelu vzalo. Víc atributů přinese až produkční model fáze 2.
+- **Popisné statistiky** na stránkách Hráč a Týmy (sezóny vedle sebe,
+  doma / venku, den po zápase, podíl na střelách týmu, střely povolené
+  útočníkům a obráncům, trestné minuty…) jsou popis historie, u rozdílů
+  s 95% intervalem. Model je nepoužívá a **tipy se podle nich
+  nevyhodnocují** (plán fáze 0: žádné řezy podle atributů).

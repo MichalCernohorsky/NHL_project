@@ -241,6 +241,64 @@ def fit(train: pd.DataFrame) -> dict:
     return const
 
 
+# ----------------------------------------------- CMP (amendment T-3, market T-T)
+
+CMP_YMAX = 40          # team penalties in 60 minutes never come near this
+
+
+def cmp_logpmf_table(mu, nu: float, ymax: int = CMP_YMAX) -> np.ndarray:
+    """log pmf[0..ymax] of a Conway-Maxwell-Poisson count for each mean in mu:
+    P(y) proportional to lambda^y / (y!)^nu, with lambda solved so that the
+    mean equals mu. nu = 1 is Poisson; nu > 1 is narrower (variance < mean)."""
+    mu = np.atleast_1d(np.asarray(mu, dtype=float))
+    ys = np.arange(ymax + 1)
+    lfact = np.concatenate([[0.0], np.cumsum(np.log(np.arange(1, ymax + 1)))])
+
+    def table(loglam):
+        logw = ys[None, :] * loglam[:, None] - nu * lfact[None, :]
+        logw -= logw.max(axis=1, keepdims=True)
+        return logw - np.log(np.exp(logw).sum(axis=1, keepdims=True))
+
+    lo = np.full(mu.shape, math.log(1e-4))
+    hi = np.full(mu.shape, math.log(1e4))
+    for _ in range(60):                       # bisection on log lambda; the mean rises with it
+        mid = (lo + hi) / 2
+        mean = (np.exp(table(mid)) * ys[None, :]).sum(axis=1)
+        below = mean < mu
+        lo = np.where(below, mid, lo)
+        hi = np.where(below, hi, mid)
+    return table((lo + hi) / 2)
+
+
+def cmp_logpmf(y, mu, nu: float) -> np.ndarray:
+    y = np.asarray(y, dtype=int)
+    return cmp_logpmf_table(mu, nu)[np.arange(len(y)), np.minimum(y, CMP_YMAX)]
+
+
+def cmp_p_over(mu, line: float, nu: float) -> np.ndarray:
+    """P(Y > line) under the CMP distribution."""
+    return 1.0 - np.exp(cmp_logpmf_table(mu, nu)[:, :int(math.floor(line)) + 1]).sum(axis=1)
+
+
+def fit_nu(y, mu, lo: float = 0.3, hi: float = 5.0) -> float:
+    """MLE of the CMP shape nu by golden-section search on log nu."""
+    f = lambda ln: -cmp_logpmf(y, mu, math.exp(ln)).sum()  # noqa: E731
+    a, b = math.log(lo), math.log(hi)
+    g = (math.sqrt(5) - 1) / 2
+    c, d = b - g * (b - a), a + g * (b - a)
+    fc, fd = f(c), f(d)
+    for _ in range(40):
+        if fc < fd:
+            b, d, fd = d, c, fc
+            c = b - g * (b - a)
+            fc = f(c)
+        else:
+            a, c, fc = c, d, fd
+            d = a + g * (b - a)
+            fd = f(d)
+    return math.exp((a + b) / 2)
+
+
 # ------------------------------------------------------------ evaluation
 
 def boot_counts(days: np.ndarray, n_boot: int = N_BOOT, seed: int = SEED):
@@ -264,23 +322,31 @@ def mean_ci(values: np.ndarray, day_idx: np.ndarray, counts: np.ndarray) -> tupl
     return float(values.mean()), float(lo), float(hi)
 
 
-def t1(y, mu, k, base_mu: dict, base_k: dict, day_idx, counts) -> dict:
-    """Criterion T1: the model's log loss against both baselines."""
-    loss = -nb_logpmf(y, mu, k)
+def t1_losses(loss: np.ndarray, base_loss: dict, day_idx, counts) -> dict:
+    """Criterion T1 from per-row log losses: the model against both baselines."""
     out = {"loss_model": float(loss.mean())}
     ok = True
     for name in ("z0", "z1"):
-        lb = -nb_logpmf(y, base_mu[name], base_k[name])
-        gain, lo, hi = mean_ci(lb - loss, day_idx, counts)
-        out[name] = {"loss": float(lb.mean()), "gain": gain, "lo": lo, "hi": hi}
+        gain, lo, hi = mean_ci(base_loss[name] - loss, day_idx, counts)
+        out[name] = {"loss": float(base_loss[name].mean()), "gain": gain, "lo": lo, "hi": hi}
         ok = ok and lo > 0
     out["pass"] = bool(ok)
     return out
 
 
-def calibration(y, mu, k: float, lines: list[float], bands: int = 5) -> pd.DataFrame:
-    """P(over line) for every row and line, pooled, in equal-sized bands."""
-    p = np.concatenate([ns.p_over(mu, line, k) for line in lines])
+def t1(y, mu, k, base_mu: dict, base_k: dict, day_idx, counts) -> dict:
+    """Criterion T1 with negative binomial distributions (plan section 5)."""
+    return t1_losses(-nb_logpmf(y, mu, k),
+                     {n: -nb_logpmf(y, base_mu[n], base_k[n]) for n in ("z0", "z1")},
+                     day_idx, counts)
+
+
+def calibration(y, mu, k: float, lines: list[float], bands: int = 5,
+                p_over=None) -> pd.DataFrame:
+    """P(over line) for every row and line, pooled, in equal-sized bands.
+    p_over(mu, line, k) defaults to the negative binomial of the player model."""
+    p_over = p_over or ns.p_over
+    p = np.concatenate([p_over(mu, line, k) for line in lines])
     hit = np.concatenate([(np.asarray(y) > line).astype(float) for line in lines])
     order = np.argsort(p, kind="stable")
     rows = []

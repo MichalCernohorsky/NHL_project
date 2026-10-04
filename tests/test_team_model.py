@@ -161,3 +161,37 @@ def test_penalty_counting_rule_is_amendment_t1(conn):
     assert (home["team_id"], home["y"], home["y_opp"]) == (1, 4, 1)
     away = df[df["is_home"] == 0].iloc[0]
     assert (away["team_id"], away["y"], away["y_opp"]) == (2, 1, 4)
+
+
+# ------------------------------------------------- CMP (amendment T-3)
+
+def test_cmp_is_a_distribution_with_the_requested_mean():
+    mu = np.array([0.8, 3.3, 6.0])
+    for nu in (0.7, 1.0, 1.4):
+        pmf = np.exp(tm.cmp_logpmf_table(mu, nu))
+        assert pmf.sum(axis=1) == pytest.approx(1.0)
+        assert (pmf * np.arange(pmf.shape[1])).sum(axis=1) == pytest.approx(mu, rel=1e-6)
+
+
+def test_cmp_with_nu_one_is_poisson_and_narrower_above_one():
+    mu = np.array([3.3])
+    y = np.arange(12)
+    pois = np.array([-3.3 + k * np.log(3.3) - sum(np.log(np.arange(1, k + 1))) for k in y])
+    assert tm.cmp_logpmf_table(mu, 1.0)[0, :12] == pytest.approx(pois, abs=1e-9)
+    ys = np.arange(tm.CMP_YMAX + 1)
+    var = lambda nu: float((np.exp(tm.cmp_logpmf_table(mu, nu))[0] * (ys - 3.3) ** 2).sum())  # noqa: E731
+    assert var(1.0) == pytest.approx(3.3, rel=1e-6) and var(1.4) < 3.3 < var(0.7)
+    # a narrower distribution puts less weight above a line that sits over the mean
+    assert tm.cmp_p_over(mu, 4.5, 1.4)[0] < tm.cmp_p_over(mu, 4.5, 1.0)[0]
+    assert tm.cmp_p_over(mu, 3.5, 1.0)[0] == pytest.approx(1 - np.exp(pois[:4]).sum())
+
+
+def test_fit_nu_recovers_under_dispersion():
+    rng = np.random.default_rng(4)
+    mu = rng.uniform(2.6, 4.2, 6000)
+    y = rng.binomial(18, mu / 18)                   # variance = mu * (1 - mu/18) < mu
+    nu = tm.fit_nu(y, mu)
+    assert 1.1 < nu < 1.5
+    assert abs(tm.fit_nu(rng.poisson(mu), mu) - 1.0) < 0.06
+    cal = tm.calibration(y, mu, nu, [3.5, 4.5], p_over=tm.cmp_p_over)
+    assert (cal["predicted"] - cal["observed"]).abs().max() < 0.03

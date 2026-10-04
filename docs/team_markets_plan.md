@@ -1,9 +1,10 @@
 # Týmové trhy: střely týmů a dvouminutové tresty — plán před daty
 
-Stav: **návrh ke schválení** (4. 10. 2026). Sepsáno před prvním pohledem na
-jakýkoli výsledek modelu těchto trhů. Po schválení se zamrazí otiskem
-SHA-256; změny jen jako datované dodatky. Fáze 0 (střely hráčů,
-`docs/market_discovery_plan.md`) má přednost a tímhle plánem se nemění.
+Stav: **schváleno uživatelem 4. 10. 2026.** Sepsáno před prvním pohledem na
+jakýkoli výsledek modelu těchto trhů. Znění je zamrazené otiskem SHA-256
+(oddíl „Schválení a dodatky" na konci); změny jen jako datované dodatky.
+Fáze 0 (střely hráčů, `docs/market_discovery_plan.md`) má přednost
+a tímhle plánem se nemění.
 
 ## 1. Proč a co je jinak než u střel hráčů
 
@@ -167,3 +168,17 @@ Rozhodnutí je uživatelovo.
 | 6 | etapa 2: pohledy po 300 a 800 tiketech | 5 |
 
 Krok 2–4 nestojí žádný kredit a neblokuje fázi 0.
+<!-- konec schváleného znění -->
+
+## Schválení a dodatky
+
+Schváleno uživatelem 4. 10. 2026 („schvaluji plán"). Otisk schváleného
+znění (vše nad značkou konce schváleného znění): **SHA-256 `ff5ca38c3c63e2373f65c47bc252a8c520c862e63c4f62e93d65497b5b2617d8`**.
+Hlídá ho `tests/test_team_plan.py`. Text nad značkou se už nemění; dodatky
+se připisují sem, s datem.
+
+Otázky O1–O5 (pravidla vyhodnocení Tipsportu) zůstávají otevřené. Platí
+u nich výchozí předpoklady ze sekce 2, dokud je uživatel nepotvrdí nebo
+neopraví; odpověď se zapíše jako dodatek **před** zamrazením modelů
+(krok 3). Krok 2 (stažení trestů a rozhodčích) na nich nezávisí — tresty
+se ukládají po jednotlivých událostech.

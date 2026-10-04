@@ -182,3 +182,21 @@ u nich výchozí předpoklady ze sekce 2, dokud je uživatel nepotvrdí nebo
 neopraví; odpověď se zapíše jako dodatek **před** zamrazením modelů
 (krok 3). Krok 2 (stažení trestů a rozhodčích) na nich nezávisí — tresty
 se ukládají po jednotlivých událostech.
+
+### Dodatek T-1 — pravidla vyhodnocení Tipsportu (4. 10. 2026, před odhadem modelů)
+
+Uživatel potvrdil 4. 10. 2026 (odpovědi na O1–O4):
+
+- **O1:** střely týmu i dvouminutové tresty se počítají za **60 minut, bez
+  prodloužení**.
+- **O2:** dvojitý menší trest (2+2) = **dva** dvouminutové tresty.
+- **O3:** 2+10 = **jeden** dvouminutový trest.
+- **O4:** trest pro hráčskou lavici se týmu **počítá**.
+- **O5** (trestné střílení) uživatel nepotvrzoval; zůstává výchozí
+  předpoklad: nepočítá se.
+
+Pravidlo počítání v datech (`penalties`): jen `period_type = 'REG'`;
+`type_code` MIN nebo BEN; počet = `duration / 2` (2 → 1, 4 → 2). Větší,
+osobní, do konce utkání, ve hře a trestné střílení se nepočítají.
+Všechny odpovědi se shodují s výchozími předpoklady sekce 2; nic dalšího
+se v plánu nemění.

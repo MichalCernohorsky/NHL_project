@@ -153,7 +153,7 @@ if tips_g.empty:
 else:
     # ----------------------------------------------------------- 2 · tip rows
     decisions = bets.current_decisions()
-    mine = {b["tip_id"]: b for b in bets.active_bets() if b.get("tip_id")}
+    mine = {b["tip_id"]: b for b in bets.player_bets() if b.get("tip_id")}
     W = [1.25, 2.2, 0.75, 1.15, 0.7, 1.35, 0.95, 1.65]
     for col, name in zip(st.columns(W), ["", "HRÁČ · STRANA · LAJNA", "MIN. KURZ",
                                          "MODEL / TRH", "HRANA", "", "", "STAV"]):

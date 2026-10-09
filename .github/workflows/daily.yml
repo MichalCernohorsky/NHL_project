@@ -5,10 +5,18 @@ name: Denni beh (data zive sezony)
 # GitHub delays or drops scheduled runs (MLB saw 40 min and a skipped day),
 # hence two backup times; the run is idempotent, a second one costs seconds.
 on:
+  # GitHub starts scheduled runs 3-7 hours late (5.-9. 10. 2026: the first
+  # run of the day landed at ~19:00 CZ). The run is idempotent and cheap, so
+  # one trigger an hour from 11:30 UTC (not earlier: docs/cloud.md) gives the
+  # tips a chance to be there by 18:00 CZ.
   schedule:
-    - cron: "30 10 * * *"     # 12:30 CEST / 11:30 CET
-    - cron: "30 13 * * *"     # backup
-    - cron: "30 17 * * *"     # backup
+    - cron: "30 11 * * *"     # 13:30 CEST / 12:30 CET
+    - cron: "30 12 * * *"
+    - cron: "30 13 * * *"
+    - cron: "30 14 * * *"
+    - cron: "30 15 * * *"
+    - cron: "30 16 * * *"
+    - cron: "30 17 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -50,6 +58,10 @@ jobs:
         run: python scripts/collect_odds.py live
       - name: Tipy dne a vyhodnoceni
         run: python scripts/build_tips.py
+      # Team markets, stage 2 (docs/team_markets_plan.md, T-5): expectations
+      # for today's games, once before puck drop; settlement of finished days.
+      - name: Tymove trhy
+        run: python scripts/build_team_tips.py
       # Also after a failed daily step (keeps what was downloaded), but never
       # when the download itself failed: there is nothing to upload then.
       - name: Ulozeni databaze

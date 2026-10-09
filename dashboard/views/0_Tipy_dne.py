@@ -143,7 +143,7 @@ def record_card(tag, d, empty):
 if not st.session_state.get("_bets_pulled"):
     bets.sync_pull()
     st.session_state["_bets_pulled"] = True
-my_bets = bets.active_bets()
+my_bets = bets.player_bets()
 mine = {b["tip_id"]: b for b in my_bets if b.get("tip_id")}
 my_profit, my_staked, my_done = 0.0, 0.0, 0
 for b in my_bets:

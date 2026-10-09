@@ -120,6 +120,37 @@ def active_bets() -> list[dict]:
     return [r for r in recs if r.get("type") == "bet" and r["id"] not in deleted]
 
 
+TEAM_MARKETS = ("S-T", "T-T")
+
+
+def player_bets() -> list[dict]:
+    """Tickets on player shots (the Tipy dne / Moje sázky flow)."""
+    return [b for b in active_bets() if b.get("market") not in TEAM_MARKETS]
+
+
+def team_bets() -> list[dict]:
+    """Tickets on the team markets (docs/team_markets_plan.md, stage 2)."""
+    return [b for b in active_bets() if b.get("market") in TEAM_MARKETS]
+
+
+def save_team_bet(pred: dict, line: float, price: float, stake: float, book: str,
+                  side: str, paper: bool, now: datetime | None = None) -> dict:
+    """A ticket on a team market; paper = no money (plan section 6)."""
+    if pred.get("market") not in TEAM_MARKETS or side not in ("over", "under"):
+        raise ValueError("neznamy trh nebo strana")
+    if started(pred.get("start_time_utc"), now):
+        raise Locked("zápas už začal - tiket se zpětně nezapisuje")
+    if price <= 1.0 or stake <= 0:
+        raise ValueError("kurz musí být > 1 a vklad > 0")
+    return _append("bets", {
+        "type": "bet", "market": pred["market"], "game_id": int(pred["game_id"]),
+        "game_date": pred.get("game_date"), "start_time_utc": pred.get("start_time_utc"),
+        "team_id": int(pred["team_id"]), "team": pred.get("tym"), "opp": pred.get("souper"),
+        "mu": float(pred["mu"]) if pred.get("mu") is not None else None,
+        "side": side, "line": float(line), "price": float(price), "stake": float(stake),
+        "book": book, "paper": bool(paper)})
+
+
 def settle(bet: dict, actual_60: int | None, played: bool) -> tuple[str, float]:
     """(outcome, profit in the stake's currency). Not played = void (stake
     back); a whole-number line can push."""

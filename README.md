@@ -33,12 +33,13 @@ pip install -r requirements.txt
 | 6 | `python scripts/report.py` | co je v databázi | nic |
 | — | `python scripts/backfill_penalties.py` / `backfill_officials.py` | tresty po událostech z play-by-play, rozhodčí odehraných zápasů (plán `docs/team_markets_plan.md`) | 1 request na zápas / nic (z cache) |
 | — | `make data` | kroky 2–5 + tresty a rozhodčí najednou | |
+| — | `python scripts/build_team_tips.py` | predikce týmových trhů pro dnešní zápasy (střely týmu, dvouminutové tresty) a vyhodnocení (plán `docs/team_markets_plan.md`, etapa 2); v cloudu součást denního běhu | nic |
 | — | `python scripts/backfill_props.py --dry-run` | vzorek a cena nákupu kurzů | nic (bez klíče) |
 | — | `make odds-morning` / `make odds-closing` | živé snímky kurzů dne | ~3 kredity na zápas a snímek |
 | — | `make daily` | denní běh živé sezóny (v cloudu automaticky, `docs/cloud.md`) | jen NHL API |
 | — | `python scripts/buy_snapshots.py --dry-run` | co by cloud koupil z archivu kurzů a za kolik | nic |
 | — | `make db-down` | stáhne aktuální databázi z cloudu (před dashboardem) | nic |
-| — | `make dashboard` | dashboard na Macu: Tipy dne, Rozbor zápasu, Moje sázky, Přehled, Kurzy, Hráč, Brankáři, Týmy (databázi jen čte; tikety zapisuje do soukromého datového repozitáře). Hostovaná verze s heslem: `docs/streamlit.md` | nic |
+| — | `make dashboard` | dashboard na Macu: Tipy dne, Rozbor zápasu, Moje sázky, Týmové trhy, Přehled, Kurzy, Hráč, Brankáři, Týmy (databázi jen čte; tikety zapisuje do soukromého datového repozitáře). Hostovaná verze s heslem: `docs/streamlit.md` | nic |
 
 Všechny stahovací kroky jsou **resumable**: přerušení (Ctrl+C) nic
 neztratí, další spuštění pokračuje. Stažené JSON odehraných zápasů se

@@ -46,7 +46,7 @@ def kpi(tag, big, rows, cls=""):
 
 
 # ------------------------------------------------------------- settle tickets
-mine = bets.active_bets()
+mine = bets.player_bets()
 rows = []
 for b in mine:
     f = data.bet_facts(b["game_id"], b["player_id"])

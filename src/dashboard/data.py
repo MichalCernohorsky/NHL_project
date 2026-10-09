@@ -509,3 +509,46 @@ def bet_facts(game_id: int, player_id: int) -> dict:
     return {"zapas": f'{r["a_ab"]} @ {r["h_ab"]}', "game_date": r["game_date"],
             "start_time_utc": r["start_time_utc"], "final": final, "played": bool(played),
             "actual": int(r["sog_reg"]) if final and played and pd.notna(r["sog_reg"]) else None}
+
+
+# ------------------------------------------------------------ team markets
+
+def team_pred_days() -> list[str]:
+    if not _has_table("team_predictions"):
+        return []
+    return q("SELECT DISTINCT game_date FROM team_predictions ORDER BY game_date DESC")["game_date"].tolist()
+
+
+def team_preds_on(game_date: str) -> pd.DataFrame:
+    """Both teams' expectations for every game of the day, both markets."""
+    if not _has_table("team_predictions"):
+        return pd.DataFrame()
+    return q("""SELECT p.*, tm.abbreviation AS tym, op.abbreviation AS souper,
+                       g.game_state, g.home_score, g.away_score, g.home_team_id,
+                       h.abbreviation AS h_ab, a.abbreviation AS a_ab
+                FROM team_predictions p JOIN games g USING (game_id)
+                JOIN teams tm ON tm.team_id = p.team_id
+                JOIN teams op ON op.team_id = p.opp_id
+                JOIN teams h ON h.team_id = g.home_team_id
+                JOIN teams a ON a.team_id = g.away_team_id
+                WHERE p.game_date = ?
+                ORDER BY g.start_time_utc, p.game_id, p.is_home DESC, p.market""", (game_date,))
+
+
+def team_bet_facts(game_id: int, team_id: int, market: str) -> dict:
+    """What a team ticket needs to be settled: the stored 60-minute count."""
+    if not _has_table("team_predictions"):
+        return {}
+    df = q("""SELECT p.actual_60, g.game_state, a.abbreviation AS a_ab, h.abbreviation AS h_ab
+              FROM team_predictions p JOIN games g USING (game_id)
+              JOIN teams h ON h.team_id = g.home_team_id
+              JOIN teams a ON a.team_id = g.away_team_id
+              WHERE p.game_id = ? AND p.team_id = ? AND p.market = ?""",
+           (int(game_id), int(team_id), market))
+    if df.empty:
+        return {}
+    r = df.iloc[0]
+    final = pd.notna(r["actual_60"])
+    return {"zapas": f'{r["a_ab"]} @ {r["h_ab"]}', "final": bool(final),
+            "actual": int(r["actual_60"]) if final else None}
+

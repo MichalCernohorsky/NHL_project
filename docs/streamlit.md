@@ -58,6 +58,7 @@ Kontrola, že je všechno v pořádku:
 
 - bez hesla není vidět nic kromě pole *Heslo*;
 - *Tipy dne* ukazují dnešní zápasy;
+- *Týmové trhy* ukazují predikce střel týmu a trestů s minimálními kurzy;
 - zkušební ✅ na tipu a jeho vrácení ❌ se objeví v `NHL_project-data`
   ve složce `bets/` (soubor `decisions.jsonl`).
 

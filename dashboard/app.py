@@ -53,6 +53,8 @@ P = {
                     icon=":material/sports_hockey:", default=True),
     "sazky": st.Page(str(PAGES / "7_Moje_sazky.py"), title="Moje sázky",
                      icon=":material/confirmation_number:", url_path="moje-sazky"),
+    "tymove": st.Page(str(PAGES / "8_Tymove_trhy.py"), title="Týmové trhy",
+                      icon=":material/stadium:", url_path="tymove-trhy"),
     # opened from a game card; hidden in the menu by CSS (assets/style.css)
     "rozbor": st.Page(str(PAGES / "6_Rozbor_zapasu.py"), title="Rozbor zápasu",
                       icon=":material/query_stats:", url_path="rozbor"),
@@ -60,7 +62,7 @@ P = {
 nav.PAGES.update(P)
 
 st.navigation({
-    "Sázení": [P["tipy"], P["sazky"], P["rozbor"]],
+    "Sázení": [P["tipy"], P["sazky"], P["tymove"], P["rozbor"]],
     "Projekt": [
         st.Page(str(PAGES / "1_Prehled.py"), title="Přehled",
                 icon=":material/dashboard:", url_path="prehled"),

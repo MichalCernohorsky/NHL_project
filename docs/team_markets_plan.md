@@ -286,3 +286,43 @@ rozdílech mezi týmy příliš sebejistý.
 **nespustilo** — sezóna 2025-26 tedy zůstává u trhu T-T použitá jen jednou.
 O dalším postupu u trhu T-T rozhodne uživatel (nový dodatek, nebo konec
 trhu). Trh S-T se tím nemění.
+
+### Dodatek T-4 — kalibrace pravděpodobnosti „více" u trestů týmu (9. 10. 2026, se souhlasem uživatele, před odhadem)
+
+**Proč.** Dodatek T-3a: ani užší rozdělení nespraví lajnu 3.5, u níž model
+nadhodnocuje „více" o 3–4 p.b. (celý práh tipu). Místo rozdělení počtů se
+proto pravděpodobnost „více než lajna" odhadne **přímo**.
+
+**Změna (jediná), trh T-T.** Pro každou lajnu ℓ ∈ {3.5, 4.5} zvlášť:
+
+    P(y > ℓ) = 1 / (1 + exp(−(a_ℓ + b_ℓ · ln μ)))
+
+kde μ je průměr ze zamrazeného `models/naive_team.json` (rodina tresty)
+a (a_ℓ, b_ℓ) se odhadnou maximální věrohodností **jen na 2023-24 +
+2024-25** (5 248 řádků). Stejný přepočet s vlastními (a, b) dostanou oba
+základy Z0 (μ = L_t) a Z1 (μ = průměr týmu v sezóně), aby model nevyhrál
+jen tím, že má kalibraci a základy ne. Na jiných lajnách než 3.5 a 4.5
+model **tipy nedává**.
+
+**Zkouška uvnitř trénovacích dat** (odhad na jedné sezóně, kontrola na
+druhé; provedeno 4. 10. před tímto dodatkem): průměrná chyba „více"
+1,3 p.b. místo 3–4, nejvyšší pásmo 48 % proti 48 % a 53 % proti 52 %.
+
+**Kritérium T1 pro T-T se měří na výsledku více / méně:** ztráta = záporný
+logaritmus pravděpodobnosti, kterou model dal tomu, co nastalo (více, nebo
+méně), zprůměrovaná přes řádky a obě lajny. Zisk proti Z0 a Z1 s bootstrap
+intervalem (seed 17, 10 000, převzorkují se herní dny); **T1 splněno,
+když jsou oba intervaly nad nulou** (lajny dohromady; po lajnách se jen
+vykazuje). Kalibrace v pěti pásmech a simulace nulového efektu (promíchaní
+soupeři, promíchané předpovědi, 500 opakování; parametry (a, b) se
+nepřeodhadují) jako v sekci 5.
+
+**Co se nemění.** Průměr μ, pravidlo počítání trestů (T-1), bootstrap.
+Trh S-T beze změny.
+
+**Co to stojí (nahlas).** Sezóna 2025-26 se u trhu T-T použije k ověření
+podruhé (poprvé `docs/team_stage1_report.md`; T-3 ověření nespustil).
+Nový výsledek jde do `docs/team_tt_cal_report.md`. Kdyby T1 nesplnila,
+trh T-T **končí**; k dřívějším verzím se nevrací. Parametry se po odhadu
+zapíší do `models/naive_team_tt_cal.json` a zamrazí otiskem (níže) dřív,
+než se ověření spustí.

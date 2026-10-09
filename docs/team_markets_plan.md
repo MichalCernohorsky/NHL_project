@@ -326,3 +326,18 @@ Nový výsledek jde do `docs/team_tt_cal_report.md`. Kdyby T1 nesplnila,
 trh T-T **končí**; k dřívějším verzím se nevrací. Parametry se po odhadu
 zapíší do `models/naive_team_tt_cal.json` a zamrazí otiskem (níže) dřív,
 než se ověření spustí.
+
+### Dodatek T-4a — zamrazení kalibrace T-T (9. 10. 2026, před ověřením na 2025-26)
+
+Odhad jen na 2023-24 + 2024-25 (5 248 řádků, `scripts/fit_team_tt_cal.py`).
+Soubor `models/naive_team_tt_cal.json`, **SHA-256 `9b7458d1c1710b39c5d0fa1292a72605b3ea2a3e63bda1ba0f786772778e4867`**.
+Hlídá ho `tests/test_team_plan.py`; skript ho odmítne přepsat.
+
+| lajna | a | b |
+|---|---|---|
+| 3.5 | -3,428 | 2,485 |
+| 4.5 | -5,168 | 3,184 |
+
+Na trénovacích datech sedí průměr předpovědi „více" se skutečností
+(39,6 % a 21,8 %) z konstrukce; o kvalitě rozhodne až 2025-26
+(`scripts/report_team_tt_cal.py`, spuštěno jednou po tomto dodatku).

@@ -38,3 +38,16 @@ def test_team_fit_script_refuses_to_overwrite(monkeypatch, capsys):
     with pytest.raises(SystemExit):
         fit_naive_team.main()
     assert "zamrazeny" in capsys.readouterr().out
+
+
+def test_team_calibration_file_matches_the_fingerprint_in_the_plan():
+    import json
+    root = PLAN.parents[1]
+    tail = PLAN.read_text().split(MARK)[1]
+    m = re.search(r"`models/naive_team_tt_cal\.json`, \*\*SHA-256 `([0-9a-f]{64})`\*\*", tail)
+    assert m, "freeze note (amendment T-4a) missing from the plan"
+    model = root / "models" / "naive_team_tt_cal.json"
+    assert hashlib.sha256(model.read_bytes()).hexdigest() == m.group(1)
+    body = json.loads(model.read_text())
+    assert body["trained_on"] == ["2023-24", "2024-25"] and set(body["lines"]) == {"3.5", "4.5"}
+    assert body["base_model_sha256"] == hashlib.sha256((root / "models" / "naive_team.json").read_bytes()).hexdigest()

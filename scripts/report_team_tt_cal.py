@@ -95,7 +95,7 @@ def main():
            f"{cz(res['z0']['lo'])} až {cz(res['z0']['hi'])} | {cz(res['z1']['gain'])} | "
            f"{cz(res['z1']['lo'])} až {cz(res['z1']['hi'])} | **{'splněno' if res['pass'] else 'nesplněno'}** |",
            "\n## Po lajnách\n",
-           "| lajna | předpověď „více" | skutečnost | zisk proti Z0 | 95% interval | zisk proti Z1 | 95% interval |",
+           "| lajna | předpověď „více“ | skutečnost | zisk proti Z0 | 95% interval | zisk proti Z1 | 95% interval |",
            "|---|---|---|---|---|---|---|"]
     for r in per_line:
         out.append(f"| {cz(r['line'], 1)} | {cz(r['predicted'] * 100, 1)} % | {cz(r['observed'] * 100, 1)} % | "

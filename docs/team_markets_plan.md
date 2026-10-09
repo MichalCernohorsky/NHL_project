@@ -341,3 +341,32 @@ Hlídá ho `tests/test_team_plan.py`; skript ho odmítne přepsat.
 Na trénovacích datech sedí průměr předpovědi „více" se skutečností
 (39,6 % a 21,8 %) z konstrukce; o kvalitě rozhodne až 2025-26
 (`scripts/report_team_tt_cal.py`, spuštěno jednou po tomto dodatku).
+
+### Dodatek T-5 — výsledek etapy 1 a start etapy 2 (9. 10. 2026, před kódem stránky)
+
+**Etapa 1 uzavřena.** T1 splnily **střely týmu (S-T)** (`docs/team_stage1_report.md`,
+negativně binomické rozdělení) a **dvouminutové tresty týmu (T-T)** s kalibrací
+(`docs/team_tt_cal_report.md`; zisk proti Z0 0,0132 [0,0071; 0,0192], proti Z1
+0,0079 [0,0024; 0,0134]; předpověď „více" 39,6 % proti 40,3 % na 3.5 a 21,6 %
+proti 22,1 % na 4.5; nulová simulace 0 %). Trhy S-Z a T-Z skončily.
+
+**Etapa 2 (sekce 6) začíná pro S-T a T-T.** Upřesnění zobrazení, aby stránka
+nerozhodovala nic, co plán nestanoví:
+
+- Predikce μ pro oba týmy každého zápasu dne se zapíše **jednou**
+  (`team_predictions`, nejpozději v denním běhu před začátkem zápasu;
+  zápas, který už začal, predikci nedostane). Všechny vstupy pocházejí ze
+  zápasů s dřívějším datem.
+- **S-T:** lajny zaokrouhlená(μ) − 2,5 … + 2,5 (šest půlčíselných lajn),
+  P(více) z negativně binomického rozdělení zamrazeného modelu, obě strany.
+- **T-T:** jen lajny 3.5 a 4.5, P(více) z kalibrace T-4; jiné lajny se
+  nenabízejí.
+- U každé strany **minimální kurz** = 1 / (p_model − 0,03); tiket splňuje
+  pravidlo, když je kurz z Tipsportu ≥ minimální kurz.
+- Tiket (papírový nebo skutečný) zapisuje uživatel: tým, trh, lajna, strana,
+  kurz, vklad. Zámek od začátku zápasu jako u střel hráčů. Vyhodnocení za
+  60 minut: S-T = součet střel hráčů v poli, T-T = pravidlo T-1; celočíselná
+  lajna by byla push (Tipsport používá půlčíselné).
+- Vykazuje se ROI v jednotkách (zisk / vklad) za kurz z tiketu, papírové
+  a skutečné tikety zvlášť, bootstrap interval od 5 herních dnů; počítadlo
+  k pohledům po 300 a 800 tiketech (sekce 6).

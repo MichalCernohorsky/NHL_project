@@ -299,6 +299,59 @@ def fit_nu(y, mu, lo: float = 0.3, hi: float = 5.0) -> float:
     return math.exp((a + b) / 2)
 
 
+# ------------------------------------- calibration (amendment T-4, market T-T)
+
+CAL_LINES = (3.5, 4.5)
+
+
+def logit_fit(x, t, iters: int = 60) -> tuple[float, float]:
+    """(a, b) of P(t = 1) = sigmoid(a + b x) by maximum likelihood (Newton)."""
+    x = np.asarray(x, dtype=float)
+    t = np.asarray(t, dtype=float)
+    X = np.column_stack([np.ones_like(x), x])
+    beta = np.zeros(2)
+    for _ in range(iters):
+        p = 1.0 / (1.0 + np.exp(-(X @ beta)))
+        w = p * (1.0 - p)
+        step = np.linalg.solve(X.T @ (X * w[:, None]) + 1e-9 * np.eye(2), X.T @ (t - p))
+        beta += step
+        if np.abs(step).max() < 1e-10:
+            break
+    return float(beta[0]), float(beta[1])
+
+
+def logit_p(mu, ab: tuple[float, float]) -> np.ndarray:
+    a, b = ab
+    return 1.0 / (1.0 + np.exp(-(a + b * np.log(np.asarray(mu, dtype=float)))))
+
+
+def fit_calibration(y, mu, lines=CAL_LINES) -> dict:
+    """{line: (a, b)} - P(y > line) as a function of ln mu, per line."""
+    return {line: logit_fit(np.log(np.asarray(mu, dtype=float)), np.asarray(y) > line)
+            for line in lines}
+
+
+def cal_losses(y, mu, cal: dict) -> tuple[np.ndarray, np.ndarray]:
+    """Per (row, line) Bernoulli log loss of P(over) and the over outcome,
+    lines stacked: -> (loss[n * lines], over[n * lines])."""
+    loss, over = [], []
+    for line, ab in cal.items():
+        p = np.clip(logit_p(mu, ab), 1e-9, 1 - 1e-9)
+        o = (np.asarray(y) > line).astype(float)
+        loss.append(-(o * np.log(p) + (1 - o) * np.log(1 - p)))
+        over.append(o)
+    return np.concatenate(loss), np.concatenate(over)
+
+
+def cal_calibration(y, mu, cal: dict, bands: int = 5) -> pd.DataFrame:
+    p = np.concatenate([logit_p(mu, ab) for ab in cal.values()])
+    hit = np.concatenate([(np.asarray(y) > line).astype(float) for line in cal])
+    order = np.argsort(p, kind="stable")
+    return pd.DataFrame([{"n": int(len(part)), "predicted": float(p[part].mean()),
+                          "observed": float(hit[part].mean())}
+                         for part in np.array_split(order, bands)])
+
+
 # ------------------------------------------------------------ evaluation
 
 def boot_counts(days: np.ndarray, n_boot: int = N_BOOT, seed: int = SEED):

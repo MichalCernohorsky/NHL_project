@@ -195,3 +195,50 @@ def test_fit_nu_recovers_under_dispersion():
     assert abs(tm.fit_nu(rng.poisson(mu), mu) - 1.0) < 0.06
     cal = tm.calibration(y, mu, nu, [3.5, 4.5], p_over=tm.cmp_p_over)
     assert (cal["predicted"] - cal["observed"]).abs().max() < 0.03
+
+
+# ------------------------------------------- calibration (amendment T-4)
+
+def test_logit_fit_recovers_known_parameters():
+    rng = np.random.default_rng(8)
+    x = rng.normal(1.2, 0.15, 20000)
+    p = 1 / (1 + np.exp(-(-3.0 + 2.4 * x)))
+    t = rng.random(20000) < p
+    a, b = tm.logit_fit(x, t)
+    assert a == pytest.approx(-3.0, abs=0.3) and b == pytest.approx(2.4, abs=0.25)
+    assert tm.logit_p(np.exp(1.2), (a, b)) == pytest.approx(1 / (1 + np.exp(-(a + b * 1.2))))
+
+
+def test_calibration_fixes_a_biased_distribution():
+    rng = np.random.default_rng(9)
+    mu = rng.uniform(2.6, 4.2, 8000)
+    y = rng.binomial(18, mu / 18)                           # narrower than Poisson
+    cal = tm.fit_calibration(y, mu)
+    assert set(cal) == {3.5, 4.5}
+    for line in tm.CAL_LINES:
+        assert tm.logit_p(mu, cal[line]).mean() == pytest.approx((y > line).mean(), abs=0.01)
+    loss, over = tm.cal_losses(y, mu, cal)
+    assert loss.shape == over.shape == (16000,)
+    assert over.mean() == pytest.approx(((y > 3.5).mean() + (y > 4.5).mean()) / 2)
+    # a calibrated model loses less than the Poisson-based P(over) with the same mu
+    pois = {line: (0.0, 0.0) for line in tm.CAL_LINES}      # placeholder, compared below
+    p_pois = np.concatenate([tm.ns.p_over(mu, line, 5000.0) for line in tm.CAL_LINES])
+    loss_pois = -(over * np.log(p_pois) + (1 - over) * np.log(1 - p_pois))
+    assert loss.mean() < loss_pois.mean()
+    cal_tab = tm.cal_calibration(y, mu, cal)
+    assert cal_tab["n"].sum() == 16000 and (cal_tab["predicted"] - cal_tab["observed"]).abs().max() < 0.03
+
+
+def test_t1_on_bernoulli_losses_uses_the_same_bootstrap():
+    rng = np.random.default_rng(10)
+    n = 3000
+    mu = rng.uniform(2.6, 4.2, n)
+    y = rng.poisson(mu)
+    days = np.repeat(np.arange(150), 20).astype(str)
+    cal = tm.fit_calibration(y, mu)
+    flat = np.full(n, mu.mean())
+    base = {"z0": tm.fit_calibration(y, flat), "z1": tm.fit_calibration(y, flat)}
+    day_idx, counts = tm.boot_counts(np.tile(days, len(tm.CAL_LINES)), n_boot=2000)
+    loss, _ = tm.cal_losses(y, mu, cal)
+    res = tm.t1_losses(loss, {k: tm.cal_losses(y, flat, base[k])[0] for k in base}, day_idx, counts)
+    assert res["pass"] and res["z0"]["gain"] > 0

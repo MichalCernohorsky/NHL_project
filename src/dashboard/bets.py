@@ -121,6 +121,21 @@ def active_bets() -> list[dict]:
 
 
 TEAM_MARKETS = ("S-T", "T-T")
+# Team penalties before 1 November are paused (docs/team_markets_plan.md,
+# amendment T-6): penalties run higher at the start of a season than the
+# model's rolling league level, so its October "under" is overstated by
+# 8.4 p.b. on the training seasons. From November it is within ~1 p.b.
+PAUSE_TT_UNTIL_MONTH = 11
+PAUSE_TT_REASON = ("Tresty týmu se do 31. 10. netipují: na začátku sezóny se píská víc, než model "
+                   "čeká (dodatek T-6 plánu). Tikety na tresty od 1. 11.")
+
+
+def paused(market: str, game_date: str | None) -> str | None:
+    """Why no ticket may be written on this market for a game of this date."""
+    if market != "T-T" or not game_date:
+        return None
+    month = int(str(game_date)[5:7])
+    return PAUSE_TT_REASON if 8 <= month < PAUSE_TT_UNTIL_MONTH else None
 
 
 def player_bets() -> list[dict]:
@@ -138,6 +153,9 @@ def save_team_bet(pred: dict, line: float, price: float, stake: float, book: str
     """A ticket on a team market; paper = no money (plan section 6)."""
     if pred.get("market") not in TEAM_MARKETS or side not in ("over", "under"):
         raise ValueError("neznamy trh nebo strana")
+    why = paused(pred["market"], pred.get("game_date"))
+    if why:
+        raise ValueError(why)
     if started(pred.get("start_time_utc"), now):
         raise Locked("zápas už začal - tiket se zpětně nezapisuje")
     if price <= 1.0 or stake <= 0:

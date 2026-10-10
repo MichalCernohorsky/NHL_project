@@ -11,7 +11,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~20:00 CZ |
 | pá 2. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~21:30 CZ |
 | ne 4. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | neověřováno | neověřováno | ~13:05–13:20 CZ |
-| so 10. 10. | 14 | 2 z 5 vylosovaných (PHI@BOS, VAN@NJD) — zbývají EDM@SJS, MIN@FLA, CBJ@STL | 6, 6 | neověřováno | neověřováno | ~15:55–16:05 CZ |
+| so 10. 10. | 14 | 4 z 5 vylosovaných (PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA) + 2 navíc (UTA@BUF, TOR@COL); z vylosovaných chybí CBJ@STL | 6, 6, 6, 6, 6, 6 | neověřováno | neověřováno | ~15:55–16:10 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -95,8 +95,32 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | 10. 10. | VAN@NJD | Boeser Brock | 1.5 | 1.60 | 2.16 | 8.80 |
 | 10. 10. | VAN@NJD | Hronek Filip | 1.5 | 1.90 | 1.78 | 8.81 |
 | 10. 10. | VAN@NJD | Pettersson Elias (1998) | 1.5 | 1.75 | 1.94 | 8.69 |
+| 10. 10. | EDM@SJS | Cagnoni Luca | 1.5 | 1.98 | 1.72 | 8.64 |
+| 10. 10. | EDM@SJS | Smith Will | 2.5 | 2.26 | 1.55 | 8.76 |
+| 10. 10. | EDM@SJS | Toffoli Tyler | 1.5 | 1.63 | 2.11 | 8.74 |
+| 10. 10. | EDM@SJS | Bouchard Evan | 2.5 | 1.65 | 2.08 | 8.68 |
+| 10. 10. | EDM@SJS | Draisaitl Leon | 2.5 | 1.55 | 2.26 | 8.76 |
+| 10. 10. | EDM@SJS | McDavid Connor | 3.5 | 2.08 | 1.65 | 8.68 |
+| 10. 10. | MIN@FLA | Jones Seth | 1.5 | 1.78 | 1.90 | 8.81 |
+| 10. 10. | MIN@FLA | Reinhart Sam | 2.5 | 1.90 | 1.78 | 8.81 |
+| 10. 10. | MIN@FLA | Tkachuk Matthew | 2.5 | 1.84 | 1.84 | 8.70 |
+| 10. 10. | MIN@FLA | Boldy Matthew | 3.5 | 2.11 | 1.63 | 8.74 |
+| 10. 10. | MIN@FLA | Hughes Quinn | 2.5 | 1.94 | 1.75 | 8.69 |
+| 10. 10. | MIN@FLA | Kaprizov Kirill | 2.5 | 1.52 | 2.33 | 8.71 |
+| 10. 10. | UTA@BUF | Dahlin Rasmus | 2.5 | 1.94 | 1.75 | 8.69 |
+| 10. 10. | UTA@BUF | Quinn Jack | 2.5 | 1.98 | 1.72 | 8.64 |
+| 10. 10. | UTA@BUF | Thompson Tage | 3.5 | 2.00 | 1.70 | 8.82 |
+| 10. 10. | UTA@BUF | Keller Clayton | 2.5 | 1.94 | 1.75 | 8.69 |
+| 10. 10. | UTA@BUF | Sergachev Mikhail | 1.5 | 1.52 | 2.33 | 8.71 |
+| 10. 10. | UTA@BUF | Schmaltz Nick | 2.5 | 1.98 | 1.72 | 8.64 |
+| 10. 10. | TOR@COL | MacKinnon Nathan | 4.5 | 2.20 | 1.58 | 8.75 |
+| 10. 10. | TOR@COL | Makar Cale | 2.5 | 1.84 | 1.84 | 8.70 |
+| 10. 10. | TOR@COL | Nečas Martin | 2.5 | 1.68 | 2.03 | 8.78 |
+| 10. 10. | TOR@COL | Matthews Auston | 3.5 | 2.11 | 1.63 | 8.74 |
+| 10. 10. | TOR@COL | Nylander William | 2.5 | 2.08 | 1.65 | 8.68 |
+| 10. 10. | TOR@COL | Raddysh Darren | 2.5 | 2.11 | 1.63 | 8.74 |
 
-Průběžně (78 dvojic, 4 dny): medián marže **8.75 %**, rozsah
+Průběžně (102 dvojic, 4 dny): medián marže **8.74 %**, rozsah
 8.64–8.82 %. Kurzy jsou ze 4 herních dnů (29. 9., 2. 10., 4. 10., 10. 10.); *m* pro D1
 se do plánu zapíše spolu s počtem hráčů pro D2, až bude K1 celé (3 dny s kontrolou do 18:00).
 
@@ -127,17 +151,23 @@ součtu 49.5–58.5, trestů 5.5–7.5 i 6.5–8.5, tým s lajnou trestů 4.5 (F
 vyvrátilo.) U jména „Pettersson Elias (1998)" Tipsport rozlišuje dva
 stejnojmenné hráče Vancouveru rokem narození.
 
-Týmové trhy 10. 10. (~15:55 CZ), PHI@BOS, kurzy méně / více: střely BOS 26.5: 1,78 / 1,94 ·
-PHI 25.5: 1,84 / 1,87 · celkem 49.5–54.5: 2,36 / 1,52 · 2,11 / 1,66 · 1,89 / 1,82 · 1,72 / 2,01 ·
-1,58 / 2,25 · 1,46 / 2,51 · kdo víc střel 1,82 · 12,70 · 2,09 · tresty celkem 6.5: 2,12 / 1,65 ·
-7.5: 1,68 / 2,07 · 8.5: 1,43 / 2,62 · BOS 3.5: 1,80 / 1,91 · PHI 3.5: 1,93 / 1,78 · kdo víc trestů
-2,57 · 4,05 · 2,15 · každý tým 3+: 1,61 / 2,19 · 4+: 2,54 / 1,45.
+Týmové trhy 10. 10. (~15:55–16:10 CZ; kurzy méně / více; podklad pro `docs/team_markets_plan.md`):
 
-Týmové trhy 10. 10. (~16:05 CZ), VAN@NJD, kurzy méně / více: střely NJD 30.5: 1,91 / 1,80 ·
-VAN 24.5: 1,84 / 1,87 · celkem 52.5–57.5: 2,49 / 1,47 · 2,23 / 1,59 · 2,00 / 1,73 · 1,81 / 1,90 ·
-1,66 / 2,10 · 1,53 / 2,34 · kdo víc střel 1,26 · 16,00 · 3,95 · tresty celkem 5.5: 2,57 / 1,44 ·
-6.5: 1,97 / 1,75 · 7.5: 1,58 / 2,24 · NJD 3.5: 1,76 / 1,96 · VAN 3.5: 1,76 / 1,96 · kdo víc trestů
-2,35 · 4,00 · 2,35 · každý tým 3+: 1,70 / 2,05 · 4+: 2,75 / 1,39.
+| trh | PHI@BOS | VAN@NJD | EDM@SJS | MIN@FLA | UTA@BUF | TOR@COL |
+|---|---|---|---|---|---|---|
+| střely týmu (domácí) | BOS 26.5: 1,78 / 1,94 | NJD 30.5: 1,91 / 1,80 | SJS 25.5: 1,78 / 1,94 | FLA 27.5: 1,79 / 1,92 | BUF 25.5: 1,91 / 1,80 | COL 32.5: 1,84 / 1,87 |
+| střely týmu (hosté) | PHI 25.5: 1,84 / 1,87 | VAN 24.5: 1,84 / 1,87 | EDM 28.5: 1,90 / 1,81 | MIN 26.5: 1,78 / 1,93 | UTA 27.5: 1,91 / 1,80 | TOR 25.5: 1,86 / 1,85 |
+| střely v zápasu: lajny | 49.5–54.5 | 52.5–57.5 | 51.5–56.5 | 51.5–56.5 | 51.5–56.5 | 55.5–60.5 |
+| střely v zápasu: kurzy po lajnách | 2,36 / 1,52 · 2,11 / 1,66 · 1,89 / 1,82 · 1,72 / 2,01 · 1,58 / 2,25 · 1,46 / 2,51 | 2,49 / 1,47 · 2,23 / 1,59 · 2,00 / 1,73 · 1,81 / 1,90 · 1,66 / 2,10 · 1,53 / 2,34 | 2,41 / 1,50 · 2,16 / 1,63 · 1,94 / 1,78 · 1,76 / 1,96 · 1,61 / 2,18 · 1,49 / 2,43 | 2,31 / 1,55 · 2,06 / 1,69 · 1,86 / 1,85 · 1,70 / 2,05 · 1,56 / 2,29 · 1,45 / 2,55 | 2,31 / 1,55 · 2,06 / 1,69 · 1,86 / 1,85 · 1,69 / 2,05 · 1,56 / 2,29 · 1,45 / 2,55 | 2,41 / 1,50 · 2,17 / 1,62 · 1,96 / 1,76 · 1,78 / 1,94 · 1,64 / 2,14 · 1,52 / 2,38 |
+| kdo víc střel (1 / X / 2) | 1,82 · 12,70 · 2,09 | 1,26 · 16,00 · 3,95 | 2,79 · 13,70 · 1,47 | 1,77 · 12,90 · 2,15 | 2,37 · 13,10 · 1,64 | 1,23 · 16,90 · 4,24 |
+| dvouminutové tresty celkem | 6.5: 2,12 / 1,65 · 7.5: 1,68 / 2,07 · 8.5: 1,43 / 2,62 | 5.5: 2,57 / 1,44 · 6.5: 1,97 / 1,75 · 7.5: 1,58 / 2,24 | 5.5: 2,51 / 1,46 · 6.5: 1,94 / 1,78 · 7.5: 1,56 / 2,29 | 6.5: 2,27 / 1,57 · 7.5: 1,78 / 1,94 · 8.5: 1,50 / 2,43 | 6.5: 2,07 / 1,68 · 7.5: 1,65 / 2,12 · 8.5: 1,41 / 2,69 | 5.5: 2,57 / 1,44 · 6.5: 1,97 / 1,75 · 7.5: 1,58 / 2,24 |
+| tresty týmu (domácí) | BOS 3.5: 1,80 / 1,91 | NJD 3.5: 1,76 / 1,96 | SJS 3.5: 1,68 / 2,07 | FLA 3.5: 2,02 / 1,72 | BUF 3.5: 1,69 / 2,06 | COL 3.5: 1,62 / 2,17 |
+| tresty týmu (hosté) | PHI 3.5: 1,93 / 1,78 | VAN 3.5: 1,76 / 1,96 | EDM 3.5: 1,79 / 1,93 | MIN 3.5: 1,94 / 1,77 | UTA 3.5: 2,00 / 1,73 | TOR 3.5: 1,92 / 1,80 |
+| kdo víc trestů (1 / X / 2) | 2,57 · 4,05 · 2,15 | 2,35 · 4,00 · 2,35 | 2,56 · 4,00 · 2,18 | 2,25 · 4,07 · 2,45 | 2,98 · 4,13 · 1,90 | 2,99 · 4,11 · 1,90 |
+| každý tým 3+ trestů (ano / ne) | 1,61 / 2,19 | 1,70 / 2,05 | 1,73 / 2,00 | 1,53 / 2,34 | 1,65 / 2,12 | 1,71 / 2,02 |
+| každý tým 4+ trestů (ano / ne) | 2,54 / 1,45 | 2,75 / 1,39 | 2,83 / 1,37 | 2,36 / 1,52 | 2,63 / 1,42 | 2,79 / 1,38 |
+
+Marže dvoucestných týmových trhů 10. 10.: 7,6–8,4 % (medián 7,8 %).
 
 Vzor výběru hráčů (pozorování, 29. 9.): Tipsport vypisuje **3 hráče za tým**,
 typicky 2 útočníky s nejvyšší lajnou a 1 obránce (FLA: Tkachuk, Reinhart,
@@ -164,5 +194,7 @@ Od 10. 10. platí dodatek D7 plánu: den se započte, když je do 18:00 CZ
 zkontrolováno 5 vylosovaných zápasů dne (při ≤ 5 zápasech všechny) a trh
 je u všech. Los 10. 10. (14 zápasů): PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA,
 CBJ@STL. Los 11. 10. (3 zápasy): všechny — SEA@WSH, VAN@NYR, CAR@PHI.
-10. 10. zkontrolovány PHI@BOS (~15:55 CZ) a VAN@NJD (~16:05 CZ), oba po
-6 hráčích (screenshoty); zbývají EDM@SJS, MIN@FLA, CBJ@STL.
+10. 10. mezi ~15:55 a ~16:10 CZ zkontrolovány (screenshoty) čtyři
+vylosované zápasy PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA a dva navíc (UTA@BUF,
+TOR@COL), všechny po 6 hráčích. **Z vylosovaných chybí CBJ@STL** — den se
+započte, až bude do 18:00 zkontrolovaný i on.

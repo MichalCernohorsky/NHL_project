@@ -370,3 +370,45 @@ nerozhodovala nic, co plán nestanoví:
 - Vykazuje se ROI v jednotkách (zisk / vklad) za kurz z tiketu, papírové
   a skutečné tikety zvlášť, bootstrap interval od 5 herních dnů; počítadlo
   k pohledům po 300 a 800 tiketech (sekce 6).
+
+### Dodatek T-6 — tikety na tresty týmu (T-T) pozastaveny (10. 10. 2026, před prvním tiketem)
+
+**Zjištění.** Při prvním porovnání s kurzy Tipsportu (10. 10., 6 zápasů)
+splnila sázka „méně než 3,5 trestu" pravidlo u 6 týmů z 12. Taková
+četnost znamená spíš chybu modelu než chybu sázkovky, a příčina je vidět
+v datech (popis tří sezón, `penalties`, 60 minut):
+
+| | říjen | listopad | prosinec–duben |
+|---|---|---|---|
+| tresty na tým a zápas 2023-24 / 2024-25 / 2025-26 | 4,10 / 3,60 / 3,70 | 3,69 / 3,29 / 3,27 | 3,0–3,4 |
+| podíl „více než 3,5" | 60 % / 47 % / 49 % | 49 % / 39 % / 39 % | 30–42 % |
+
+Na začátku sezóny se píská víc a během podzimu to klesá. Model bere
+úroveň ligy z klouzavého průměru posledních 200 zápasů, takže za tímhle
+průběhem v říjnu zaostává, a kalibrace T-4 převádí μ na celosezónní
+četnosti. Změřeno na trénovacích sezónách (lajna 3.5, „více"):
+
+| část sezóny | řádků | model | skutečnost | rozdíl |
+|---|---|---|---|---|
+| říjen | 612 | 44,7 % | 53,1 % | **−8,4 p.b.** |
+| listopad | 866 | 45,1 % | 44,2 % | +0,9 p.b. |
+| prosinec–duben | 3 770 | 37,6 % | 36,4 % | +1,2 p.b. |
+
+V říjnu tedy model nadhodnocuje „méně" o 8,4 p.b. — skoro trojnásobek
+prahu tipu. Od listopadu sedí do ~1 p.b. Kurzy Tipsportu (P „více než
+3,5" kolem 47–50 %) odpovídají říjnové skutečnosti; model ne.
+
+Kritérium T1 tohle zachytit nemohlo: měří průměr za celou sezónu.
+
+**Rozhodnutí.** Tikety na trh T-T se **nezapisují a do testu nepočítají
+u zápasů hraných před 1. listopadem** (každou sezónu). Do té doby stránka
+Týmové trhy u trestů ukazuje jen očekávání a varování, bez minimálních
+kurzů, a zápis tiketu na T-T odmítne i kód. Od 1. 11. se T-T chová podle
+dodatku T-5. Predikce T-T se ukládají celou sezónu. Před tímto dodatkem
+nebyl zapsán žádný tiket. Oprava modelu pro začátek sezóny by byla
+samostatný dodatek; zatím se nedělá.
+
+**Střely týmu (S-T) beze změny.** Stejná kontrola na trénovacích
+sezónách: odchylka modelu po měsících −1,1 až +2,1 % (říjen −0,3 %)
+a v prvních 5 zápasech sezóny je model proti ligovému průměru stejně
+dobrý jako později (zisk +0,056 proti +0,046).

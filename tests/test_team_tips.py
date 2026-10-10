@@ -145,11 +145,21 @@ def test_team_tickets_in_the_bets_store():
                            now=datetime(2026, 10, 21, tzinfo=timezone.utc))
     with pytest.raises(ValueError):
         bets.save_team_bet({**pred, "market": "S-Z"}, 50.5, 1.9, 100, "Tipsport", "over", True, now=NOW)
+    # team penalties are paused (plan amendment T-6): refused in code, not only hidden
+    assert bets.paused("T-T", DAY) and bets.paused("T-T", "2026-09-30") and not bets.paused("S-T", DAY)
+    assert not bets.paused("T-T", "2026-11-01") and not bets.paused("T-T", "2027-01-15")
+    with pytest.raises(ValueError, match="netipují"):
+        bets.save_team_bet({**pred, "market": "T-T"}, 3.5, 1.9, 100, "Tipsport", "under", True, now=NOW)
+    assert len(bets.team_bets()) == 1
+    november = {**pred, "market": "T-T", "game_date": "2026-11-03", "start_time_utc": "2026-11-03T23:00:00Z"}
+    ok = bets.save_team_bet(november, 3.5, 1.9, 100, "Tipsport", "under", True,
+                            now=datetime(2026, 11, 3, 15, 0, tzinfo=timezone.utc))
+    assert ok["market"] == "T-T" and len(bets.team_bets()) == 2
     # a player ticket stays a player ticket
     tip = {"tip_id": "x", "game_id": 2001, "player_id": 5, "side": "over",
            "start_time_utc": f"{DAY}T23:00:00Z"}
     bets.save_bet(tip, 2.5, 1.9, 50, "Tipsport", now=NOW)
-    assert len(bets.player_bets()) == 1 and len(bets.team_bets()) == 1
+    assert len(bets.player_bets()) == 1 and len(bets.team_bets()) == 2
 
 
 def test_daily_workflow_builds_team_tips_after_player_tips():

@@ -57,6 +57,8 @@ st.markdown("""
 .stub{display:inline-flex;gap:8px;padding:3px 9px;background:#e8f4ee;border:1px dashed #bfe0cf;
   border-radius:8px;font-size:11.5px;color:#1e7a46;margin:2px 4px 6px 0}
 .stub.paper{background:#f4f6f9;border-color:#d7dce3;color:#5a6572}
+.paused{background:#f4f6f9;border:1px dashed #d7dce3;border-radius:8px;padding:6px 10px;
+  font-size:12px;color:#5a6572;margin-bottom:6px}
 .note{background:#fdf3e1;border:1px solid #f3d9a6;color:#7a5410;border-radius:12px;
   padding:10px 14px;font-size:13px;margin:2px 0 12px}
 </style>
@@ -130,7 +132,7 @@ paper = done[done["paper"] == True] if not done.empty else done      # noqa: E71
 real = done[done["paper"] == False] if not done.empty else done      # noqa: E712
 st.markdown('<div class="kpis">' + "".join([
     kpi("Predikce dne", str(preds["game_id"].nunique() if not preds.empty else 0),
-        [f"týmů <b>{preds['team_id'].nunique() if not preds.empty else 0}</b>", "S-T a T-T"]),
+        [f"týmů <b>{preds['team_id'].nunique() if not preds.empty else 0}</b>", "střely týmu · tresty od 1. 11."]),
     record_card("Papírové tikety", paper, "zatím žádný vyhodnocený"),
     record_card("Skutečné tikety", real, "zatím žádný vyhodnocený"),
     kpi("Pohledy", f"{n_all} / {LOOKS[0]}" if n_all < LOOKS[0] else f"{n_all} / {LOOKS[1]}",
@@ -141,8 +143,8 @@ st.markdown(
     '<div class="note"><b>Bez ověřené hrany proti Tipsportu.</b> Modely porazily jen jednoduché '
     'základy (etapa 1); historické kurzy těchto trhů neexistují, takže o zisku rozhodne teprve '
     'tento test. <b>Tiket dává smysl jen za kurz ≥ min. kurz.</b> Doporučení plánu: do verdiktu '
-    'jen papírové tikety. Tresty: jen lajny 3,5 a 4,5; dvojitý menší = 2, střídačka se počítá, '
-    'prodloužení ne.</div>', unsafe_allow_html=True)
+    'jen papírové tikety. <b>Tresty týmu se do 31. 10. netipují</b> (na začátku sezóny se píská '
+    'víc, než model čeká); do té doby tikety jen na střely týmu.</div>', unsafe_allow_html=True)
 
 # ------------------------------------------------------------- per game
 if preds.empty:
@@ -192,8 +194,11 @@ for g in games.itertuples():
                         unsafe_allow_html=True)
             for p in tr.itertuples():
                 actual = "" if pd.isna(p.actual_60) else f" · skutečnost <b>{int(p.actual_60)}</b>"
+                why = bets.paused(p.market, p.game_date)
+                body_html = (f'<div class="paused">⏸ {html.escape(why)}</div>' if why
+                             else lines_html(p.market, p.mu))
                 st.markdown(f'<div class="mkt">{team_tips.NAMES[p.market]} · model čeká '
-                            f'<b>{cz(p.mu, 2)}</b>{actual}</div>' + lines_html(p.market, p.mu),
+                            f'<b>{cz(p.mu, 2)}</b>{actual}</div>' + body_html,
                             unsafe_allow_html=True)
                 for b in my_by_key.get((p.game_id, p.team_id, p.market), []):
                     res = {"win": "✅", "loss": "❌", "push": "push", "pending": "čeká"}[b["outcome"]]
@@ -207,7 +212,8 @@ for g in games.itertuples():
             with st.form(f"ticket_{g.game_id}"):
                 c1, c2, c3, c4 = st.columns([1.2, 1.4, 1, 1])
                 team_pick = c1.selectbox("Tým", sorted(sub["tym"].unique()), key=f"t_{g.game_id}")
-                market = c2.selectbox("Trh", list(team_tips.MARKETS), format_func=lambda m: team_tips.NAMES[m],
+                market = c2.selectbox("Trh", [m for m in team_tips.MARKETS if not bets.paused(m, day)],
+                                      format_func=lambda m: team_tips.NAMES[m],
                                       key=f"m_{g.game_id}")
                 row = sub[(sub["tym"] == team_pick) & (sub["market"] == market)]
                 mu = float(row["mu"].iloc[0]) if not row.empty else None

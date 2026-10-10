@@ -11,7 +11,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~20:00 CZ |
 | pá 2. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~21:30 CZ |
 | ne 4. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | neověřováno | neověřováno | ~13:05–13:20 CZ |
-| so 10. 10. | 14 | 1 z 5 vylosovaných (PHI@BOS) — zbývají VAN@NJD, EDM@SJS, MIN@FLA, CBJ@STL | 6 | neověřováno | neověřováno | ~15:55 CZ |
+| so 10. 10. | 14 | 2 z 5 vylosovaných (PHI@BOS, VAN@NJD) — zbývají EDM@SJS, MIN@FLA, CBJ@STL | 6, 6 | neověřováno | neověřováno | ~15:55–16:05 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -89,8 +89,14 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | 10. 10. | PHI@BOS | Drysdale Jamie | 1.5 | 2.26 | 1.55 | 8.76 |
 | 10. 10. | PHI@BOS | Konecny Travis | 1.5 | 1.58 | 2.20 | 8.75 |
 | 10. 10. | PHI@BOS | Tippett Owen | 2.5 | 2.00 | 1.70 | 8.82 |
+| 10. 10. | VAN@NJD | Hischier Nico | 2.5 | 1.94 | 1.75 | 8.69 |
+| 10. 10. | VAN@NJD | Hughes Jack | 3.5 | 1.84 | 1.84 | 8.70 |
+| 10. 10. | VAN@NJD | Hughes Luke | 2.5 | 2.03 | 1.68 | 8.78 |
+| 10. 10. | VAN@NJD | Boeser Brock | 1.5 | 1.60 | 2.16 | 8.80 |
+| 10. 10. | VAN@NJD | Hronek Filip | 1.5 | 1.90 | 1.78 | 8.81 |
+| 10. 10. | VAN@NJD | Pettersson Elias (1998) | 1.5 | 1.75 | 1.94 | 8.69 |
 
-Průběžně (72 dvojic, 4 dny): medián marže **8.75 %**, rozsah
+Průběžně (78 dvojic, 4 dny): medián marže **8.75 %**, rozsah
 8.64–8.82 %. Kurzy jsou ze 4 herních dnů (29. 9., 2. 10., 4. 10., 10. 10.); *m* pro D1
 se do plánu zapíše spolu s počtem hráčů pro D2, až bude K1 celé (3 dny s kontrolou do 18:00).
 
@@ -127,6 +133,12 @@ PHI 25.5: 1,84 / 1,87 · celkem 49.5–54.5: 2,36 / 1,52 · 2,11 / 1,66 · 1,89 
 7.5: 1,68 / 2,07 · 8.5: 1,43 / 2,62 · BOS 3.5: 1,80 / 1,91 · PHI 3.5: 1,93 / 1,78 · kdo víc trestů
 2,57 · 4,05 · 2,15 · každý tým 3+: 1,61 / 2,19 · 4+: 2,54 / 1,45.
 
+Týmové trhy 10. 10. (~16:05 CZ), VAN@NJD, kurzy méně / více: střely NJD 30.5: 1,91 / 1,80 ·
+VAN 24.5: 1,84 / 1,87 · celkem 52.5–57.5: 2,49 / 1,47 · 2,23 / 1,59 · 2,00 / 1,73 · 1,81 / 1,90 ·
+1,66 / 2,10 · 1,53 / 2,34 · kdo víc střel 1,26 · 16,00 · 3,95 · tresty celkem 5.5: 2,57 / 1,44 ·
+6.5: 1,97 / 1,75 · 7.5: 1,58 / 2,24 · NJD 3.5: 1,76 / 1,96 · VAN 3.5: 1,76 / 1,96 · kdo víc trestů
+2,35 · 4,00 · 2,35 · každý tým 3+: 1,70 / 2,05 · 4+: 2,75 / 1,39.
+
 Vzor výběru hráčů (pozorování, 29. 9.): Tipsport vypisuje **3 hráče za tým**,
 typicky 2 útočníky s nejvyšší lajnou a 1 obránce (FLA: Tkachuk, Reinhart,
 Jones; CAR: Aho, Svechnikov, Gostisbehere; MTL: Caufield, Slafkovský,
@@ -152,5 +164,5 @@ Od 10. 10. platí dodatek D7 plánu: den se započte, když je do 18:00 CZ
 zkontrolováno 5 vylosovaných zápasů dne (při ≤ 5 zápasech všechny) a trh
 je u všech. Los 10. 10. (14 zápasů): PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA,
 CBJ@STL. Los 11. 10. (3 zápasy): všechny — SEA@WSH, VAN@NYR, CAR@PHI.
-10. 10. v ~15:55 CZ zkontrolován PHI@BOS (6 hráčů, screenshot); zbývají
-čtyři vylosované.
+10. 10. zkontrolovány PHI@BOS (~15:55 CZ) a VAN@NJD (~16:05 CZ), oba po
+6 hráčích (screenshoty); zbývají EDM@SJS, MIN@FLA, CBJ@STL.

@@ -452,6 +452,30 @@ verdiktu fáze 0.
 hráče s ≥ 10 zápasy v sezóně. Pravidlo 6.4, konstanty modelu, zamrazení
 před etapou A — beze změny.
 
+### D7 — K1 se ověřuje na vylosovaných zápasech (10. 10. 2026, na žádost uživatele, před schválením a před nákupem)
+
+**Proč.** K1 žádá trh u ≥ 75 % zápasů dne ve ≥ 3 dnech. V den se 14 zápasy
+to znamená ručně projít 11 zápasů. Dosavadní kontroly přitom vyšly
+pokaždé stejně: 29. 9., 2. 10. a 4. 10. všech 15 zápasů, 10. 10. první
+zkontrolovaný — **16 zápasů z 16, vždy 6 hráčů**. Kdyby Tipsport trh
+vypisoval jen u 75 % zápasů, vyšlo by 16 z 16 v 1 % případů.
+
+**Změna (jen způsob ověření, ne práh).** Den se do K1 započte, když
+uživatel **do 18:00 CZ** zkontroluje **5 zápasů dne vylosovaných předem**
+(má-li den nejvýš 5 zápasů, všechny) a trh je vypsaný u všech z nich,
+v průměru ≥ 4 hráči na zápas. Los: zápasy dne seřazené podle `game_id`,
+`numpy.random.default_rng(RRRRMMDD).choice(n, 5, replace=False)` — pevné
+pravidlo, aby výběr nezávisel na tom, které zápasy jsou zrovna po ruce
+(pozdní zápasy mohou naskočit později). Stačí sdělení uživatele (počet
+hráčů u každého z nich); screenshot není nutný a do protokolu se to tak
+zapíše. Když u některého vylosovaného zápasu trh chybí, den se nepočítá
+a platí původní pravidlo (≥ 75 % všech zápasů dne).
+
+**Co D7 nemění.** Prahy K1 (75 %, ≥ 4 hráči, 18:00, 3 dny), ostatní
+kritéria K2–K5, vzorek, rozpočet, model, práh hrany. K1 je kontrola
+proveditelnosti („dá se to u Tipsportu vsadit?"), ne ziskovosti; žádný
+výsledek o zisku se tím neovlivní.
+
 ### Zamrazení naivního modelu střel (2. 10. 2026, před nákupem etapy A)
 
 `models/naive_sog.json`, **SHA-256 `87b23226a866a86c82b42086d6a691a7d3da56c0e73e7e28852485f0d9fb08c2`**.

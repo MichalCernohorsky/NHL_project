@@ -11,6 +11,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | út 29. 9. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~20:00 CZ |
 | pá 2. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~21:30 CZ |
 | ne 4. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | neověřováno | neověřováno | ~13:05–13:20 CZ |
+| so 10. 10. | 14 | 1 z 5 vylosovaných (PHI@BOS) — zbývají VAN@NJD, EDM@SJS, MIN@FLA, CBJ@STL | 6 | neověřováno | neověřováno | ~15:55 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -82,9 +83,15 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | 4. 10. | VGK@VAN | Eichel Jack | 3.5 | 2.03 | 1.68 | 8.78 |
 | 4. 10. | VGK@VAN | Marner Mitchell | 1.5 | 1.55 | 2.26 | 8.76 |
 | 4. 10. | VGK@VAN | Theodore Shea | 1.5 | 1.68 | 2.03 | 8.78 |
+| 10. 10. | PHI@BOS | Lindholm Hampus | 1.5 | 2.11 | 1.63 | 8.74 |
+| 10. 10. | PHI@BOS | Pastrňák David | 3.5 | 2.00 | 1.70 | 8.82 |
+| 10. 10. | PHI@BOS | Zacha Pavel | 1.5 | 1.68 | 2.03 | 8.78 |
+| 10. 10. | PHI@BOS | Drysdale Jamie | 1.5 | 2.26 | 1.55 | 8.76 |
+| 10. 10. | PHI@BOS | Konecny Travis | 1.5 | 1.58 | 2.20 | 8.75 |
+| 10. 10. | PHI@BOS | Tippett Owen | 2.5 | 2.00 | 1.70 | 8.82 |
 
-Průběžně (66 dvojic, 3 dny): medián marže **8.74 %**, rozsah
-8.64–8.82 %. Kurzy jsou ze 3 herních dnů (29. 9., 2. 10., 4. 10.); *m* pro D1
+Průběžně (72 dvojic, 4 dny): medián marže **8.75 %**, rozsah
+8.64–8.82 %. Kurzy jsou ze 4 herních dnů (29. 9., 2. 10., 4. 10., 10. 10.); *m* pro D1
 se do plánu zapíše spolu s počtem hráčů pro D2, až bude K1 celé (3 dny s kontrolou do 18:00).
 
 Týmové střely na branku (jen kontext, nesází se): FLA@CAR 1,88/1,84 a
@@ -114,6 +121,12 @@ součtu 49.5–58.5, trestů 5.5–7.5 i 6.5–8.5, tým s lajnou trestů 4.5 (F
 vyvrátilo.) U jména „Pettersson Elias (1998)" Tipsport rozlišuje dva
 stejnojmenné hráče Vancouveru rokem narození.
 
+Týmové trhy 10. 10. (~15:55 CZ), PHI@BOS, kurzy méně / více: střely BOS 26.5: 1,78 / 1,94 ·
+PHI 25.5: 1,84 / 1,87 · celkem 49.5–54.5: 2,36 / 1,52 · 2,11 / 1,66 · 1,89 / 1,82 · 1,72 / 2,01 ·
+1,58 / 2,25 · 1,46 / 2,51 · kdo víc střel 1,82 · 12,70 · 2,09 · tresty celkem 6.5: 2,12 / 1,65 ·
+7.5: 1,68 / 2,07 · 8.5: 1,43 / 2,62 · BOS 3.5: 1,80 / 1,91 · PHI 3.5: 1,93 / 1,78 · kdo víc trestů
+2,57 · 4,05 · 2,15 · každý tým 3+: 1,61 / 2,19 · 4+: 2,54 / 1,45.
+
 Vzor výběru hráčů (pozorování, 29. 9.): Tipsport vypisuje **3 hráče za tým**,
 typicky 2 útočníky s nejvyšší lajnou a 1 obránce (FLA: Tkachuk, Reinhart,
 Jones; CAR: Aho, Svechnikov, Gostisbehere; MTL: Caufield, Slafkovský,
@@ -131,7 +144,13 @@ až po potvrzení brankáře). Tipsport: zásahy ani bloky ve 2 dnech nevidět (
 
 **Podmínka „vypsaný nejpozději v 18:00 CZ" (K1):** kontroly 29. 9. (~20:00)
 a 2. 10. (~21:30) proběhly až po 18:00 — pokrytí a počet hráčů z nich platí,
-čas ne. 3. 10. kontrola neproběhla. **4. 10. v ~13:05–13:20 CZ** byly střely
-hráčů vypsané u všech 5 zápasů dne, po 6 hráčích — **první započtený den
-K1 (1 ze 3)**. Zbývají dva dny s kontrolou do 18:00 a aspoň 75 % zápasů
-dne (5. a 6. 10.).
+čas ne. **4. 10. v ~13:05–13:20 CZ** byly střely hráčů vypsané u všech
+5 zápasů dne, po 6 hráčích — **první započtený den K1 (1 ze 3)**.
+5.–9. 10. kontrola neproběhla.
+
+Od 10. 10. platí dodatek D7 plánu: den se započte, když je do 18:00 CZ
+zkontrolováno 5 vylosovaných zápasů dne (při ≤ 5 zápasech všechny) a trh
+je u všech. Los 10. 10. (14 zápasů): PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA,
+CBJ@STL. Los 11. 10. (3 zápasy): všechny — SEA@WSH, VAN@NYR, CAR@PHI.
+10. 10. v ~15:55 CZ zkontrolován PHI@BOS (6 hráčů, screenshot); zbývají
+čtyři vylosované.

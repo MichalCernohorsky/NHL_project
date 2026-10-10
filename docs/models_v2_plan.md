@@ -224,3 +224,11 @@ aspoň 3 knih), před jakýmkoli pohledem na blok B na sezóně 2025-26. Soubor
 
 Zisk věrohodnosti v tréninku proti bloku A: střely +16.8, tresty
 +1.0 (v tréninku — o ničem nerozhoduje).
+
+**Zamrazení bloku B hráčského modelu (10. 10. 2026).** Odhad jen na 2023-24
++ 2024-25 nad pevným blokem A (77882 z 77910 řádků má kurzy), před
+jakýmkoli pohledem na blok B na vzorku s kurzy. Soubor
+`models/player_v2b.json`, **SHA-256
+`1957f3541bd1fe4ed66370e4149edad8155e04735f87f9cbcf1aa822a06795a5`**. Hlídá ho `tests/test_models_v2_plan.py`. Koeficienty: úroveň
+-0.0011, pravděpodobnost výhry +0.1500, čekaný počet gólů -0.0025, k =
+18.01; zisk věrohodnosti v tréninku proti bloku A +18.5.

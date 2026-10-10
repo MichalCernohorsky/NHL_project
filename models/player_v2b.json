@@ -1,0 +1,35 @@
+{
+ "builds_on": {
+  "naive_team.json": "0ffa901a3917c35f511e8db597376e7479cfebd6859ece90f6fc692bdf97ef6d",
+  "player_v2.json": "eb44ce13bb8218c181885db05bfe134e5e5dd27befea28a856725f9805e32c29"
+ },
+ "coef": {
+  "S0": -0.001133673622132131,
+  "S1": 0.14998908431283572,
+  "S2": -0.0025457585021650647
+ },
+ "columns": [
+  "S0",
+  "S1",
+  "S2"
+ ],
+ "fit_rows": 77910,
+ "fitted_at": "2026-10-10T21:01:19+00:00",
+ "git_commit": "499e49666b02f8b9ba1683c8c95ea563449539fa",
+ "goals_mean_train": 6.2668180803115865,
+ "loglik": -121855.89715549209,
+ "loglik_a": -121874.41678113092,
+ "min_books": 3,
+ "model": "player_v2b",
+ "nb_k": 18.012794479954707,
+ "ot_ratio": {
+  "D": 0.01083446939800531,
+  "F": 0.013697632721414724
+ },
+ "rows_with_lines": 77882,
+ "spec": "docs/models_v2_plan.md 4; docs/models_v2_notes.md N-2",
+ "trained_on": [
+  "2023-24",
+  "2024-25"
+ ]
+}

@@ -65,6 +65,9 @@ odds:
   # only - saves and blocks have not appeared at Tipsport; there is no team
   # shots market in The Odds API).
   hist_daily_markets: [player_shots_on_goal]
+  # Which archive snapshots are bought the day after. Since 10. 10. 2026 closing
+  # only (user's decision, docs/topdown_plan.md TD-2): the morning one is not needed.
+  hist_daily_kinds: [closing]
   hist_daily_days: 7        # look-back window: a missed run catches up
   hist_daily_budget: 1000   # max credits per run
   # Live tips (docs/tips_plan.md): one live snapshot of today's games per

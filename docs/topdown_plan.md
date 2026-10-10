@@ -1,9 +1,10 @@
 # Trh jako model — sázka, když Tipsport platí víc než férový kurz amerického trhu
 
-Stav: **NÁVRH ke schválení** (10. 10. 2026). Sepsáno po verdiktu fáze 0
+Stav: **SCHVÁLENO uživatelem 10. 10. 2026.** Sepsáno po verdiktu fáze 0
 (`docs/phase0_report.md`) a po jednom průzkumném pohledu popsaném v sekci 1;
-žádný další výsledek tohoto postupu nebyl spočítán. Po schválení se
-zamrazí otiskem SHA-256; změny jen jako datované dodatky.
+žádný další výsledek tohoto postupu nebyl v době schválení spočítán. Znění
+je zamrazené otiskem SHA-256 (oddíl na konci); změny jen jako datované
+dodatky.
 
 ## 1. Proč, a odkud se ta myšlenka vzala
 
@@ -112,3 +113,32 @@ uživatelovo.
 - Žádná změna prahu 3 %, počtu knih ani stáří snímku podle výsledků.
 - Žádné stahování kurzů z webu Tipsportu; kurzy zapisuje uživatel.
 - Střely hráčů podle naivního modelu se dál nesází (verdikt fáze 0).
+<!-- konec schváleného znění -->
+
+## Schválení a dodatky
+
+Schváleno uživatelem 10. 10. 2026 („schvaluji"). Otisk schváleného znění
+(vše nad značkou konce schváleného znění): **SHA-256 `10aec8625498de102b661270d2a2600c63c81703acba5174c6ea3fef0735c741`**.
+Hlídá ho `tests/test_topdown_plan.py`. Dodatky se připisují sem, s datem.
+
+### Dodatek TD-1 — simulace v etapě 1 (10. 10. 2026, před kódem a před výpočtem)
+
+Sekce 3 nazývá „simulací nulového efektu" simulaci, v níž má pravdu
+konsensus všech knih. To je nepřesné pojmenování: taková simulace neukazuje
+„žádný efekt", ale naopak **co čekat, když princip platí beze zbytku**
+(horní mez). Skutečný nulový stav je opačný: **pravdu má odchýlená kniha**.
+Report proto uvede obě simulace (po 2 000):
+
+- *princip platí:* pravda = konsensus všech knih → jaké ROI by pravidlo mělo;
+- *nulový efekt:* pravda = kurz knihy, u které se sází (po odečtení její
+  marže) → jak často by kritérium P1 (ROI > 0) prošlo náhodou.
+
+V obou se pro každého (zápas, hráč) losuje jeden počet střel z negativně
+binomického rozdělení (rozptyl ze zamrazeného modelu), aby sázky na téhož
+hráče u více knih a lajn měly společný výsledek. Kritérium P1 se nemění.
+
+### Dodatek TD-2 — denní nákup z archivu: jen closing (10. 10. 2026, rozhodnutí uživatele)
+
+Od 10. 10. 2026 se pro živou sezónu z archivu kupuje jen closingový snímek
+(10 kreditů na zápas); ranní archivní snímek se vypíná (`odds.hist_daily_kinds`).
+Closing slouží diagnostice posunu trhu v etapě 2.

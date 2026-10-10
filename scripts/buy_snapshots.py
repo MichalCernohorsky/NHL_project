@@ -46,7 +46,7 @@ def window(until: str, days: int) -> tuple[str, str]:
     return (end - timedelta(days=days - 1)).isoformat(), end.isoformat()
 
 
-def todo(conn, season: str, start: str, end: str, markets=None) -> list[tuple]:
+def todo(conn, season: str, start: str, end: str, markets=None, kinds=KINDS) -> list[tuple]:
     """(game row, kind) pairs still to buy, oldest first. A game counts as
     covered for a kind when it already has rows of one of `markets`."""
     games = conn.execute(
@@ -61,7 +61,7 @@ def todo(conn, season: str, start: str, end: str, markets=None) -> list[tuple]:
              AND EXISTS (SELECT 1 FROM team_game_logs t WHERE t.game_id = g.game_id)
            ORDER BY g.game_date, g.start_time_utc""", (season, start, end)).fetchall()
     out = []
-    for kind in KINDS:
+    for kind in kinds:
         done = state_keys(conn, task(kind), statuses=("done", "missing"))
         sql = "SELECT DISTINCT game_id FROM odds WHERE snapshot_kind = ?"
         params = [kind]
@@ -107,7 +107,8 @@ def main():
     budget = args.budget or oc["hist_daily_budget"]
     conn = connect(resolve_db_path(cfg))
     markets = oc.get("hist_daily_markets") or oc["markets"]
-    items = todo(conn, season, start, end, markets)
+    kinds = tuple(k for k in KINDS if k in (oc.get("hist_daily_kinds") or KINDS))
+    items = todo(conn, season, start, end, markets, kinds)
 
     per_kind = Counter(k for _, k in items)
     days = sorted({g["game_date"] for g, _ in items})

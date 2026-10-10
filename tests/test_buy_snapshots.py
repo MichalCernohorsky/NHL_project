@@ -143,3 +143,13 @@ def test_only_the_bought_markets_count_as_covered(conn):
     sog = ["player_shots_on_goal"]
     assert _kinds(bs.todo(conn, "2026-27", "2026-09-25", "2026-10-01", sog)) == ["closing", "morning"]
     assert _kinds(bs.todo(conn, "2026-27", "2026-09-25", "2026-10-01")) == ["morning"]
+
+
+def test_only_configured_kinds_are_bought(conn):
+    """Since 10. 10. 2026 the daily purchase buys closing only (config
+    odds.hist_daily_kinds, docs/topdown_plan.md TD-2)."""
+    import yaml
+    _seed(conn)
+    assert _kinds(bs.todo(conn, "2026-27", "2026-09-25", "2026-10-01", None, ("closing",))) == ["closing"]
+    cfg = yaml.safe_load((bs.ROOT / "config" / "config.yaml").read_text())
+    assert cfg["odds"]["hist_daily_kinds"] == ["closing"]

@@ -173,3 +173,17 @@ o kolik se americký konsensus mezi snímkem a closingem posunul směrem ke
 kurzu Tipsportu. Posun blízko nule = odchylka Tipsportu není informace
 (dobře pro pravidlo); posun blízko celé odchylce = Tipsport měl pravdu.
 Při ~40 lajnách denně je odhad přesný po jednom až dvou týdnech.
+
+### Dodatek TD-4 — jak je etapa 2 postavená (10. 10. 2026, před prvním tiketem)
+
+- Férová pravděpodobnost se čte z uložených kandidátů tipů (`tips.p_consensus`,
+  medián knih na lajně, 60 minut, počet knih v `tips.books`) posledního
+  živého snímku zápasu — stránka ukazuje přesně to, co je v databázi.
+- Pravidlo hlídá kód při zápisu tiketu (`dashboard.bets.save_fair_bet`):
+  ≥ 3 knihy, snímek nejvýš 60 minut starý, kurz ≥ 1,03 / p, zámek od
+  začátku zápasu. Tiket pod minimálním kurzem se nezapíše vůbec.
+- Obnova snímku: `.github/workflows/live.yml` (`collect_odds.py live
+  --refresh`), nejvýš 3 obnovy na zápas a den, ~1 kredit na zápas.
+- Posun trhu u tiketu = férová pravděpodobnost strany v closingu (≥ 3
+  knihy, přepočet na 60 minut) minus ta při tiketu.
+

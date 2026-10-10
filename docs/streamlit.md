@@ -86,6 +86,10 @@ Kontrola, že je všechno v pořádku:
      NHL_ACTIONS_TOKEN = "sem-token"
      ```
 
+  Stejný token zapne na stránce *Férové kurzy* tlačítko **↻ Obnovit americké kurzy**
+  (nový snímek kurzů u zápasů, které ještě nezačaly; asi 1 kredit na zápas, nejvýš
+  3× denně na zápas). Bez čerstvého snímku (do 60 minut) tiket testu nejde zapsat.
+
   Token umí jen spouštět a číst běhy v repozitáři kódu. K datům, klíči
   The Odds API ani k úpravě kódu přístup nedává.
 

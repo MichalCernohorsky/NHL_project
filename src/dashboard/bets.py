@@ -138,9 +138,62 @@ def paused(market: str, game_date: str | None) -> str | None:
     return PAUSE_TT_REASON if 8 <= month < PAUSE_TT_UNTIL_MONTH else None
 
 
+FAIR = "FAIR-SOG"                 # docs/topdown_plan.md: the market as the model
+FAIR_EV_MIN = 0.03                # ticket only when price * p - 1 >= 3 %
+FAIR_MIN_BOOKS = 3                # the fair price needs at least three books
+FAIR_MAX_AGE_MIN = 60             # ... and a US snapshot no older than this
+
+
 def player_bets() -> list[dict]:
-    """Tickets on player shots (the Tipy dne / Moje sázky flow)."""
-    return [b for b in active_bets() if b.get("market") not in TEAM_MARKETS]
+    """Tickets on the naive model's tips (the Tipy dne / Moje sázky flow)."""
+    return [b for b in active_bets() if b.get("market") is None]
+
+
+def fair_bets() -> list[dict]:
+    """Tickets of the market-as-model test (docs/topdown_plan.md, stage 2)."""
+    return [b for b in active_bets() if b.get("market") == FAIR]
+
+
+def fair_min_price(p_side: float) -> float:
+    """Lowest Tipsport price that meets the rule for a side with fair
+    probability p_side."""
+    return (1.0 + FAIR_EV_MIN) / p_side
+
+
+def snapshot_age_min(snapshot_time: str, now: datetime | None = None) -> float:
+    snap = datetime.fromisoformat(str(snapshot_time).replace("Z", "+00:00"))
+    return ((now or now_utc()) - snap).total_seconds() / 60.0
+
+
+def save_fair_bet(row: dict, side: str, price: float, stake: float, book: str,
+                  paper: bool, now: datetime | None = None) -> dict:
+    """A ticket of the market-as-model test. `row` = one fair line (game,
+    player, line, p_over = US consensus for 60 minutes, books, snapshot_time).
+    The plan's rule is enforced here, not only on the page."""
+    if side not in ("over", "under"):
+        raise ValueError("neznama strana")
+    if started(row.get("start_time_utc"), now):
+        raise Locked("zápas už začal - tiket se zpětně nezapisuje")
+    if price <= 1.0 or stake <= 0:
+        raise ValueError("kurz musí být > 1 a vklad > 0")
+    if int(row["books"]) < FAIR_MIN_BOOKS:
+        raise ValueError(f"férový kurz potřebuje aspoň {FAIR_MIN_BOOKS} americké knihy")
+    age = snapshot_age_min(row["snapshot_time"], now)
+    if age > FAIR_MAX_AGE_MIN:
+        raise ValueError(f"americký snímek je starý {age:.0f} min (nejvýš {FAIR_MAX_AGE_MIN}) - obnov kurzy")
+    p_side = float(row["p_over"]) if side == "over" else 1.0 - float(row["p_over"])
+    ev = price * p_side - 1.0
+    if ev < FAIR_EV_MIN - 1e-9:
+        raise ValueError(f"kurz {price:.2f} nesplňuje pravidlo: minimální kurz je "
+                         f"{fair_min_price(p_side):.2f}")
+    return _append("bets", {
+        "type": "bet", "market": FAIR, "game_id": int(row["game_id"]),
+        "game_date": row.get("game_date"), "start_time_utc": row.get("start_time_utc"),
+        "player_id": int(row["player_id"]), "player_name": row.get("player_name"),
+        "side": side, "line": float(row["line"]), "price": float(price), "stake": float(stake),
+        "book": book, "paper": bool(paper), "p_fair": p_side, "ev": ev,
+        "min_price": fair_min_price(p_side), "books": int(row["books"]),
+        "snapshot_time": row["snapshot_time"]})
 
 
 def team_bets() -> list[dict]:

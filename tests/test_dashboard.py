@@ -57,7 +57,7 @@ def _today_with_tips(conn):
                 team_id=17, opp_id=8, market="player_shots_on_goal", mu_60=1.4, p_market=0.5,
                 books=3, best_book="dk", best_price=1.9, sim_tipsport_price=1.84,
                 entry_live=1, gp_season=0, gp_prev=80, snapshot_kind="live",
-                snapshot_time=f"{today}T14:00:00Z", built_at=f"{today}T15:00:00Z")
+                snapshot_time=f"{today}T14:00:00Z", built_at=f"{today}T15:00:00Z", p_consensus=0.5)
     factors = dict(f_rate_60=5.2, f_prior_60=6.0, f_season_shots=3.0, f_season_toi_min=33.0,
                    f_toi_l10_min=16.1, f_opp_factor=0.97, f_opp_mean=27.0, f_opp_n=2, pos_group="F")
     rows = [dict(base, **factors, tip_id="a", player_id=8477429, player_name="Andrew Copp", line=1.5,

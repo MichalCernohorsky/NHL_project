@@ -552,3 +552,55 @@ def team_bet_facts(game_id: int, team_id: int, market: str) -> dict:
     return {"zapas": f'{r["a_ab"]} @ {r["h_ab"]}', "final": bool(final),
             "actual": int(r["actual_60"]) if final else None}
 
+
+# ------------------------------------------------------------ fair prices
+
+def fair_days() -> list[str]:
+    if not _has_table("tips"):
+        return []
+    return q("""SELECT DISTINCT game_date FROM tips WHERE p_consensus IS NOT NULL
+                ORDER BY game_date DESC""")["game_date"].tolist()
+
+
+def fair_lines(game_date: str) -> pd.DataFrame:
+    """Fair probabilities of the day (docs/topdown_plan.md): for every
+    (game, player, line) of the latest live snapshot the US consensus of
+    P(over) for 60 minutes and the number of books behind it. Read from the
+    stored tip candidates, so the page shows exactly what was recorded."""
+    if not _has_table("tips"):
+        return pd.DataFrame()
+    return q("""SELECT t.game_id, t.game_date, t.start_time_utc, t.player_id, t.player_name,
+                       tm.abbreviation AS tym, t.line, t.p_consensus AS p_over, t.books,
+                       t.snapshot_time, t.snapshot_kind, h.abbreviation AS h_ab,
+                       a.abbreviation AS a_ab, g.game_state, g.home_score, g.away_score
+                FROM tips t JOIN games g USING (game_id)
+                LEFT JOIN teams tm ON tm.team_id = t.team_id
+                JOIN teams h ON h.team_id = g.home_team_id
+                JOIN teams a ON a.team_id = g.away_team_id
+                WHERE t.game_date = ? AND t.side = 'over' AND t.p_consensus IS NOT NULL
+                  AND t.snapshot_time = (SELECT MAX(x.snapshot_time) FROM tips x
+                                         WHERE x.game_id = t.game_id)
+                ORDER BY g.start_time_utc, t.game_id, tm.abbreviation, t.player_name, t.line""",
+             (game_date,))
+
+
+def closing_consensus(game_id: int, player_id: int, line: float) -> tuple[float | None, int]:
+    """(median de-vig P(over) of the closing snapshot for the full game,
+    number of books) - the diagnostic 'did the market move our way'."""
+    df = q("""SELECT o.bookmaker, o.side, MAX(o.price) AS price FROM odds o
+              WHERE o.game_id = ? AND o.player_id = ? AND o.market = 'player_shots_on_goal'
+                AND o.line = ? AND o.snapshot_kind = 'closing'
+              GROUP BY o.bookmaker, o.side""", (int(game_id), int(player_id), float(line)))
+    if df.empty:
+        return None, 0
+    w = df.pivot(index="bookmaker", columns="side", values="price").dropna()
+    if w.empty or not {"over", "under"} <= set(w.columns):
+        return None, 0
+    p = (1 / w["over"]) / (1 / w["over"] + 1 / w["under"])
+    return float(p.median()), int(len(w))
+
+
+def player_position(player_id: int) -> str | None:
+    df = q("SELECT position FROM players WHERE player_id = ?", (int(player_id),))
+    return None if df.empty else df["position"][0]
+

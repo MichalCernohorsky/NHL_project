@@ -79,6 +79,23 @@ def due_now(games, done: set[str], now: datetime, kind: str,
     return out
 
 
+MAX_REFRESH = 3      # extra live snapshots a game may get in a day (docs/topdown_plan.md 4)
+
+
+def refresh_due(conn, games, now: datetime, markets: list[str],
+                max_refresh: int = MAX_REFRESH) -> list:
+    """Games that have not started and may get one more live snapshot: the
+    first one is the daily job's, then at most `max_refresh` on demand
+    (fair prices must be fresh when a ticket is written). ~1 credit a game."""
+    marks = ",".join("?" * len(markets))
+    taken = dict(conn.execute(
+        f"""SELECT game_id, COUNT(DISTINCT snapshot_time) FROM odds
+            WHERE snapshot_kind = 'live' AND market IN ({marks}) GROUP BY game_id""",
+        list(markets)).fetchall())
+    return [g for g in games if now < parse_iso(g["start_time_utc"])
+            and taken.get(g["game_id"], 0) < 1 + max_refresh]
+
+
 def next_wakeup(games, done: set[str], now: datetime, minutes_before: int):
     """Earliest future closing moment of a game not priced yet, or None."""
     future = [closing_moment(g["start_time_utc"], minutes_before) for g in games

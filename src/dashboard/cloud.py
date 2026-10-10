@@ -165,9 +165,9 @@ def _gh(method: str, path: str, token: str, **kw):
                                      "Accept": "application/vnd.github+json"}, **kw)
 
 
-def daily_run_state(token: str) -> str | None:
-    """The status of a daily run that is waiting or running, else None."""
-    r = _gh("GET", f"/repos/{CODE_REPO}/actions/workflows/{WORKFLOW}/runs", token,
+def daily_run_state(token: str, workflow: str = WORKFLOW) -> str | None:
+    """The status of a run of the workflow that is waiting or running, else None."""
+    r = _gh("GET", f"/repos/{CODE_REPO}/actions/workflows/{workflow}/runs", token,
             params={"per_page": 5})
     r.raise_for_status()
     for run in r.json().get("workflow_runs", []):
@@ -197,3 +197,27 @@ def dispatch_daily(now: datetime | None = None) -> tuple[bool, str]:
         return True, "Denní běh spuštěn. Hotovo bývá za 2–3 minuty, pak dej Obnovit data."
     except (requests.RequestException, KeyError, ValueError) as exc:
         return False, "GitHub neodpověděl: " + str(exc).replace(token, "***TOKEN***")[:200]
+
+
+LIVE_WORKFLOW = "live.yml"
+
+
+def dispatch_live_refresh() -> tuple[bool, str]:
+    """Ask the cloud for a fresh live snapshot of the games not started
+    (docs/topdown_plan.md 4; ~1 credit a game, at most 3 a day per game)."""
+    token = dispatch_token()
+    if not token:
+        return False, "Chybí NHL_ACTIONS_TOKEN (postup: docs/streamlit.md)."
+    try:
+        if daily_run_state(token, LIVE_WORKFLOW) or daily_run_state(token, WORKFLOW):
+            return False, "Nějaký běh už běží nebo čeká. Za pár minut dej Obnovit data."
+        repo = _gh("GET", f"/repos/{CODE_REPO}", token)
+        repo.raise_for_status()
+        r = _gh("POST", f"/repos/{CODE_REPO}/actions/workflows/{LIVE_WORKFLOW}/dispatches", token,
+                json={"ref": repo.json()["default_branch"]})
+        if r.status_code != 204:
+            return False, f"GitHub běh nespustil (HTTP {r.status_code}). Zkontroluj oprávnění tokenu."
+        return True, "Obnova kurzů spuštěna. Hotovo bývá za 1–2 minuty, pak dej Obnovit data."
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        return False, "GitHub neodpověděl: " + str(exc).replace(token, "***TOKEN***")[:200]
+

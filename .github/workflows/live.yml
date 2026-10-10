@@ -1,0 +1,44 @@
+name: Obnova zivych kurzu
+
+# docs/topdown_plan.md, stage 2: fair prices must not be older than 60
+# minutes when a ticket is written, so the user can ask for a fresh live
+# snapshot of the games that have not started (dashboard button or here).
+# Manual only; ~1 credit a game, at most 3 refreshes per game and day
+# (enforced in code), stops at odds.reserve_live.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: nhl-db               # never two writers of the database at once
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NHL_DB_RELEASE_REPO: MichalCernohorsky/NHL_project-data
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - name: Stazeni databaze
+        id: down
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py down --force
+      - name: Migrace schematu
+        run: python scripts/migrate.py
+      - name: Novy zivy snimek
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: python scripts/collect_odds.py live --refresh
+      - name: Tipy a ferove kurzy z noveho snimku
+        run: python scripts/build_tips.py
+      - name: Ulozeni databaze
+        if: always() && steps.down.outcome == 'success'
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py up

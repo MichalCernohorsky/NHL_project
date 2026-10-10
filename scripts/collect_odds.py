@@ -57,6 +57,9 @@ def main():
     ap.add_argument("--repeat", action="store_true",
                     help="closing: price again games already priced (cloud: the "
                          "LAST snapshot before puck drop is the closing line)")
+    ap.add_argument("--refresh", action="store_true",
+                    help="live: one more snapshot of every game not started (max 3 a day "
+                         "per game, ~1 credit a game) - fresh fair prices, docs/topdown_plan.md")
     ap.add_argument("--changed-flag", metavar="PATH",
                     help="touch this file when any odds row was written")
     args = ap.parse_args()
@@ -92,6 +95,9 @@ def main():
             else odds_live.done_keys(conn, args.kind)
         due = odds_live.due_now(games, done, now, args.kind, minutes, window,
                                 early_min=args.early_minutes)
+        if args.kind == "live" and args.refresh:
+            due = odds_live.refresh_due(conn, games, now, oc["live_markets"])
+            print(f"obnova zivych kurzu: {len(due)} zapasu (nejvys {odds_live.MAX_REFRESH} obnovy na zapas a den)")
         if due:
             stats = odds_live.collect(conn, client, due, kind=args.kind, oc=oc, now=now,
                                       markets=oc["live_markets"] if args.kind == "live" else None)

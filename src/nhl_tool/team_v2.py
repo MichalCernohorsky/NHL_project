@@ -247,11 +247,12 @@ def fit_block_a(train: pd.DataFrame, const: dict, family: str) -> dict:
     return out
 
 
-def fit_rho(train: pd.DataFrame, const: dict, block: dict) -> dict:
-    """Block R: rho on top of the fixed block A (penalties)."""
+def fit_rho(train: pd.DataFrame, const: dict, block: dict, mu=None) -> dict:
+    """Block R: rho on top of a fixed expectation (block A by default; pass
+    mu for block B) - penalties only."""
     assert set(train["season"]) <= set(tm.TRAIN), "training frame holds other seasons"
     y = train["y"].to_numpy(dtype=float)
-    offset = np.log(predict_a(train, const, block))
+    offset = np.log(predict_a(train, const, block) if mu is None else np.asarray(mu, dtype=float))
     X = train[["R"]].to_numpy(dtype=float)
     beta, k = nb_fit(y, offset, X)
     return {"rho": float(beta[0]), "k": float(k), "shrink": REF_SHRINK,

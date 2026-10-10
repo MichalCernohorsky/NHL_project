@@ -1,7 +1,8 @@
 # Fáze 0 — plán výběru trhu NHL (CO SÁZET)
 
 **Zapsáno 28. 9. 2026, PŘED nákupem jediného historického kurzu a před
-stažením jediného řádku statistik.** Stav: **NÁVRH ke schválení**. Schválení
+stažením jediného řádku statistik.** Stav: **SCHVÁLENO uživatelem 10. 10. 2026**
+(„schvaluji, jeď"), před nákupem etapy A; otisk je na konci souboru. Schválení
 = uživatelovo „jeď" k nákupu kurzů; v tu chvíli se zapíše otisk SHA-256
 tohoto souboru a test ho zapinuje (jako A3/A4 v NBA). Po schválení se text
 nemění; případná změna je jen datovaný dodatek na konci a jeho dopad se
@@ -532,3 +533,13 @@ rychlost střelby, protože liga mezi tréninkovými sezónami střílela méně
 úroveň. Mezi 2024-25 a 2025-26 byl pokles 1,6 %, takže na validaci se
 čeká menší posun. **Neladí se** (6.2: „pevné teď, bez ladění"); posun
 k overům se projeví ve výsledku fáze 0 a v reportu se uvede.
+<!-- konec schváleného znění -->
+
+## 12. Schválení a dodatky po schválení
+
+Schváleno uživatelem 10. 10. 2026 („schvaluji, jeď"), před nákupem
+historických kurzů etapy A. Otisk schváleného znění (vše nad značkou konce
+schváleného znění, včetně dodatků D1–D8): **SHA-256 `3ee50048023b96f6c76a559aed4bcd9fb26fbdd3b0353560dd43070e7b891d88`**.
+Hlídá ho `tests/test_phase0_plan.py`. Text nad značkou se už nemění;
+případné dodatky se připisují sem, s datem, a jejich dopad se vykazuje
+zvlášť.

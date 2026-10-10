@@ -7,7 +7,9 @@ single candidate with the largest edge is the tip if edge >= 3 p.b. and the
 player passes the live entry rule. Everything else is stored too.
 
 Settlement (60 minutes, D3): a player without ice time in the game is void.
-The MODEL arm is paid at the simulated Tipsport price of D1.
+The MODEL arm is paid at the simulated Tipsport price of D1: from the
+market CONSENSUS of the tip's line and side (median de-vig over the books,
+plan 6.3), not from the book that produced the largest edge.
 """
 from __future__ import annotations
 
@@ -190,7 +192,18 @@ def candidates(lines: pd.DataFrame, pred: pd.DataFrame, model: dict, margin: flo
              .groupby(["game_id", "player_id", "line", "side"], as_index=False).first())
     best = best.merge(books, on=["game_id", "player_id", "line"]).merge(
         best_price, on=["game_id", "player_id", "line", "side"])
-    best["sim_tipsport_price"] = 1.0 / (best["p_market"] * (1 + margin))
+    # D1: the Tipsport price is simulated from the consensus of the line, not
+    # from the selected (most favourable) book
+    cons = (wide.assign(p_full=[devig_over(o, u) for o, u in zip(wide["over"], wide["under"])])
+                .groupby(["game_id", "player_id", "line"], as_index=False)
+                .agg(p_full=("p_full", "median"), group=("group", "first")))
+    cons["p_cons_over"] = [ns.market_p_60(pf, line, k, model["ot_ratio"][g])
+                           for pf, line, g in zip(cons["p_full"], cons["line"], cons["group"])]
+    best = best.merge(cons[["game_id", "player_id", "line", "p_cons_over"]],
+                      on=["game_id", "player_id", "line"])
+    best["p_consensus"] = best["p_cons_over"].where(best["side"] == "over", 1 - best["p_cons_over"])
+    best = best.drop(columns="p_cons_over")
+    best["sim_tipsport_price"] = 1.0 / (best["p_consensus"] * (1 + margin))
     best["tipsport_min_price"] = best["p_model"].map(min_price)
     top = best.sort_values("edge", ascending=False).groupby(["game_id", "player_id"]).head(1)
     best["playable"] = False
@@ -210,9 +223,9 @@ def store(conn, cand: pd.DataFrame, model_name: str, game_date: str, kind: str) 
                    player_id, player_name, team_id, opp_id, market, line, side, mu_60,
                    p_model, p_market, edge, books, best_book, best_price, tipsport_min_price,
                    sim_tipsport_price, entry_live, gp_season, gp_prev, playable,
-                   snapshot_kind, snapshot_time, built_at)
+                   snapshot_kind, snapshot_time, built_at, p_consensus)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                       ?, ?, ?, ?, ?, ?)""",
+                       ?, ?, ?, ?, ?, ?, ?)""",
             (tip_id(model_name, r.game_id, r.player_id, r.line, r.side, r.snapshot_time),
              model_name, int(r.game_id), game_date, r.start_time_utc, int(r.player_id),
              r.player_name, int(r.team_id), int(r.opp_id), MARKET, float(r.line), r.side,
@@ -222,7 +235,8 @@ def store(conn, cand: pd.DataFrame, model_name: str, game_date: str, kind: str) 
                                                       and math.isnan(r.tipsport_min_price))
              else float(r.tipsport_min_price),
              float(r.sim_tipsport_price), int(r.entry_live), int(r.gp_season),
-             int(r.gp_prev), int(r.playable), kind, r.snapshot_time, now)).rowcount
+             int(r.gp_prev), int(r.playable), kind, r.snapshot_time, now,
+             float(r.p_consensus))).rowcount
     return n
 
 
@@ -266,6 +280,49 @@ def build(conn, game_date: str, kind: str = "live", model_path: Path = MODEL_FIL
     return {"games": int(lines["game_id"].nunique()) if not lines.empty else 0,
             "candidates": int(len(cand)), "inserted": n,
             "playable": int(cand["playable"].sum()) if not cand.empty else 0, "top": top}
+
+
+def fix_sim_prices(conn, model: dict, margin: float) -> int:
+    """Tips written before 10. 10. 2026 were paid at a price simulated from
+    the selected book (migration 0010). Recompute the consensus of the tip's
+    own snapshot, keep the old price in sim_price_bestbook, and correct the
+    paper profit of the tips that won. Idempotent: only rows without
+    p_consensus are touched."""
+    todo = conn.execute(
+        """SELECT t.tip_id, t.game_id, t.player_id, t.line, t.side, t.snapshot_kind,
+                  t.snapshot_time, t.sim_tipsport_price, t.outcome, t.pos_group, p.position
+           FROM tips t LEFT JOIN players p ON p.player_id = t.player_id
+           WHERE t.p_consensus IS NULL""").fetchall()
+    k, n = model["nb_k"], 0
+    for t in todo:
+        quotes = conn.execute(
+            """SELECT o.bookmaker, o.side, o.price FROM odds o
+               WHERE o.game_id = ? AND o.player_id = ? AND o.market = ? AND o.line = ?
+                 AND o.snapshot_kind = ? AND o.snapshot_time = ?""",
+            (t["game_id"], t["player_id"], MARKET, t["line"], t["snapshot_kind"],
+             t["snapshot_time"])).fetchall()
+        by_book: dict[str, dict] = {}
+        for q in quotes:
+            by_book.setdefault(q["bookmaker"], {})[q["side"]] = max(
+                q["price"], by_book.get(q["bookmaker"], {}).get(q["side"], 0))
+        full = sorted(devig_over(b["over"], b["under"]) for b in by_book.values()
+                      if "over" in b and "under" in b)
+        if not full:
+            continue
+        mid = len(full) // 2
+        p_full = full[mid] if len(full) % 2 else (full[mid - 1] + full[mid]) / 2
+        group = t["pos_group"] or ns.pos_group(t["position"])
+        p_over = ns.market_p_60(p_full, t["line"], k, model["ot_ratio"][group])
+        p_side = p_over if t["side"] == "over" else 1 - p_over
+        price = 1.0 / (p_side * (1 + margin))
+        conn.execute(
+            """UPDATE tips SET p_consensus = ?, sim_price_bestbook = sim_tipsport_price,
+                      sim_tipsport_price = ?,
+                      profit_units = CASE WHEN outcome = 'win' THEN ? - 1.0 ELSE profit_units END
+               WHERE tip_id = ?""", (p_side, price, price, t["tip_id"]))
+        n += 1
+    conn.commit()
+    return n
 
 
 # ---------------------------------------------------------------- settle

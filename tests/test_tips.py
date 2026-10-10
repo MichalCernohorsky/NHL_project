@@ -43,7 +43,14 @@ def test_rule_picks_one_side_per_player_at_3_points():
     p_full = tips.devig_over(1.90, 1.90)
     assert c[(c.player_id == 20) & (c.side == "over")].p_market.iloc[0] < p_full
     assert top.tipsport_min_price == pytest.approx(1 / (top.p_model - 0.03))
-    assert top.sim_tipsport_price == pytest.approx(1 / (top.p_market * 1.0875))
+    # D1: the Tipsport price is simulated from the CONSENSUS of the line (median of the two
+    # books), not from the book that gave the largest edge
+    p_cons_over = ns.market_p_60((tips.devig_over(2.10, 1.75) + tips.devig_over(2.05, 1.80)) / 2,
+                                 2.5, 16.84, 0.0137)
+    assert under25.p_consensus == pytest.approx(1 - p_cons_over)
+    assert under25.sim_tipsport_price == pytest.approx(1 / ((1 - p_cons_over) * 1.0875))
+    assert under25.p_market < under25.p_consensus          # the selected book is the favourable one
+    assert under25.sim_tipsport_price < 1 / (under25.p_market * 1.0875)
 
 
 def test_no_entry_no_tip():
@@ -76,7 +83,7 @@ def test_store_and_settle(conn):
         "team_id": 17, "opp_id": 8, "entry_live": True, "gp_season": 0, "gp_prev": 80,
         "snapshot_time": "2025-10-09T14:00:00Z", "start_time_utc": "2025-10-09T23:00:00Z",
         "books": 3, "best_price": 1.9, "sim_tipsport_price": 1.84, "tipsport_min_price": 1.75,
-        "playable": True} for pid, side in ((8477429, "under"), (9999, "over"))])
+        "p_consensus": 0.5, "playable": True} for pid, side in ((8477429, "under"), (9999, "over"))])
     assert tips.store(conn, cand, "test", "2025-10-09", "live") == 2
     assert tips.store(conn, cand, "test", "2025-10-09", "live") == 0   # written once
     assert tips.settle(conn, "2025-10-09") == 2
@@ -114,3 +121,40 @@ def test_top_of_the_day(conn):
     top = {r[0] for r in conn.execute("SELECT tip_id FROM tips WHERE arm_top = 1")}
     assert top == {"a1", "c1", "b1"}
     assert tips.mark_top(conn, "2025-10-09") == 0       # membership never changes
+
+
+def test_old_tips_get_the_consensus_price_and_corrected_profit(conn):
+    """Migration 0010: a tip paid at the selected book's price is re-priced
+    from the consensus of its own snapshot; only winners change profit."""
+    conn.executemany("INSERT INTO teams (team_id, abbreviation, full_name) VALUES (?, ?, ?)",
+                     [(1, "AAA", "A"), (2, "BBB", "B")])
+    conn.execute("""INSERT INTO games (game_id, season, season_type, game_date, start_time_utc,
+                        home_team_id, away_team_id, game_state)
+                    VALUES (5, '2026-27', 'regular', '2026-10-02', '2026-10-02T23:00:00Z', 1, 2, 'OFF')""")
+    conn.execute("INSERT INTO players (player_id, full_name, position) VALUES (10, 'P', 'C')")
+    snap = "2026-10-02T14:00:00Z"
+    for book, over, under in (("dk", 2.10, 1.75), ("fd", 2.05, 1.80), ("mgm", 1.95, 1.87)):
+        for side, price in (("over", over), ("under", under)):
+            conn.execute("""INSERT INTO odds (event_id, game_id, player_id, player_name_raw, bookmaker,
+                                market, line, side, price, snapshot_time, snapshot_kind)
+                            VALUES ('e', 5, 10, 'P', ?, 'player_shots_on_goal', 2.5, ?, ?, ?, 'live')""",
+                         (book, side, price, snap))
+    base = dict(model="t", game_id=5, game_date="2026-10-02", start_time_utc="2026-10-02T23:00:00Z",
+                player_id=10, market="player_shots_on_goal", line=2.5, mu_60=1.6, books=3,
+                entry_live=1, playable=1, snapshot_kind="live", snapshot_time=snap, built_at="x",
+                sim_tipsport_price=1.99, p_model=0.6, p_market=0.46, edge=0.14)
+    rows = [dict(base, tip_id="win", side="under", outcome="win", profit_units=0.99),
+            dict(base, tip_id="loss", side="over", outcome="loss", profit_units=-1.0, playable=0),
+            dict(base, tip_id="open", side="under", line=3.5)]              # no quotes at 3.5: left alone
+    for r in rows:
+        conn.execute(f"INSERT INTO tips ({','.join(r)}) VALUES ({','.join('?' * len(r))})", list(r.values()))
+    assert tips.fix_sim_prices(conn, MODEL, 0.0874) == 2
+    got = {r["tip_id"]: r for r in conn.execute("SELECT * FROM tips")}
+    p_over = ns.market_p_60(tips.devig_over(2.05, 1.80), 2.5, 16.84, 0.0137)   # the median book
+    win = got["win"]
+    assert win["p_consensus"] == pytest.approx(1 - p_over) and win["sim_price_bestbook"] == 1.99
+    assert win["sim_tipsport_price"] == pytest.approx(1 / ((1 - p_over) * 1.0874))
+    assert win["profit_units"] == pytest.approx(win["sim_tipsport_price"] - 1)
+    assert got["loss"]["profit_units"] == -1.0 and got["loss"]["p_consensus"] == pytest.approx(p_over)
+    assert got["open"]["p_consensus"] is None and got["open"]["sim_tipsport_price"] == 1.99
+    assert tips.fix_sim_prices(conn, MODEL, 0.0874) == 0                    # idempotent

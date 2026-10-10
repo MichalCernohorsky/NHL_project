@@ -32,6 +32,9 @@ def main():
     conn = connect(resolve_db_path(cfg))
     today = datetime.now(ET).date()
     day = args.date or today.isoformat()
+    fixed = tips.fix_sim_prices(conn, tips.load_model(), cfg["odds"]["tipsport_margin"])
+    if fixed:
+        print(f"oprava vyplaty (konsensus misto vybrane knihy, migrace 0010): {fixed} tipu")
     settled = tips.settle(conn, (today - timedelta(days=1)).isoformat())
     res = tips.build(conn, day, kind=args.kind, margin=cfg["odds"]["tipsport_margin"])
     for (d,) in conn.execute("SELECT DISTINCT game_date FROM tips WHERE f_rate_60 IS NULL").fetchall():

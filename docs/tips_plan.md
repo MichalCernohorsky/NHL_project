@@ -175,3 +175,27 @@ vyhodnocení se nemění.
   útočníkům a obráncům, trestné minuty…) jsou popis historie, u rozdílů
   s 95% intervalem. Model je nepoužívá a **tipy se podle nich
   nevyhodnocují** (plán fáze 0: žádné řezy podle atributů).
+
+## 12. Oprava papírové výplaty a verdikt fáze 0 (10. 10. 2026)
+
+**Chyba proti plánu, nalezená při psaní vyhodnocení fáze 0.** Papírová
+výplata tipu je simulovaný kurz Tipsportu podle dodatku D1:
+1 / (p × (1 + m)), kde p je **konsensus** trhu na lajně a straně tipu
+(medián knih, sekce 6.3 plánu fáze 0). Kód tipů ale bral p z **knihy,
+která dala tipu největší hranu** — tedy z té nejvýhodnější odchylky.
+Tím výplatu nadsazoval: na vzorku fáze 0 o 0,04 v kurzu (1,876 místo
+1,836), tj. zhruba o 2 p.b. ROI.
+
+**Oprava (migrace 0010):** nové tipy se oceňují z konsensu; u starých se
+konsensus dopočítal z jejich vlastního snímku kurzů, původní kurz zůstal
+ve sloupci `sim_price_bestbook` a papírový zisk výher se přepočítal.
+Dopad na dosavadní záznam (629 tipů, 8 dnů): průměrný simulovaný kurz
+1,862 → 1,810, ROI všech tipů −0,5 % → **−3,2 %** (95% interval −11,5 až
++4,3 %). Výběr tipů, ⭐ TOP ani výsledky výher / proher se nemění. Zároveň
+m = 0,0874 místo odhadu 0,0875 (dodatek D8).
+
+**Verdikt fáze 0.** Naivní model na 330 zápasech sezóny 2025-26 neprošel
+(K4b: ROI −6,9 %, 95% interval −9,9 až −4,2 %; `docs/phase0_report.md`).
+Sekce 5 tohoto plánu doporučovala skutečné peníze až po verdiktu; verdikt
+je záporný, takže **tipy na střely hráčů jsou jen informativní** a stránka
+Tipy dne to říká nahoře. Papírový záznam se vede dál beze změny pravidel.

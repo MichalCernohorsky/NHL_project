@@ -43,7 +43,7 @@ with st.sidebar:
     else:
         meta = (f'<span class="dot{" stale" if age > 30 else ""}">●</span> '
                 f"databáze stará {age:.0f} h")
-    st.markdown(f'<div class="side-meta">Fáze 0 · výběr trhu<br>{meta}<br>'
+    st.markdown(f'<div class="side-meta">Fáze 0 · střely hráčů neprošly<br>{meta}<br>'
                 "✎ tikety se zálohují na GitHub</div>", unsafe_allow_html=True)
     if not cloud.is_local() and st.button(
             "↻ Obnovit data", use_container_width=True,

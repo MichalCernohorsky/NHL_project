@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 import pandas as pd
 import streamlit as st
 
-from dashboard import bets, data, nav
+from dashboard import bets, data, nav, phase0
 from dashboard.hero import hero, team_logo, ticker
 from dashboard.theme import section, setup_page
 from nhl_tool import explain
@@ -83,6 +83,9 @@ st.markdown("""
 .gcard.top{border-top:3px solid #c8102e}
 div[data-testid="stButton"] > button[kind="tertiary"]{color:#2E5FB7;font-weight:650;padding:2px 4px}
 .gcard .none{padding:10px 16px;color:#5a6572;font-size:12.5px;border-top:1px solid #e2e6ea}
+.verdict{background:#fbeceb;border:1px solid #f0cbc7;color:#7c2620;border-radius:12px;
+  padding:10px 14px;font-size:13px;margin:2px 0 12px}
+.verdict b{color:#5e1a15}
 .naive{background:#fdf3e1;border:1px solid #f3d9a6;color:#7a5410;border-radius:12px;
   padding:10px 14px;font-size:13px;margin:2px 0 12px}
 .naive b{color:#5c3d06}
@@ -175,13 +178,11 @@ cards = [
 st.markdown('<div class="kpis">' + "".join(cards) + "</div>", unsafe_allow_html=True)
 
 st.markdown(
-    '<div class="naive"><b>Naivní model — bez ověřené hrany.</b> Tipy dává zamrazený '
-    'jednoduchý model (loňské a letošní střely, čas na ledě, soupeř). Jestli trh porazí, '
-    'ukáže až verdikt fáze 0. Na začátku sezóny stojí hlavně na loňsku. '
-    '<b>Hraj jen za kurz ≥ min. kurz</b> — pod ním marže Tipsportu sní hranu. '
-    '⚠ = model se s trhem rozchází o víc než 10 p.b.; v NBA byly takové tipy nejhorší. '
-    'Řádek „proč“ ukazuje, o kolik procentních bodů zvedá nebo sráží tip střelba hráče, '
-    'čas na ledě a soupeř. Celý rozklad a ✅ Vsazeno najdeš v <b>Rozboru zápasu</b> pod kartou.</div>',
+    f'<div class="verdict"><b>{html.escape(phase0.VERDICT_SHORT)}</b> Tipy níže jsou proto jen '
+    'informativní — podle plánu se střely hráčů letos nesází. Papírová bilance se vede dál; kurz '
+    'Tipsportu se v ní odhaduje z průměru amerických knih. ⚠ = model se s trhem rozchází o víc než '
+    '10 p.b. Řádek „proč“ ukazuje, o kolik procentních bodů zvedá nebo sráží tip střelba hráče, '
+    'čas na ledě a soupeř; celý rozklad najdeš v <b>Rozboru zápasu</b> pod kartou.</div>',
     unsafe_allow_html=True)
 
 # ------------------------------------------------------------- game cards

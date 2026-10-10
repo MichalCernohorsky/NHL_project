@@ -33,7 +33,7 @@ rows = [{"cas": cz_time(g.start_time_utc), "a_ab": g.a_ab, "h_ab": g.h_ab,
                    else None)} for g in games.itertuples()]
 done = sum(1 for k in phase0.CRITERIA if k[3] == "ok")
 hero("Přehled",
-     f"Sezóna <b>{data.live_season()}</b> · fáze 0: výběr trhu · "
+     f"Sezóna <b>{data.live_season()}</b> · fáze 0: verdikt — střely hráčů neprošly · "
      f"dnes ({today_et} ET) <b>{len(games)}</b> zápasů · stav k {phase0.UPDATED}",
      kpi_label="kritéria splněna", kpi_value=f"{done} / {len(phase0.CRITERIA)}",
      kpi_cls="acc", scene="rink", ticker_html=ticker(rows))
@@ -59,6 +59,7 @@ c4.markdown(metric_card("kredity The Odds API", quota["zbyva"] if quota else "�
 
 section("Fáze 0 — kritéria výběru trhu",
         "plán: docs/market_discovery_plan.md · stav se zapisuje ručně po důkazu")
+st.error(phase0.VERDICT + " Podrobnosti: docs/phase0_report.md.")
 KIND = {"ok": ("splněno", "over"), "progress": ("probíhá", "warn"),
         "wait": ("čeká", "neutral"), "fail": ("nesplněno", "under")}
 html_rows = "".join(

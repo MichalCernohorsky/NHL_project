@@ -543,3 +543,25 @@ schváleného znění, včetně dodatků D1–D8): **SHA-256 `3ee50048023b96f6c7
 Hlídá ho `tests/test_phase0_plan.py`. Text nad značkou se už nemění;
 případné dodatky se připisují sem, s datem, a jejich dopad se vykazuje
 zvlášť.
+
+### Výsledek fáze 0 (10. 10. 2026)
+
+Etapa A koupena 10. 10. 2026: 330 zápasů sezóny 2025-26, jen
+`player_shots_on_goal`, closing; 58 755 řádků, 2 nespárovaná jména,
+**3 342 kreditů** (zůstatek 95 236). Vyhodnocovací kód
+(`src/nhl_tool/phase0.py`, `scripts/report_phase0.py`) byl commitnut před
+prvním pohledem na koupená data (commit 5ba4782) a spuštěn jednou.
+
+| kritérium | výsledek | |
+|---|---|---|
+| K1 | 22 zápasů z 22, 6 hráčů (D8) | splněno |
+| K2 | 3 sezóny, 0 chyb | splněno |
+| K3 | 330 zápasů s closingovou lajnou | splněno |
+| K4a | Brier 0,2469 proti 0,2437; rozdíl 0,0032 (0,0016 až 0,0048) | splněno |
+| K4b | ROI za simulovaný kurz Tipsportu **−6,9 %** (−9,9 až −4,2 %), 3 153 sázek | **nesplněno** |
+| K5 | 30,0 sázky na herní den po přepočtu | splněno |
+
+**Verdikt: střely hráče NEPOSTUPUJÍ.** Podle sekce 3 tedy výsledek fáze 0
+zní: NHL se v sezóně 2026-27 na tomto trhu nesází, jen se sbírají data.
+Simulace nulového efektu: 0,0 %. Podrobnosti `docs/phase0_report.md`.
+Druhé kolo s jinými parametry se nekoná (6.6).

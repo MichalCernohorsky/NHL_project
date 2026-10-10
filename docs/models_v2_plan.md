@@ -168,3 +168,25 @@ kreditů**, o 60 nad stropem 10 500 — nákup se proto nespustil a uživatel
 rozhodl znovu: „jeď, 10 560 je ok". Nový strop nákupu je 10 560 kreditů.
 Nákup se zastaví sám, kdyby po 3 dnech nenašel žádný zápas s kurzy nebo po
 25 dnech pokrýval méně než 80 % zápasů.
+
+**Zamrazení týmových modelů v2, bloky A a R (10. 10. 2026).** Odhad jen na
+2023-24 + 2024-25 (5 248 týmových řádků), před jakýmkoli pohledem na
+verzi 2 na sezóně 2025-26. Soubor `models/team_v2.json`, **SHA-256
+`d63a0c4600d0420daf1c833514fcabbd3a7e4325b3de45ffe7f3bf271849d189`**. Hlídá ho `tests/test_models_v2_plan.py`; skript
+`scripts/fit_team_v2.py` ho odmítne přepsat.
+
+| koeficient | střely týmu | tresty týmu |
+|---|---|---|
+| úroveň c₀ | -0.0037 | -0.0255 |
+| přesilovky γ (na jednu očekávanou navíc) | -0.0015 | +0.0273 |
+| 1.–10. zápas φ₁ | +0.0100 | +0.0570 |
+| 11.–20. zápas φ₂ | -0.0167 | -0.0398 |
+| tým druhý den po sobě β₁ | -0.0306 | +0.0062 |
+| soupeř druhý den po sobě β₂ | +0.0253 | +0.0001 |
+| váha pokusů α | 0.4 | — |
+| rozptyl k | 100.13 | Poisson (mez 5000) |
+| rozhodčí ρ (blok R) | — | +0.1244 |
+
+Zisk věrohodnosti v tréninku proti verzi 1: střely +27.0,
+tresty +10.0, rozhodčí nad blokem A +6.1
+(v tréninku — o ničem nerozhoduje).

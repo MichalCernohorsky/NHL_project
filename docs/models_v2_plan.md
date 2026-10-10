@@ -247,7 +247,7 @@ interval, herní dny):
 | blok A proti verzi 1 | +0,0062 (+0,0025 až +0,0098) — **A nahrazuje v1** | +0,0023 (+0,0007 až +0,0041) — **A nahrazuje v1** |
 | síla testu / falešný poplach | 75,0 % / 0,0 % | 16,4 % / 0,0 % |
 | blok B proti bloku A | +0,0024 (−0,0002 až +0,0049) — **zůstává A** | 0,0000 (−0,0003 až +0,0003) — **zůstává A** |
-| rozhodčí nad blokem A (popis) | — | +0,0012 (+0,00002 až +0,0024) |
+| rozhodčí nad blokem A (popis) | — | +0,0012 (+0,00001 až +0,0024) |
 
 - **Nasazeno: blok A** u střel i trestů. Od 11. 10. 2026 denní běh ukládá
   predikci verze 1 i verze 2 vedle sebe a stránka Týmové trhy počítá

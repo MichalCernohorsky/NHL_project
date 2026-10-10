@@ -150,3 +150,18 @@ Index „mimo" = mimo přesilovku, „přes" = v přesilovce.
 Koeficienty do `models/team_v2.json` a `models/player_v2.json`; otisk
 SHA-256 do dodatku plánu **před** spuštěním reportů na 2025-26. Skripty
 odmítnou zamrazený soubor přepsat.
+
+## Dodatky
+
+**N-1 (10. 10. 2026, před prvním odhadem a před jakýmkoli výsledkem na
+skutečných datech): volný člen.** Sekce 1 říkala „bez volného členu". Test
+na umělých datech s podstrčeným efektem (`tests/test_player_v2.py`) ukázal,
+že bez něj se efekt neodhadne správně: základ verze 1 už obsahuje průměr
+přes odpočaté i unavené zápasy, takže koeficient „druhý den po sobě" vyjde
+menší a zbytek se přelije do ostatních koeficientů. Proto má blok A u týmů
+i hráčů navíc volný člen c₀ (sloupec jedniček):
+
+    ln μ = ln μ_základ + c₀ + X·β
+
+Blok R (ρ) volný člen nepřidává — odhaduje se nad pevným blokem A a R má
+průměr u nuly. Nic jiného se nemění.

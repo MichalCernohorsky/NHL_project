@@ -183,3 +183,88 @@ def test_release_script_loads_and_refuses_the_public_repo(not_local):
 def test_secrets_file_is_ignored_and_make_sets_the_local_flag():
     assert ".streamlit/secrets.toml" in (ROOT / ".gitignore").read_text()
     assert "NHL_DASHBOARD_LOCAL=1 streamlit run" in (ROOT / "Makefile").read_text()
+
+
+# --------------------------------------------- start the daily job from the page
+
+class _Resp:
+    def __init__(self, status=200, body=None):
+        self.status_code, self._body = status, body or {}
+
+    def json(self):
+        return self._body
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise cloud.requests.HTTPError(f"HTTP {self.status_code}")
+
+
+def _github(monkeypatch, runs=(), dispatch_status=204, fail=None):
+    calls = []
+
+    def request(method, url, **kw):
+        calls.append((method, url, kw))
+        if fail:
+            raise cloud.requests.ConnectionError(fail)
+        if url.endswith("/runs"):
+            return _Resp(body={"workflow_runs": [{"status": s} for s in runs]})
+        if url.endswith("/dispatches"):
+            return _Resp(dispatch_status)
+        return _Resp(body={"default_branch": "hlavni-vetev"})
+
+    monkeypatch.setattr(cloud.requests, "request", request)
+    return calls
+
+
+NOON = cloud.datetime(2026, 10, 10, 12, 0, tzinfo=cloud.timezone.utc)
+TOKEN = "github_pat_ACTIONSSECRET"
+
+
+def test_dispatch_needs_a_token_and_never_runs_too_early(monkeypatch):
+    calls = _github(monkeypatch)
+    assert cloud.dispatch_daily(NOON)[0] is False and calls == []          # no token
+    monkeypatch.setenv("NHL_ACTIONS_TOKEN", TOKEN)
+    early = cloud.datetime(2026, 10, 10, 11, 29, tzinfo=cloud.timezone.utc)
+    ok, msg = cloud.dispatch_daily(early)
+    assert ok is False and "11:30" in msg and calls == []
+    assert not cloud.too_early(cloud.datetime(2026, 10, 10, 11, 30, tzinfo=cloud.timezone.utc))
+
+
+def test_dispatch_starts_the_daily_workflow_on_the_default_branch(monkeypatch):
+    monkeypatch.setenv("NHL_ACTIONS_TOKEN", TOKEN)
+    calls = _github(monkeypatch, runs=("completed", "completed"))
+    ok, msg = cloud.dispatch_daily(NOON)
+    assert ok is True and "spuštěn" in msg
+    method, url, kw = calls[-1]
+    assert method == "POST" and url.endswith(
+        "/repos/MichalCernohorsky/NHL_project/actions/workflows/daily.yml/dispatches")
+    assert kw["json"] == {"ref": "hlavni-vetev"}
+    assert all(c[2]["headers"]["Authorization"] == f"Bearer {TOKEN}" for c in calls)
+    assert all(TOKEN not in c[1] for c in calls)                            # never in a URL
+
+
+def test_dispatch_does_not_stack_runs_and_hides_the_token_in_errors(monkeypatch):
+    monkeypatch.setenv("NHL_ACTIONS_TOKEN", TOKEN)
+    calls = _github(monkeypatch, runs=("in_progress",))
+    ok, msg = cloud.dispatch_daily(NOON)
+    assert ok is False and "už běží" in msg and not any(c[0] == "POST" for c in calls)
+    _github(monkeypatch, dispatch_status=403)
+    assert cloud.dispatch_daily(NOON) == (False, "GitHub běh nespustil (HTTP 403). Zkontroluj oprávnění tokenu.")
+    _github(monkeypatch, fail=f"cannot reach host with {TOKEN}")
+    ok, msg = cloud.dispatch_daily(NOON)
+    assert ok is False and TOKEN not in msg and "***TOKEN***" in msg
+
+
+def test_sidebar_offers_the_run_button_only_with_a_token(hosted):
+    hosted.setenv("NHL_DASHBOARD_LOCAL", "1")
+    at = AppTest.from_file(APP, default_timeout=30).run()
+    labels = [b.label for b in at.sidebar.button]
+    assert "▶ Spustit denní běh" not in labels and "↻ Obnovit data" not in labels   # local, no token
+    hosted.setenv("NHL_ACTIONS_TOKEN", TOKEN)
+    at = AppTest.from_file(APP, default_timeout=30).run()
+    assert "▶ Spustit denní běh" in [b.label for b in at.sidebar.button]
+
+
+def test_no_test_can_dispatch_for_real():
+    import os
+    assert "NHL_ACTIONS_TOKEN" not in os.environ          # conftest removes it for every test

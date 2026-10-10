@@ -62,6 +62,33 @@ Kontrola, že je všechno v pořádku:
 - zkušební ✅ na tipu a jeho vrácení ❌ se objeví v `NHL_project-data`
   ve složce `bets/` (soubor `decisions.jsonl`).
 
+## Tlačítka v levém panelu
+
+- **↻ Obnovit data** — zeptá se hned, jestli cloud nenahrál novější
+  databázi (jinak se kontroluje jednou za 15 minut). Funguje bez nastavení.
+- **▶ Spustit denní běh** — spustí v cloudu stažení dat, snímek kurzů
+  a tipy. Je tu proto, že GitHub spouští plánované běhy s několikahodinovým
+  zpožděním (5.–10. 10. 2026 první běh dne až kolem 19:00). Opakování je
+  bezpečné: nic se nekoupí ani nevyfotí dvakrát. Nejde spustit před
+  11:30 UTC (13:30 letního času), aby tipy nestály na neúplných kurzech,
+  a nespustí se, když už nějaký běh běží. **Objeví se až po nastavení
+  tokenu** (jednorázově, ~5 minut):
+
+  1. GitHub → fotka vpravo nahoře → *Settings* → *Developer settings* →
+     *Personal access tokens* → *Fine-grained tokens* → *Generate new token*.
+  2. Token name `nhl-actions`, Expiration za rok, Repository access
+     **Only select repositories** → `NHL_project` (ten veřejný, s kódem).
+  3. Permissions → Repository permissions → **Actions: Read and write**.
+     Nic jiného. *Generate token* → zkopírovat.
+  4. share.streamlit.io → aplikace → ⋮ → *Settings* → *Secrets* → přidat
+     čtvrtý řádek a uložit:
+     ```
+     NHL_ACTIONS_TOKEN = "sem-token"
+     ```
+
+  Token umí jen spouštět a číst běhy v repozitáři kódu. K datům, klíči
+  The Odds API ani k úpravě kódu přístup nedává.
+
 ## Co když
 
 - **„Dashboard je zamčený: chybí APP_PASSWORD"** — v aplikaci na

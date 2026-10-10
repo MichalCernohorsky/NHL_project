@@ -22,8 +22,10 @@ import hmac
 import importlib.util
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,6 +36,14 @@ MIN_PASSWORD = 8
 CHECK_EVERY_S = 900          # how often a running app asks GitHub for a newer database
 MARKER = ".release_sha"
 SECRETS = ("NHL_DATA_TOKEN", "NHL_DB_RELEASE_REPO")
+# "Spustit denní běh" (docs/streamlit.md): GitHub starts scheduled runs hours
+# late, so the user can start the daily job from the dashboard. Needs its own
+# token (NHL_ACTIONS_TOKEN: Actions read/write on the code repository only).
+CODE_REPO = "MichalCernohorsky/NHL_project"
+WORKFLOW = "daily.yml"
+GH_API = "https://api.github.com"
+EARLIEST_UTC = (11, 30)      # docs/cloud.md: an earlier snapshot is too thin for tips
+BUSY = ("queued", "in_progress", "requested", "waiting", "pending")
 
 
 def is_local() -> bool:
@@ -136,3 +146,54 @@ def hosted_setup() -> None:
         return
     # ~ may not be writable there; data/ is (the database lands in it too)
     os.environ.setdefault("NHL_BETS_DIR", str(ROOT / "data" / "bets_store"))
+
+
+# ------------------------------------------------------ start the daily job
+
+def dispatch_token() -> str | None:
+    return setting("NHL_ACTIONS_TOKEN")
+
+
+def too_early(now: datetime | None = None) -> bool:
+    now = now or datetime.now(timezone.utc)
+    return (now.hour, now.minute) < EARLIEST_UTC
+
+
+def _gh(method: str, path: str, token: str, **kw):
+    return requests.request(method, f"{GH_API}{path}", timeout=20,
+                            headers={"Authorization": f"Bearer {token}",
+                                     "Accept": "application/vnd.github+json"}, **kw)
+
+
+def daily_run_state(token: str) -> str | None:
+    """The status of a daily run that is waiting or running, else None."""
+    r = _gh("GET", f"/repos/{CODE_REPO}/actions/workflows/{WORKFLOW}/runs", token,
+            params={"per_page": 5})
+    r.raise_for_status()
+    for run in r.json().get("workflow_runs", []):
+        if run.get("status") in BUSY:
+            return run["status"]
+    return None
+
+
+def dispatch_daily(now: datetime | None = None) -> tuple[bool, str]:
+    """Start the daily cloud job. -> (started, message for the user). The job
+    is idempotent: a second run the same day buys and snapshots nothing again."""
+    token = dispatch_token()
+    if not token:
+        return False, "Chybí NHL_ACTIONS_TOKEN (postup: docs/streamlit.md)."
+    if too_early(now):
+        return False, ("Denní běh jde spustit nejdřív v 11:30 UTC (13:30 letního, 12:30 zimního "
+                       "času) — dřív by tipy stály na neúplných kurzech.")
+    try:
+        if daily_run_state(token):
+            return False, "Denní běh už běží nebo čeká ve frontě. Za pár minut dej Obnovit data."
+        repo = _gh("GET", f"/repos/{CODE_REPO}", token)
+        repo.raise_for_status()
+        r = _gh("POST", f"/repos/{CODE_REPO}/actions/workflows/{WORKFLOW}/dispatches", token,
+                json={"ref": repo.json()["default_branch"]})
+        if r.status_code != 204:
+            return False, f"GitHub běh nespustil (HTTP {r.status_code}). Zkontroluj oprávnění tokenu."
+        return True, "Denní běh spuštěn. Hotovo bývá za 2–3 minuty, pak dej Obnovit data."
+    except (requests.RequestException, KeyError, ValueError) as exc:
+        return False, "GitHub neodpověděl: " + str(exc).replace(token, "***TOKEN***")[:200]

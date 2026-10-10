@@ -20,7 +20,8 @@ def _no_real_github(monkeypatch, tmp_path):
     """No test may reach the user's real data repository: the token the
     Mac's shell exports (docs/cloud.md step 5) is removed for every test,
     and the bets store writes into a temporary directory."""
-    for name in ("NHL_DATA_TOKEN", "GITHUB_TOKEN", "GH_TOKEN", "NHL_DB_RELEASE_REPO"):
+    for name in ("NHL_DATA_TOKEN", "GITHUB_TOKEN", "GH_TOKEN", "NHL_DB_RELEASE_REPO",
+                 "NHL_ACTIONS_TOKEN"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("NHL_BETS_DIR", str(tmp_path / "bets"))
 

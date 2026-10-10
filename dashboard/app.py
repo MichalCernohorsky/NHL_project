@@ -45,6 +45,18 @@ with st.sidebar:
                 f"databáze stará {age:.0f} h")
     st.markdown(f'<div class="side-meta">Fáze 0 · výběr trhu<br>{meta}<br>'
                 "✎ tikety se zálohují na GitHub</div>", unsafe_allow_html=True)
+    if not cloud.is_local() and st.button(
+            "↻ Obnovit data", use_container_width=True,
+            help="Zeptá se hned, jestli cloud nenahrál novější databázi (jinak se kontroluje "
+                 "jednou za 15 minut)."):
+        cloud.ensure_db.clear()
+        st.rerun()
+    if cloud.dispatch_token() and st.button(
+            "▶ Spustit denní běh", use_container_width=True,
+            help="Spustí v cloudu stažení dat, snímek kurzů a tipy. Bezpečné opakovat: nic se "
+                 "nekoupí dvakrát. Nejdřív v 11:30 UTC."):
+        started, msg = cloud.dispatch_daily()
+        (st.success if started else st.warning)(msg)
 
 from dashboard import nav
 

@@ -190,3 +190,16 @@ verzi 2 na sezóně 2025-26. Soubor `models/team_v2.json`, **SHA-256
 Zisk věrohodnosti v tréninku proti verzi 1: střely +27.0,
 tresty +10.0, rozhodčí nad blokem A +6.1
 (v tréninku — o ničem nerozhoduje).
+
+**Zamrazení hráčského modelu v2, blok A (10. 10. 2026).** Odhad jen na
+2023-24 + 2024-25 (77910 řádků se vstupem fáze 0), před jakýmkoli
+pohledem na verzi 2 na kurzech nebo na sezóně 2025-26. Soubor
+`models/player_v2.json`, **SHA-256
+`eb44ce13bb8218c181885db05bfe134e5e5dd27befea28a856725f9805e32c29`**. Hlídá ho `tests/test_models_v2_plan.py`; skript
+`scripts/fit_player_v2.py` ho odmítne přepsat.
+
+Koeficienty: α = 0.7 (váha pokusů o střelu), π = 0.25 (mocnina
+očekávaných přesilovek), úroveň -0.0152, tým druhý den po sobě
+-0.0345, soupeř druhý den po sobě +0.0343, rozptyl k =
+17.92. Zisk věrohodnosti v tréninku proti verzi 1 na stejných
+řádcích: +253.1 (v tréninku — o ničem nerozhoduje).

@@ -44,3 +44,16 @@ def test_team_v2_is_frozen_and_built_on_the_frozen_v1(monkeypatch, capsys):
     with pytest.raises(SystemExit):
         fit_team_v2.main()
     assert "zamrazeny" in capsys.readouterr().out
+
+
+def test_player_v2_is_frozen_and_built_on_the_frozen_models(monkeypatch, capsys):
+    body = _frozen("player_v2.json")
+    assert body["trained_on"] == ["2023-24", "2024-25"]
+    for name in ("naive_sog.json", "naive_team.json"):
+        assert body["builds_on"][name] == hashlib.sha256((ROOT / "models" / name).read_bytes()).hexdigest()
+    assert 0 <= body["alpha"] <= 1 and 0 <= body["pi"] <= 2 and set(body["coef"]) == {"c0", "B_team", "B_opp"}
+    import fit_player_v2
+    monkeypatch.setattr("sys.argv", ["fit_player_v2.py"])
+    with pytest.raises(SystemExit):
+        fit_player_v2.main()
+    assert "zamrazeny" in capsys.readouterr().out

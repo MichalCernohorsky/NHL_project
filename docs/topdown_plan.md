@@ -142,3 +142,34 @@ hráče u více knih a lajn měly společný výsledek. Kritérium P1 se neměn�
 Od 10. 10. 2026 se pro živou sezónu z archivu kupuje jen closingový snímek
 (10 kreditů na zápas); ranní archivní snímek se vypíná (`odds.hist_daily_kinds`).
 Closing slouží diagnostice posunu trhu v etapě 2.
+
+### Dodatek TD-3 — výsledek etapy 1 a oprava odhadu objemu (10. 10. 2026)
+
+**Etapa 1 (`docs/topdown_stage1_report.md`, jeden běh po commitu kódu):**
+8 knih, 27 925 řádků s ≥ 3 dalšími knihami; pravidlo vsadilo jen **76×**
+(0,3 % řádků) — na closingu se americké knihy mezi sebou liší málokdy
+o víc než své marže. ROI **+1,9 %** (95% interval −21,3 až +24,7 %), výhry
+46,1 % proti 46,2 % čekaným pravidlem. **P1 (bodový odhad > 0) je
+splněno, „podpořeno" není.**
+
+**Síla té kontroly je malá (nahlas):** v simulaci, kde má pravdu odchýlená
+kniha, by P1 prošlo ve 31,8 % případů (průměr −6,4 %); kdyby princip
+platil beze zbytku, čekalo by se +3,5 % s rozpětím −19 až +26 %. 76 sázek
+tyto dva stavy nerozliší. Etapa 1 tedy princip nevyvrátila, ale ani
+nepotvrdila. Podle sekce 3 se pokračuje etapou 2.
+
+**Chyba v sekci 4 schváleného znění.** Odhad „2–3 tikety na zápas, 800
+tiketů za 2–3 měsíce" je špatně. V průzkumném vzorku splnily pravidlo
+(očekávaný zisk ≥ 3 % **a** ≥ 3 knihy) jen 4 lajny z 65, tj. asi
+**0,33 tiketu na zápas**. Do konce základní části (~1 270 zápasů) to dává
+zhruba **400 tiketů**: první pohled (300) kolem března, druhý (800) letos
+nenastane. Při 300 tiketech je interval široký asi ±11 p.b.; test letos
+nejspíš skončí „nerozhodnuto", pokud není výhoda velká.
+
+**Doplnění diagnostiky (ne metriky, pravidlo se nemění).** Aby se dřív
+poznalo, jestli odchylky Tipsportu něco vědí, vyhodnocuje se posun trhu
+u **všech** lajn Tipsportu přepsaných ze screenshotů, ne jen u tiketů:
+o kolik se americký konsensus mezi snímkem a closingem posunul směrem ke
+kurzu Tipsportu. Posun blízko nule = odchylka Tipsportu není informace
+(dobře pro pravidlo); posun blízko celé odchylce = Tipsport měl pravdu.
+Při ~40 lajnách denně je odhad přesný po jednom až dvou týdnech.

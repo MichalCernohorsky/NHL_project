@@ -204,7 +204,7 @@ else:
                         '</div>', unsafe_allow_html=True)
         if not locked and fresh:
             with st.expander(f"✍️ Tiket {head['a_ab']} @ {head['h_ab']}"):
-                with st.form(f"fair_{gid}"):
+                with st.container():
                     picks = list(g.itertuples())
                     c1, c2, c3 = st.columns([2.4, 1, 1])
                     pick = c1.selectbox("Hráč a lajna", picks, key=f"fp_{gid}",
@@ -223,7 +223,7 @@ else:
                     st.caption(f"Férový kurz {cz(1 / p_side, 2)} · minimální kurz {cz(need, 2)} → "
                                f"{'✅ splňuje pravidlo' if price >= need else '❌ pod minimálním kurzem — nezapíše se'}"
                                f" · očekávaný zisk {cz((price * p_side - 1) * 100)} %")
-                    if st.form_submit_button("Zapsat tiket", type="primary"):
+                    if st.button("Zapsat tiket", type="primary", key=f"fsave_{gid}"):
                         try:
                             bets.save_fair_bet(pick._asdict(), side, float(price), float(stake), book,
                                                bool(is_paper))

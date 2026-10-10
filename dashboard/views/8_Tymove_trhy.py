@@ -209,7 +209,7 @@ for g in games.itertuples():
                                 unsafe_allow_html=True)
     if not locked:
         with st.expander(f"✍️ Tiket {g.a_ab} @ {g.h_ab}"):
-            with st.form(f"ticket_{g.game_id}"):
+            with st.container():
                 c1, c2, c3, c4 = st.columns([1.2, 1.4, 1, 1])
                 team_pick = c1.selectbox("Tým", sorted(sub["tym"].unique()), key=f"t_{g.game_id}")
                 market = c2.selectbox("Trh", [m for m in team_tips.MARKETS if not bets.paused(m, day)],
@@ -236,7 +236,7 @@ for g in games.itertuples():
                         st.caption(f"Model: {side_cz(side)} {cz(line)} s pravděpodobností "
                                    f"{cz(p_side * 100)} % · min. kurz {cz(mp, 2) if mp else '–'} → "
                                    f"{'✅ splňuje pravidlo' if ok else '❌ nesplňuje pravidlo (jen k záznamu)'}")
-                if st.form_submit_button("Zapsat tiket", type="primary"):
+                if st.button("Zapsat tiket", type="primary", key=f"tsave_{g.game_id}"):
                     try:
                         pred = row.iloc[0].to_dict()
                         bets.save_team_bet(pred, float(line), float(price), float(stake), book,

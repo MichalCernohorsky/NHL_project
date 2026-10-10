@@ -45,7 +45,7 @@ def test_daily_run_covers_every_data_step_with_the_live_season():
     from daily_collect import STEPS, commands
     names = [s[0] for s in STEPS]
     assert names == ["schedule", "rosters", "boxscores", "toi", "players", "pbp",
-                     "penalties", "officials", "refprobe", "rematch"]
+                     "penalties", "attempts", "officials", "refprobe", "rematch"]
     for name, cmd in commands("2026-27"):
         if name not in ("players", "refprobe", "rematch"):
             assert cmd[-2:] == ["--season", "2026-27"]

@@ -36,6 +36,7 @@ STEPS = [
     # team markets plan, step 2: penalty events, officials of finished games,
     # and whether tonight's referees are already known
     ("penalties", "backfill_penalties.py", True),
+    ("attempts", "backfill_attempts.py", True),     # models v2: shot attempts, manpower split
     ("officials", "backfill_officials.py", True),
     ("refprobe", "probe_referees.py", False),
     ("rematch", "rematch_odds_players.py", False),

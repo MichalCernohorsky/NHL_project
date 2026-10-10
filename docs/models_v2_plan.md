@@ -1,9 +1,9 @@
 # Modely v2 — nové atributy pro týmy, tresty a hráče
 
-Stav: **NÁVRH ke schválení** (10. 10. 2026). Sepsáno před stažením nových
-dat a před jakýmkoli výpočtem. Po schválení se zamrazí otiskem SHA-256;
-změny jen jako datované dodatky. Pravidla sázení, prahy a běžící papírové
-testy se tímto plánem nemění.
+Stav: **SCHVÁLENO uživatelem 10. 10. 2026.** Sepsáno před stažením nových
+dat a před jakýmkoli výpočtem. Znění je zamrazené otiskem SHA-256 (oddíl
+na konci); změny jen jako datované dodatky. Pravidla sázení, prahy a běžící
+papírové testy se tímto plánem nemění.
 
 ## 1. Co se zkouší a co čekat
 
@@ -146,3 +146,18 @@ Zůstatek 95 216 kreditů (sdílený s NBA a MLB).
 5. „Jeď" k hlavním kurzům → blok B pro všechny tři → report.
 6. Podle výsledků: nasazení v2 do dashboardu (týmy, tresty), případně
    potvrzovací nákup pro hráče.
+<!-- konec schváleného znění -->
+
+## Schválení a dodatky
+
+Schváleno uživatelem 10. 10. 2026 („schvaluji, pusť se do bloku zdarma
+a klidně jdi i do bodu za kredity"). Otisk schváleného znění (vše nad
+značkou konce schváleného znění): **SHA-256 `91c11d3b96563fcce4e414a463fb4a2d36093e42ad0203a75f21b15faae3ca07`**. Hlídá ho
+`tests/test_models_v2_plan.py`.
+
+**Souhlas s nákupem hlavních kurzů (blok B) dal uživatel předem** ve stejné
+zprávě. Platí pro nákup popsaný v sekci 2 (moneyline + počet gólů, jeden
+snímek na herní den, tři sezóny) se stropem **10 500 kreditů**; před
+nákupem proběhne suchý běh a kdyby vyšel nad strop, nákup se nespustí
+a rozhodne uživatel znovu. Potvrzovací vzorek pro hráče (~9 820 kreditů)
+tímto souhlasem krytý není.

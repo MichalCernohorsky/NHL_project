@@ -71,4 +71,4 @@ odds:
   # game, these markets only (~1 credit per game).
   live_markets: [player_shots_on_goal]
   # Tipsport margin m of amendment D1 - interim value until fixed after K1.
-  tipsport_margin: 0.0875
+  tipsport_margin: 0.0874   # fixed 10. 10. 2026 (plan D1/D8): median of 108 Tipsport price pairs

@@ -254,7 +254,7 @@ def mark_top(conn, game_date: str) -> int:
 
 
 def build(conn, game_date: str, kind: str = "live", model_path: Path = MODEL_FILE,
-          margin: float = 0.0875) -> dict:
+          margin: float = 0.0874) -> dict:
     model = load_model(model_path)
     lines = latest_snapshot(conn, game_date, kind)
     pred = predict(conn, model, game_date, lines)

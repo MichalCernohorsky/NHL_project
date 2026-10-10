@@ -303,6 +303,8 @@ metrikou projektu je reálný zisk, ne zisk v knize, kde se nesází.
 - **m se zafixuje před nákupem** jako medián marže všech hráčských dvojic
   daného trhu ze screenshotů K1 (3 herní dny). Zapíše se sem jako číslo
   s datem. Do té doby platí odhad m = 0,087.
+  **Zafixováno 10. 10. 2026 (dodatek D8): m = 0,0874** (medián 108 dvojic kurzů
+  ze 4 herních dnů, rozsah 8,64–8,82 %; `docs/tipsport_k1_log.md`).
 - ROI za kurz amerických knih se v reportu uvádí dál, ale jen jako
   **vedlejší** údaj; o postupu rozhoduje ROI za simulovaný kurz Tipsportu.
 - Simulace nulového efektu (6.5) se počítá se stejnou výplatou.
@@ -334,6 +336,7 @@ podat.
 hráčů na zápas s lajnou trhu v closingu vzorku)**. Číslo 6 se po
 3 herních dnech K1 nahradí průměrem z `docs/tipsport_k1_log.md` a zapíše
 se sem s datem, před nákupem.
+**Zafixováno 10. 10. 2026 (dodatek D8): 6 hráčů na zápas** (22 zápasů z 22).
 
 **Co D2 záměrně NEdělá.** Nevybírá „tipsportovou" podmnožinu hráčů pro
 ROI (K4b). Historicky nevíme, které tři hráče by Tipsport vypsal, a
@@ -475,6 +478,39 @@ a platí původní pravidlo (≥ 75 % všech zápasů dne).
 kritéria K2–K5, vzorek, rozpočet, model, práh hrany. K1 je kontrola
 proveditelnosti („dá se to u Tipsportu vsadit?"), ne ziskovosti; žádný
 výsledek o zisku se tím neovlivní.
+
+### D8 — K1 uzavřeno na dosavadních kontrolách (10. 10. 2026, na žádost uživatele, před schválením a před nákupem)
+
+**Stav kontrol Tipsportu (střely hráče):**
+
+| den | zápasů dne | zkontrolováno | trh vypsaný | hráčů na zápas | čas kontroly |
+|---|---|---|---|---|---|
+| 29. 9. | 5 | 5 | 5 z 5 | 6 | ~20:00 CZ |
+| 2. 10. | 5 | 5 | 5 z 5 | 6 | ~21:30 CZ |
+| 4. 10. | 5 | 5 | 5 z 5 | 6 | 13:05–13:20 CZ |
+| 10. 10. | 14 | 7 (5 vylosovaných podle D7 + 2) | 7 ze 7 | 6 | 15:55–16:15 CZ |
+
+Pokrytí (≥ 75 % zápasů dne) a počet hráčů (≥ 4) jsou splněné ve **4 dnech**
+(práh 3). Podmínka „nejpozději v 18:00 CZ" je ověřená ve **2 dnech**; v obou
+byl trh vypsaný 2–5 hodin před 18:00, i u zápasů začínajících po půlnoci.
+
+**Změna.** Třetí den s kontrolou do 18:00 se nevyžaduje; **K1 se pro střely
+hráče považuje za splněné.** Důvod: další den by nepřinesl informaci —
+kdyby Tipsport trh vypisoval jen u 75 % zápasů, vyšlo by 22 zápasů z 22
+v 0,2 % případů.
+
+**Co se tím vzdává (nahlas).** Jedna ze tří časových kontrol. K1 je kontrola
+proveditelnosti („dá se to u Tipsportu vsadit?"), ne ziskovosti; žádný
+výsledek o zisku se tím neovlivní. Kritéria K2–K5, vzorek, rozpočet, model
+a práh hrany beze změny.
+
+**Ostatní kandidátní trhy K1 nesplnily:** zásahy brankáře a zblokované
+střely Tipsport nevypisuje (kontroly 29. 9. a 2. 10.). Kupují se proto jen
+střely hráče (`player_shots_on_goal`), jeden trh: etapa A = 330 zápasů ×
+1 trh × 10 + 42 volání seznamu zápasů = **nejvýš 3 342 kreditů**.
+
+**Zafixováno před nákupem:** marže Tipsportu pro D1 **m = 0,0874**; počet
+hráčů na zápas pro D2 **6**.
 
 ### Zamrazení naivního modelu střel (2. 10. 2026, před nákupem etapy A)
 

@@ -1,0 +1,57 @@
+name: Nakup historickych kurzu (etapa A)
+
+# Phase 0, stage A (docs/market_discovery_plan.md 4, D8): closing lines of
+# player shots for the pre-registered sample of 2025-26. MANUAL ONLY and
+# DRY by default: the job buys only when the input "confirm" is exactly
+# "jed" - the user's go-ahead in the conversation. The script itself is
+# resumable and stops at the budget and at the account reserve.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Napis "jed" pro skutecny nakup; cokoli jineho = suchy beh'
+        required: false
+        default: ""
+      budget:
+        description: "Strop kreditu pro tento beh"
+        required: false
+        default: "3400"
+
+concurrency:
+  group: nhl-db               # never two writers of the database at once
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NHL_DB_RELEASE_REPO: MichalCernohorsky/NHL_project-data
+
+jobs:
+  props:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - name: Stazeni databaze
+        id: down
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py down --force
+      - name: Migrace schematu
+        run: python scripts/migrate.py
+      - name: Suchy beh (nic se nekupuje)
+        run: python scripts/backfill_props.py --dry-run --markets player_shots_on_goal --snapshot closing
+      - name: Nakup
+        id: buy
+        if: inputs.confirm == 'jed'
+        env: { ODDS_API_KEY: "${{ secrets.ODDS_API_KEY }}" }
+        run: >
+          python scripts/backfill_props.py --markets player_shots_on_goal
+          --snapshot closing --budget "${{ inputs.budget }}"
+      - name: Ulozeni databaze
+        if: always() && inputs.confirm == 'jed' && steps.down.outcome == 'success'
+        env: { NHL_DATA_TOKEN: "${{ secrets.NHL_DATA_TOKEN }}" }
+        run: python scripts/db_release.py up

@@ -41,3 +41,20 @@ def test_daily_job_buys_yesterday_after_the_data_and_before_upload():
     i_data, i_buy, i_up = (names.index("Denni beh"), names.index("Nakup vcerejsich snimku kurzu"),
                            names.index("Ulozeni databaze"))
     assert i_data < i_buy < i_up
+
+
+def test_props_purchase_is_manual_and_dry_unless_confirmed():
+    text = (WF / "props.yml").read_text()
+    wf = yaml.safe_load(text)
+    trig = wf[True] if True in wf else wf["on"]
+    assert set(trig) == {"workflow_dispatch"}                       # never on a schedule
+    assert trig["workflow_dispatch"]["inputs"]["confirm"]["default"] == ""
+    assert wf["concurrency"]["group"] == "nhl-db"
+    steps = {s.get("name"): s for s in wf["jobs"]["props"]["steps"]}
+    assert "--dry-run" in steps["Suchy beh (nic se nekupuje)"]["run"]
+    assert "ODDS_API_KEY" not in str(steps["Suchy beh (nic se nekupuje)"])     # dry run needs no key
+    buy = steps["Nakup"]
+    assert buy["if"] == "inputs.confirm == 'jed'" and "--dry-run" not in buy["run"]
+    assert "player_shots_on_goal" in buy["run"] and "--budget" in buy["run"]
+    up = steps["Ulozeni databaze"]["if"]
+    assert "inputs.confirm == 'jed'" in up and "steps.down.outcome == 'success'" in up

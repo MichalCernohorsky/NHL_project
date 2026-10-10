@@ -20,6 +20,7 @@ repozitáře kódu.
 |---|---|---|
 | `.github/workflows/daily.yml` | každou hodinu 13:30–19:30 CEST (GitHub spouští se zpožděním 3–7 h, 5.–9. 10. první běh dne až ~19:00; víc spouštění = větší šance, že tipy jsou do 18:00) | denní běh dat (jako `make daily`; od 4. 10. i tresty, rozhodčí a záznam, zda jsou rozhodčí dnešních zápasů už známí; od 9. 10. i predikce týmových trhů) + nákup včerejších snímků kurzů z archivu (`scripts/buy_snapshots.py`, dodatek D4 plánu) |
 | `.github/workflows/odds.yml` | jen ručně | bezplatná kontrola klíče The Odds API |
+| `.github/workflows/props.yml` | jen ručně | nákup historických kurzů etapy A (střely hráče, 330 zápasů 2025-26). Bez vstupu `confirm = jed` proběhne jen suchý běh; nákup až po uživatelově souhlasu („jeď“) |
 | `.github/workflows/tests.yml` | každý push | testy |
 
 **Proč ne živé snímky (2. 10. 2026):** GitHub spouštěl plán „každých 10

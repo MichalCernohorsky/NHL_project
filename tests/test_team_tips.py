@@ -2,6 +2,7 @@
 written once before puck drop from earlier games only, the lines and the
 minimum price follow the plan, settlement uses the 60-minute counts, and
 team tickets live in the bets store next to the player ones."""
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -109,6 +110,38 @@ def test_build_writes_once_before_puck_drop_and_settles(conn):
     got = {(r["team_id"], r["market"]): r["actual_60"] for r in
            conn.execute("SELECT team_id, market, actual_60 FROM team_predictions WHERE game_id = 2001")}
     assert got == {(1, "S-T"): 30, (1, "T-T"): 3, (2, "S-T"): 22, (2, "T-T"): 1}
+
+
+def test_v2_is_written_next_to_v1_once_frozen(conn, tmp_path):
+    """Forward confirmation (docs/models_v2_plan.md 5): both expectations at
+    the same moment; without a frozen v2 file the v2 columns stay empty."""
+    _db(conn)
+    for gid in range(1001, 1025):                         # attempts of the finished games
+        for r in conn.execute("SELECT player_id, team_id, sog_reg FROM player_game_logs WHERE game_id = ?",
+                              (gid,)).fetchall():
+            conn.execute("""INSERT INTO player_shot_splits (game_id, player_id, team_id, att_reg,
+                                sog_pp_reg, att_pp_reg, sog_sh_reg, att_sh_reg) VALUES (?, ?, ?, ?, 3, 6, 0, 1)""",
+                         (gid, r["player_id"], r["team_id"], r["sog_reg"] + 25))
+    conn.commit()
+    none = team_tips.load_models(v2_path=tmp_path / "missing.json")
+    assert none["v2"] is None and team_tips.mu_v2(conn, DAY, none) == {}
+    v2 = {"model": "team_v2",
+          "shots": {"alpha": 0.5, "league_att_train": 55.0, "k": 90.0,
+                    "coef": {"c0": 0.0, "D": 0.0, "F1": 0.0, "F2": 0.0, "B_team": -0.5, "B_opp": 0.0}},
+          "penalties": {"k": 5000.0, "coef": {"c0": 0.1, "D": 0.0, "F1": 0.0, "F2": 0.0, "B_team": 0.0, "B_opp": 0.0}}}
+    path = tmp_path / "team_v2.json"
+    path.write_text(json.dumps(v2))
+    models = team_tips.load_models(v2_path=path)
+    stats = team_tips.build(conn, DAY, NOW, models)
+    assert stats["inserted"] == 4
+    rows = {(r["team_id"], r["market"]): r for r in conn.execute(
+        "SELECT team_id, market, mu, mu_v2, model_v2 FROM team_predictions WHERE game_id = 2001")}
+    assert all(r["model_v2"] == "team_v2_A" and r["mu_v2"] > 0 for r in rows.values())
+    for team in (1, 2):                                   # penalties: only the level differs
+        assert rows[(team, "T-T")]["mu_v2"] == pytest.approx(rows[(team, "T-T")]["mu"] * np.exp(0.1))
+        assert rows[(team, "S-T")]["mu_v2"] != pytest.approx(rows[(team, "S-T")]["mu"])
+    # the game that had started got neither
+    assert conn.execute("SELECT COUNT(*) FROM team_predictions WHERE game_id = 2002").fetchone()[0] == 0
 
 
 def test_features_come_from_earlier_days_only(conn):

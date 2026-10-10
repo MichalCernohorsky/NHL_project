@@ -203,3 +203,24 @@ očekávaných přesilovek), úroveň -0.0152, tým druhý den po sobě
 -0.0345, soupeř druhý den po sobě +0.0343, rozptyl k =
 17.92. Zisk věrohodnosti v tréninku proti verzi 1 na stejných
 řádcích: +253.1 (v tréninku — o ničem nerozhoduje).
+
+**Nákup hlavních kurzů proběhl (10. 10. 2026).** 528 herních dnů, utraceno
+přesně **10 560 kreditů**, zůstatek 84 656. Kurzy má 3 933 z 3 936 zápasů
+(3 zápasy začaly před snímkem v 15:00 UTC; jeden herní den měl jen takový
+zápas, takže jeho 20 kreditů nepřineslo nic). Všechny snímky jsou z 14:55
+UTC.
+
+**Zamrazení bloku B týmových modelů (10. 10. 2026).** Odhad jen na 2023-24
++ 2024-25 nad pevným blokem A (5244 z 5248 řádků má kurzy
+aspoň 3 knih), před jakýmkoli pohledem na blok B na sezóně 2025-26. Soubor
+`models/team_v2b.json`, **SHA-256
+`c36944cbdf7f38019c3b1fcf78cd1d15c922f954d6f1b6c7c69b4ed6e1b7d2a6`**. Hlídá ho `tests/test_models_v2_plan.py`.
+
+| koeficient | střely týmu | tresty týmu |
+|---|---|---|
+| úroveň δ₀ | -0.0008 | -0.0002 |
+| pravděpodobnost výhry δ₁ | +0.1414 | -0.0875 |
+| čekaný počet gólů δ₂ | +0.0017 | +0.0043 |
+
+Zisk věrohodnosti v tréninku proti bloku A: střely +16.8, tresty
++1.0 (v tréninku — o ničem nerozhoduje).

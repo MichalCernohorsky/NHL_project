@@ -57,3 +57,11 @@ def test_player_v2_is_frozen_and_built_on_the_frozen_models(monkeypatch, capsys)
     with pytest.raises(SystemExit):
         fit_player_v2.main()
     assert "zamrazeny" in capsys.readouterr().out
+
+
+def test_team_v2b_is_frozen_on_top_of_the_frozen_block_a():
+    body = _frozen("team_v2b.json")
+    assert body["trained_on"] == ["2023-24", "2024-25"] and body["min_books"] == 3
+    for name in ("naive_team.json", "team_v2.json"):
+        assert body["builds_on"][name] == hashlib.sha256((ROOT / "models" / name).read_bytes()).hexdigest()
+    assert set(body["shots"]["coef"]) == {"S0", "S1", "S2"} == set(body["penalties"]["coef"])

@@ -165,3 +165,25 @@ i hráčů navíc volný člen c₀ (sloupec jedniček):
 
 Blok R (ρ) volný člen nepřidává — odhaduje se nad pevným blokem A a R má
 průměr u nuly. Nic jiného se nemění.
+
+**N-2 (10. 10. 2026, před nákupem hlavních kurzů): přesná podoba atributu
+(4) a bloku B.**
+
+- Data: tabulka `main_odds`, snímek archivu v 15:00 UTC herního dne.
+  Použijí se jen zápasy, které v čase snímku ještě nezačaly, a jen knihy
+  kotující obě strany.
+- **Pravděpodobnost výhry** týmu: u každé knihy poměrné odstranění marže ze
+  dvou kurzů na vítěze zápasu (včetně prodloužení); medián přes knihy.
+- **Čekaný počet gólů** zápasu G: u každé knihy lajna počtu gólů
+  a P(více) bez marže → střední hodnota Poissonova rozdělení, při které
+  P(více než lajna) vyjde stejně (u celé lajny se remíza s lajnou
+  vynechává); medián přes knihy.
+- Obojí jen při **alespoň 3 knihách**; jinak zápas atribut nemá a blok B
+  se pro něj rovná bloku A.
+- g = G − průměr G v trénovacích sezónách (jedna konstanta v modelu).
+- **Blok B** = pevný blok A × exp(δ₀ + δ₁ × (p_výhry − 0,5) + δ₂ × g),
+  δ odhadnuté nad pevnými koeficienty bloku A (jako ρ u bloku R) jen na
+  trénovacích řádcích s kurzy, nové k; u T-T nová kalibrace na ln μ_B.
+  Stejně u hráčů (p_výhry týmu hráče), vlastní δ.
+- Vyhodnocení B proti A stejnou ztrátou a pravidlem jako A proti v1;
+  u hráčů znovu kritéria fáze 0.

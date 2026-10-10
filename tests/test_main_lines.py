@@ -8,6 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+import pytest  # noqa: E402
+
 from nhl_tool import main_lines as ml  # noqa: E402
 
 EVENT = {"id": "ev1", "commence_time": "2025-10-07T23:00:00Z",
@@ -89,3 +91,36 @@ def test_workflow_buys_only_on_the_go_ahead():
     dry = next(s for s in steps if s.get("name", "").startswith("Suchy"))
     assert "--buy" not in dry["run"] and "env" not in dry
     assert trig["workflow_dispatch"]["inputs"]["budget"]["default"] == "10500"
+
+
+def test_goals_from_a_total_line():
+    assert ml.poisson_over(6.0, 5.5) == pytest.approx(1 - sum(
+        2.718281828459045 ** -6 * 6 ** k / __import__("math").factorial(k) for k in range(6)))
+    for lam, line in ((5.8, 5.5), (6.4, 6.5), (6.1, 6.0), (5.2, 6.0)):
+        assert ml.goals_from_total(ml.poisson_over(lam, line), line) == pytest.approx(lam, abs=1e-6)
+    # an even price on 6.5 means a mean a little above 6.5; on a whole line 6 a little above 6
+    assert 6.6 < ml.goals_from_total(0.5, 6.5) < 6.8 and 6.1 < ml.goals_from_total(0.5, 6.0) < 6.3
+    assert ml.goals_from_total(0.6, 6.5) > ml.goals_from_total(0.5, 6.5)
+
+
+def test_game_script_needs_three_books(conn):
+    _game(conn)
+    books = [("a", 1.80, 2.10, 6.5, 1.95, 1.87), ("b", 1.83, 2.05, 6.5, 1.91, 1.91), ("c", 1.77, 2.15, 6.0, 1.80, 2.02)]
+
+    def put(rows):
+        for b, home, away, line, over, under in rows:
+            for market, side, ln, price in (("h2h", "home", None, home), ("h2h", "away", None, away),
+                                            ("totals", "over", line, over), ("totals", "under", line, under)):
+                conn.execute("""INSERT INTO main_odds (game_id, event_id, bookmaker, market, side, line, price,
+                                    snapshot_time, snapshot_kind) VALUES (2025020001, 'e', ?, ?, ?, ?, ?,
+                                    '2025-10-07T14:55:00Z', 'day')""", (b, market, side, ln, price))
+    put(books[:2])
+    two = ml.game_script(conn).iloc[0]
+    assert two["books_p_home"] == 2 and two["p_home"] != two["p_home"] and two["goals"] != two["goals"]   # NaN
+    put(books[2:])
+    r = ml.game_script(conn).iloc[0]
+    ps = sorted((1 / h) / (1 / h + 1 / a) for _, h, a, *_ in books)
+    assert r["p_home"] == pytest.approx(ps[1]) and 0.5 < r["p_home"] < 0.56
+    gs = sorted(ml.goals_from_total((1 / o) / (1 / o + 1 / u), line) for *_, line, o, u in books)
+    assert r["goals"] == pytest.approx(gs[1]) and r["books_goals"] == 3
+    assert ml.game_script(conn, kind="live").empty

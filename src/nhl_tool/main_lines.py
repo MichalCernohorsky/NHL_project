@@ -13,7 +13,7 @@ import math
 
 import pandas as pd
 
-from .odds_import import find_event, normalize_name
+from .odds_import import _parse_utc, find_event, normalize_name
 
 MARKETS = ("h2h", "totals")
 ANCHOR_UTC = "15:00:00"
@@ -28,6 +28,17 @@ def anchor(game_date: str) -> str:
 
 def estimate(days: int) -> int:
     return days * CREDITS_PER_CALL
+
+
+def coverage_stop(days_done: int, matched: int, pregame: int) -> str | None:
+    """Why a purchase must stop early, or None: credits are not to be spent
+    on snapshots this code cannot read (3 days without a single game) or
+    that miss many games (under 80 % after 25 days)."""
+    if days_done >= 3 and matched == 0:
+        return "po 3 dnech zadny zapas s kurzy"
+    if days_done >= 25 and matched < 0.8 * pregame:
+        return f"pokryti {matched}/{pregame} zapasu je pod 80 %"
+    return None
 
 
 def parse_event(event: dict) -> list[dict]:
@@ -60,6 +71,28 @@ def parse_event(event: dict) -> list[dict]:
     return rows
 
 
+def match_event(events: list, game: dict, max_hours: float = 3.0) -> str | None:
+    """find_event, then a fallback for a renamed team: one side by its
+    nickname, the other by the first word of its name (the place), and a
+    start within max_hours - a team does not play twice in that time."""
+    eid = find_event(events, game["home"], game["away"], game["start_time_utc"])
+    if eid is not None:
+        return eid
+    target = _parse_utc(game["start_time_utc"])
+    words = {side: normalize_name(game[side]).split(" ") for side in ("home", "away")}
+    hits = []
+    for ev in events:
+        if not ev.get("commence_time") or \
+                abs((_parse_utc(ev["commence_time"]) - target).total_seconds()) > max_hours * 3600:
+            continue
+        theirs = {side: normalize_name(ev.get(f"{side}_team")).split(" ") for side in ("home", "away")}
+        nick = {side: theirs[side][-1] == words[side][-1] for side in ("home", "away")}
+        place = {side: theirs[side][0] == words[side][0] for side in ("home", "away")}
+        if (nick["home"] and place["away"]) or (nick["away"] and place["home"]):
+            hits.append(ev["id"])
+    return hits[0] if len(hits) == 1 else None
+
+
 def store_snapshot(conn, payload: dict, games: list, kind: str = "day") -> dict:
     """Store the rows of `games` (dicts with game_id, home, away,
     start_time_utc) found in one snapshot payload. Games that had started by
@@ -72,7 +105,7 @@ def store_snapshot(conn, payload: dict, games: list, kind: str = "day") -> dict:
         if not stamp or g["start_time_utc"] <= stamp:
             out["started"] += 1
             continue
-        eid = find_event(events, g["home"], g["away"], g["start_time_utc"])
+        eid = match_event(events, g)
         if eid is None:
             continue
         rows = parse_event(by_id[eid])

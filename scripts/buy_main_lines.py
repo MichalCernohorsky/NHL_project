@@ -63,7 +63,12 @@ def main():
         print("STOP: po nakupu by zustatek klesl pod rezervu, nic se nestahuje.")
         return
     total = {"matched": 0, "started": 0, "rows": 0}
+    seen = 0
     for i, day in enumerate(todo, 1):
+        why = ml.coverage_stop(i - 1, total["matched"], seen - total["started"])
+        if why:
+            print(f"\nSTOP po {i - 1} dnech: {why}. Nic dalsiho se nekupuje.")
+            break
         spent = (client.last_used or 0) - start_used
         if spent + ml.CREDITS_PER_CALL > args.budget - spent_before:      # never above the cap
             print(f"\nSTOP ROZPOCTU po {i - 1} dnech: utraceno {spent:.0f}. Nic dalsiho se nekupuje.")
@@ -73,6 +78,7 @@ def main():
                                     regions=oc["regions"], markets=",".join(ml.MARKETS),
                                     oddsFormat="decimal")
             res = ml.store_snapshot(conn, payload, days[day])
+            seen += len(days[day])
             for k in total:
                 total[k] += res[k]
             set_state(conn, ml.TASK, day, "done" if res["rows"] else "missing",
@@ -87,8 +93,7 @@ def main():
         conn.commit()
         if i % 50 == 0:
             print(f"  {i}/{len(todo)} dnu | zustatek {client.last_remaining:.0f}", flush=True)
-    games = sum(len(days[d]) for d in todo)
-    print(f"\nshrnuti: zapasu s kurzy {total['matched']} z {games} | zacalo pred snimkem "
+    print(f"\nshrnuti: zapasu s kurzy {total['matched']} z {seen} | zacalo pred snimkem "
           f"{total['started']} | radku {total['rows']}")
     print(f"utraceno {(client.last_used or 0) - start_used:.0f}, zustatek "
           f"{(client.last_remaining or 0):.0f} kreditu")

@@ -161,3 +161,10 @@ snímek na herní den, tři sezóny) se stropem **10 500 kreditů**; před
 nákupem proběhne suchý běh a kdyby vyšel nad strop, nákup se nespustí
 a rozhodne uživatel znovu. Potvrzovací vzorek pro hráče (~9 820 kreditů)
 tímto souhlasem krytý není.
+
+**Suchý běh a „jeď" k hlavním kurzům (10. 10. 2026).** Suchý běh
+(`scripts/buy_main_lines.py`) vyšel na 528 herních dnů × 20 = **10 560
+kreditů**, o 60 nad stropem 10 500 — nákup se proto nespustil a uživatel
+rozhodl znovu: „jeď, 10 560 je ok". Nový strop nákupu je 10 560 kreditů.
+Nákup se zastaví sám, kdyby po 3 dnech nenašel žádný zápas s kurzy nebo po
+25 dnech pokrýval méně než 80 % zápasů.

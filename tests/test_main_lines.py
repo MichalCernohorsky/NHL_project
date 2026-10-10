@@ -124,3 +124,27 @@ def test_game_script_needs_three_books(conn):
     gs = sorted(ml.goals_from_total((1 / o) / (1 / o + 1 / u), line) for *_, line, o, u in books)
     assert r["goals"] == pytest.approx(gs[1]) and r["books_goals"] == 3
     assert ml.game_script(conn, kind="live").empty
+
+
+def test_renamed_team_is_matched_by_place_and_time():
+    game = {"home": "Utah Mammoth", "away": "St. Louis Blues", "start_time_utc": "2024-11-05T02:00:00Z"}
+    events = [{"id": "x", "commence_time": "2024-11-05T02:10:00Z", "home_team": "Utah Hockey Club",
+               "away_team": "St Louis Blues"},
+              {"id": "y", "commence_time": "2024-11-07T02:00:00Z", "home_team": "Utah Hockey Club",
+               "away_team": "St Louis Blues"},
+              {"id": "z", "commence_time": "2024-11-05T00:00:00Z", "home_team": "New York Rangers",
+               "away_team": "New York Islanders"}]
+    assert ml.match_event(events, game) == "x"
+    # the two New York teams are never confused: the other side must agree too
+    ny = {"home": "New York Islanders", "away": "Boston Bruins", "start_time_utc": "2024-11-05T00:00:00Z"}
+    assert ml.match_event(events, ny) is None
+    assert ml.match_event(events, {**game, "start_time_utc": "2024-11-06T02:00:00Z"}) is None
+
+
+def test_purchase_stops_early_when_snapshots_cannot_be_read():
+    assert ml.coverage_stop(2, 0, 20) is None
+    assert "zadny zapas" in ml.coverage_stop(3, 0, 20)
+    assert ml.coverage_stop(3, 1, 20) is None and ml.coverage_stop(24, 10, 180) is None
+    assert "pod 80" in ml.coverage_stop(25, 100, 180) and ml.coverage_stop(25, 150, 180) is None
+    src = (ROOT / "scripts" / "buy_main_lines.py").read_text()
+    assert src.index("ml.coverage_stop(") < src.index('client.get(f"/historical')

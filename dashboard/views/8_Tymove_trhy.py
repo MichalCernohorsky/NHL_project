@@ -144,7 +144,10 @@ st.markdown(
     'základy (etapa 1); historické kurzy těchto trhů neexistují, takže o zisku rozhodne teprve '
     'tento test. <b>Tiket dává smysl jen za kurz ≥ min. kurz.</b> Doporučení plánu: do verdiktu '
     'jen papírové tikety. <b>Tresty týmu se do 31. 10. netipují</b> (na začátku sezóny se píská '
-    'víc, než model čeká); do té doby tikety jen na střely týmu.</div>', unsafe_allow_html=True)
+    'víc, než model čeká – i verze 2 to v říjnu 2025 podhodnotila); do té doby tikety jen na '
+    'střely týmu. <b>Od 11. 10. 2026 počítá čísla verze 2</b> (pokusy o střelu, přesilovky, '
+    'fáze sezóny, odpočinek): na sezóně 2025-26 předpovídala líp než verze 1 u střel i trestů; '
+    'u starších predikcí je vidět verze 1.</div>', unsafe_allow_html=True)
 
 # ------------------------------------------------------------- per game
 if preds.empty:
@@ -155,8 +158,8 @@ for r in rows:
     my_by_key.setdefault((r["game_id"], r["team_id"], r["market"]), []).append(r)
 
 
-def lines_html(market, mu, locked_actual=None):
-    t = team_tips.table(market, mu, models)
+def lines_html(market, mu, version="v1"):
+    t = team_tips.table(market, mu, models, version)
     if t.empty:
         return '<div style="color:#5a6572;font-size:12px">Bez lajn.</div>'
     out = ['<table class="ltab"><tr><th>lajna</th><th>p více</th><th>min. kurz více</th>'
@@ -195,10 +198,13 @@ for g in games.itertuples():
             for p in tr.itertuples():
                 actual = "" if pd.isna(p.actual_60) else f" · skutečnost <b>{int(p.actual_60)}</b>"
                 why = bets.paused(p.market, p.game_date)
+                mu_p, ver = team_tips.active(p, models)
+                other = (f' <small style="color:#5a6572">(verze 1: {cz(p.mu, 2)})</small>'
+                         if ver == "v2" else ' <small style="color:#5a6572">(verze 1)</small>')
                 body_html = (f'<div class="paused">⏸ {html.escape(why)}</div>' if why
-                             else lines_html(p.market, p.mu))
+                             else lines_html(p.market, mu_p, ver))
                 st.markdown(f'<div class="mkt">{team_tips.NAMES[p.market]} · model čeká '
-                            f'<b>{cz(p.mu, 2)}</b>{actual}</div>' + body_html,
+                            f'<b>{cz(mu_p, 2)}</b>{other}{actual}</div>' + body_html,
                             unsafe_allow_html=True)
                 for b in my_by_key.get((p.game_id, p.team_id, p.market), []):
                     res = {"win": "✅", "loss": "❌", "push": "push", "pending": "čeká"}[b["outcome"]]
@@ -216,7 +222,7 @@ for g in games.itertuples():
                                       format_func=lambda m: team_tips.NAMES[m],
                                       key=f"m_{g.game_id}")
                 row = sub[(sub["tym"] == team_pick) & (sub["market"] == market)]
-                mu = float(row["mu"].iloc[0]) if not row.empty else None
+                mu, ver = team_tips.active(row.iloc[0].to_dict(), models) if not row.empty else (None, "v1")
                 line = c3.selectbox("Lajna", team_tips.lines_for(market, mu) if mu else [],
                                     format_func=cz, key=f"l_{g.game_id}")
                 side = c4.radio("Strana", ["over", "under"], format_func=side_cz, horizontal=True,
@@ -228,7 +234,7 @@ for g in games.itertuples():
                 book = d3.selectbox("Sázkovka", BOOKS, key=f"b_{g.game_id}")
                 is_paper = d4.checkbox("papírový (bez peněz)", value=True, key=f"pp_{g.game_id}")
                 if mu is not None:
-                    p = team_tips.p_over(market, mu, float(line), models)
+                    p = team_tips.p_over(market, mu, float(line), models, ver)
                     if p is not None:
                         p_side = p if side == "over" else 1 - p
                         mp = team_tips.min_price(p_side)
@@ -238,7 +244,8 @@ for g in games.itertuples():
                                    f"{'✅ splňuje pravidlo' if ok else '❌ nesplňuje pravidlo (jen k záznamu)'}")
                 if st.button("Zapsat tiket", type="primary", key=f"tsave_{g.game_id}"):
                     try:
-                        pred = row.iloc[0].to_dict()
+                        pred = {**row.iloc[0].to_dict(), "mu": mu,
+                                "model_used": team_tips.model_name(market, ver, models)}
                         bets.save_team_bet(pred, float(line), float(price), float(stake), book,
                                            side, bool(is_paper))
                         st.success("Tiket zapsaný a zálohovaný." if not bets.unsynced()
@@ -280,7 +287,7 @@ else:
 
 with st.expander("ℹ️ Vysvětlivky"):
     st.markdown("""
-**Model čeká** — očekávaný počet za 60 minut ze zamrazeného naivního modelu (liga × útok týmu × obrana soupeře × doma/venku).
+**Model čeká** — očekávaný počet za 60 minut. Verze 1: liga × útok týmu × obrana soupeře × doma/venku. Verze 2 (od 11. 10. 2026) k tomu přidává formu z pokusů o střelu (jen střely), očekávaný počet přesilovek, fázi sezóny (1.–10. a 11.–20. zápas) a to, jestli tým nebo soupeř hraje druhý den po sobě. V závorce je pro srovnání číslo verze 1; obě se ukládají, aby šly po 300 zápasech porovnat.
 **p více / p méně** — pravděpodobnost podle modelu; u trestů z kalibrace odhadnuté na sezónách 2023–25, proto jen lajny 3,5 a 4,5.
 **Min. kurz** — 1 ÷ (p − 0,03): nejnižší kurz, při kterém sázka splňuje pravidlo hrany 3 p.b. Pod ním se nesází.
 **Papírový tiket** — zápis bez peněz; počítá se do testu stejně jako skutečný, vykazuje se zvlášť.

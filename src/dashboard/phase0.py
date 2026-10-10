@@ -11,9 +11,15 @@ UPDATED = "10. 10. 2026"
 # of the pre-committed evaluation on the stage A purchase.
 VERDICT = ("Střely hráče NEPOSTUPUJÍ: naivní model na 330 zápasech sezóny 2025-26 prodělal za "
            "simulovaný kurz Tipsportu −6,9 % (95% interval −9,9 až −4,2 %; 3 153 sázek). Podle plánu "
-           "se střely hráčů v sezóně 2026-27 nesází; tipy jsou jen informativní.")
+           "se střely hráčů v sezóně 2026-27 nesází; tipy jsou jen informativní. Verze 2 modelu "
+           "(pokusy o střelu, přesilovky, odpočinek, průběh zápasu z hlavních kurzů) byla trhu blíž, "
+           "ale na stejném vzorku také prodělala: −4,8 % (−7,9 až −1,9 %) a s průběhem zápasu −4,4 % "
+           "(−7,7 až −1,5 %). Hráčský model tím podle plánu končí (docs/player_v2b_report.md).")
 VERDICT_SHORT = ("Verdikt fáze 0 (10. 10. 2026): model neprošel. Na 330 zápasech sezóny 2025-26 "
-                 "prodělal za odhadnutý kurz Tipsportu −6,9 % (95% interval −9,9 až −4,2 %).")
+                 "prodělal za odhadnutý kurz Tipsportu −6,9 % (95% interval −9,9 až −4,2 %). "
+                 "Neprošla ani verze 2 s novými atributy (pokusy o střelu, přesilovky, odpočinek, "
+                 "průběh zápasu): −4,8 % a −4,4 %, oba intervaly celé pod nulou — hráčský model "
+                 "tím podle plánu končí.")
 
 # (id, criterion, status text, state: ok / progress / wait / fail)
 CRITERIA = [

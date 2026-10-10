@@ -218,6 +218,7 @@ def save_team_bet(pred: dict, line: float, price: float, stake: float, book: str
         "game_date": pred.get("game_date"), "start_time_utc": pred.get("start_time_utc"),
         "team_id": int(pred["team_id"]), "team": pred.get("tym"), "opp": pred.get("souper"),
         "mu": float(pred["mu"]) if pred.get("mu") is not None else None,
+        "model": pred.get("model_used"),          # which model's expectation "mu" is
         "side": side, "line": float(line), "price": float(price), "stake": float(stake),
         "book": book, "paper": bool(paper)})
 

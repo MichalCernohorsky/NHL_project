@@ -47,20 +47,38 @@ def lines_for(market: str, mu: float) -> list[float]:
     return [base - 2.5 + i for i in range(N_LINES_ST)]
 
 
-def p_over(market: str, mu: float, line: float, models: dict) -> float | None:
-    """P(count > line) in 60 minutes; None where the plan gives no number."""
+def active(pred, models: dict) -> tuple[float, str]:
+    """(expectation, version) the page and the tickets use for a stored
+    prediction: version 2 (block A) where it was written next to version 1
+    and its frozen file is here - it replaced version 1 on both markets
+    (docs/team_v2_report.md) - else version 1."""
+    mu2 = pred.get("mu_v2") if isinstance(pred, dict) else getattr(pred, "mu_v2", None)
+    mu1 = pred.get("mu") if isinstance(pred, dict) else getattr(pred, "mu")
+    if models.get("v2") and mu2 is not None and not pd.isna(mu2):
+        return float(mu2), "v2"
+    return float(mu1), "v1"
+
+
+def model_name(market: str, version: str, models: dict) -> str:
+    return f"{models['v2']['model']}_A" if version == "v2" else models["names"][market]
+
+
+def p_over(market: str, mu: float, line: float, models: dict, version: str = "v1") -> float | None:
+    """P(count > line) in 60 minutes; None where the plan gives no number.
+    `version` picks the dispersion / calibration that belongs to mu."""
     if market == "S-T":
-        k = models["team"]["families"]["shots"]["k_team"]
+        k = models["v2"]["shots"]["k"] if version == "v2" else models["team"]["families"]["shots"]["k_team"]
         return float(ns.p_over(mu, line, k)[0])
-    ab = models["cal"].get(float(line))
+    cal = t2.as_cal(models["v2"]["penalties"]["cal"]) if version == "v2" else models["cal"]
+    ab = cal.get(float(line))
     return None if ab is None else float(tm.logit_p(mu, ab))
 
 
-def table(market: str, mu: float, models: dict) -> pd.DataFrame:
+def table(market: str, mu: float, models: dict, version: str = "v1") -> pd.DataFrame:
     """One row per line: P(over), P(under) and the minimum price of each side."""
     rows = []
     for line in lines_for(market, mu):
-        p = p_over(market, mu, line, models)
+        p = p_over(market, mu, line, models, version)
         if p is None:
             continue
         rows.append({"line": line, "p_over": p, "p_under": 1 - p,
@@ -138,7 +156,12 @@ def build(conn, game_date: str, now: datetime | None = None, models: dict | None
     now_iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     models = models or load_models()
     stats = {"games": 0, "inserted": 0, "started": 0}
-    second = mu_v2(conn, game_date, models)
+    try:
+        second = mu_v2(conn, game_date, models)
+    except Exception as exc:  # noqa: BLE001 - version 1 must be written even if version 2 fails
+        print(f"POZOR: predikce verze 2 se nepodarilo spocitat ({type(exc).__name__}: {exc}); "
+              "zapisuje se jen verze 1")
+        second = {}
     name_v2 = models["v2"]["model"] + "_A" if second else None
     for market, family in MARKETS.items():
         const = models["team"]["families"][family]

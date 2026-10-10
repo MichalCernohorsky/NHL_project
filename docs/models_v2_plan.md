@@ -232,3 +232,57 @@ jakýmkoli pohledem na blok B na vzorku s kurzy. Soubor
 `1957f3541bd1fe4ed66370e4149edad8155e04735f87f9cbcf1aa822a06795a5`**. Hlídá ho `tests/test_models_v2_plan.py`. Koeficienty: úroveň
 -0.0011, pravděpodobnost výhry +0.1500, čekaný počet gólů -0.0025, k =
 18.01; zisk věrohodnosti v tréninku proti bloku A +18.5.
+
+## Výsledky (10. 10. 2026)
+
+Všechny modely byly zamrazené otiskem před pohledem na ověřovací data;
+reporty: `docs/team_v2_report.md`, `docs/team_v2b_report.md`,
+`docs/player_v2_report.md`, `docs/player_v2b_report.md`.
+
+**Týmy a tresty, sezóna 2025-26** (zisk = o kolik je ztráta menší; 95%
+interval, herní dny):
+
+| srovnání | střely týmu | tresty týmu |
+|---|---|---|
+| blok A proti verzi 1 | +0,0062 (+0,0025 až +0,0098) — **A nahrazuje v1** | +0,0023 (+0,0007 až +0,0041) — **A nahrazuje v1** |
+| síla testu / falešný poplach | 75,0 % / 0,0 % | 16,4 % / 0,0 % |
+| blok B proti bloku A | +0,0024 (−0,0002 až +0,0049) — **zůstává A** | 0,0000 (−0,0003 až +0,0003) — **zůstává A** |
+| rozhodčí nad blokem A (popis) | — | +0,0012 (+0,00002 až +0,0024) |
+
+- **Nasazeno: blok A** u střel i trestů. Od 11. 10. 2026 denní běh ukládá
+  predikci verze 1 i verze 2 vedle sebe a stránka Týmové trhy počítá
+  pravděpodobnosti a minimální kurzy z verze 2 (s jejím rozptylem
+  a kalibrací); tikety si zapisují, ze kterého modelu číslo je.
+- **Blok B se nenasazuje** — u střel interval o vlas zasahuje pod nulu
+  a „skoro" znamená ne; u trestů nepřidal nic. Hlavní kurzy se proto denně
+  nekupují (0 kreditů navíc).
+- **Rozhodčí:** zisk je kladný, ale malý a dolní mez intervalu je prakticky
+  na nule; test má sílu jen 14 %. Automatické čtení webu Scouting the Refs
+  se zatím nezavádí.
+- **Potvrzení dopředu** běží: po 300 zápasech sezóny 2026-27 od 11. 10.
+  se v1 a v2 porovnají stejnou ztrátou na datech, která žádná neviděla.
+
+**Dodatek V2-1 (10. 10. 2026): pozastavení trestů do 1. 11. zůstává.**
+Sekce 3 říká, že dodatek T-6 platí, dokud verze 2 neprojde. Prošla, ale
+(a) v říjnu 2025 čekala „více než 3,5" ve 43,5 % případů a skutečnost byla
+48,6 % (verze 1: 40,8 %) — říjnové podhodnocení zmenšila, neodstranila;
+(b) síla testu u trestů byla jen 16 %. Tikety na tresty se proto dál píšou
+až od 1. listopadu; je to přísnější než plán, ne volnější.
+
+**Hráči, vzorek 330 zápasů 2025-26** (stejné kurzy a kritéria jako fáze 0):
+
+| | verze 1 | blok A | blok B |
+|---|---|---|---|
+| Brier modelu − Brier trhu | +0,0032 | +0,0012 | +0,0010 |
+| sázek | 3 153 | 3 170 | 3 196 |
+| výhry (model čekal / trh čekal) | 51,7 % (56,7 / 51,0) | 53,1 % (57,0 / 51,1) | 53,3 % (57,0 / 51,1) |
+| **ROI za simulovaný kurz Tipsportu** | −6,9 % (−9,9 až −4,2) | **−4,8 %** (−7,9 až −1,9) | **−4,4 %** (−7,7 až −1,5) |
+| ROI za nejlepší americký kurz | −3,5 % | −1,1 % | −0,7 % |
+
+- Verze 2 je prokazatelně přesnější než verze 1 (zlepšení Brier 0,0019,
+  interval 0,0009 až 0,0031) a trhu se přiblížila, ale **K4b nesplnil ani
+  blok A, ani blok B** — oba intervaly jsou celé pod nulou. Podle sekce 5
+  **hráčský model končí**; potvrzovací nákup (~9 820 kreditů) se nekoná.
+- Zbylých ~980 zápasů 2025-26 zůstalo u hráčů neotevřených.
+
+**Kredity:** utraceno 10 560 (hlavní kurzy), zůstatek 84 656.

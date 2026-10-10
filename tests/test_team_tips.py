@@ -142,6 +142,27 @@ def test_v2_is_written_next_to_v1_once_frozen(conn, tmp_path):
         assert rows[(team, "S-T")]["mu_v2"] != pytest.approx(rows[(team, "S-T")]["mu"])
     # the game that had started got neither
     assert conn.execute("SELECT COUNT(*) FROM team_predictions WHERE game_id = 2002").fetchone()[0] == 0
+    # the page and the tickets use version 2 where it was stored, with ITS dispersion / calibration
+    models["v2"]["penalties"]["cal"] = {"3.5": {"a": -3.0, "b": 2.0}, "4.5": {"a": -5.0, "b": 3.0}}
+    r = dict(rows[(1, "S-T")])
+    assert team_tips.active(r, models) == (r["mu_v2"], "v2")
+    assert team_tips.active({**r, "mu_v2": None}, models) == (r["mu"], "v1")
+    assert team_tips.active(r, none) == (r["mu"], "v1")                       # no frozen v2 file
+    assert team_tips.model_name("S-T", "v2", models) == "team_v2_A"
+    assert team_tips.model_name("T-T", "v1", models) == "naive_team_v1+naive_team_tt_cal"
+    p1, p2 = (team_tips.p_over("S-T", 27.4, 26.5, models, v) for v in ("v1", "v2"))
+    assert p1 != p2 and 0.5 < p2 < 0.7
+    assert team_tips.p_over("T-T", 3.3, 3.5, models, "v2") == pytest.approx(
+        1 / (1 + np.exp(-(-3.0 + 2.0 * np.log(3.3)))))
+    assert team_tips.table("T-T", 3.3, models, "v2")["line"].tolist() == [3.5, 4.5]
+
+
+def test_v1_is_still_written_when_v2_fails(conn, monkeypatch, capsys):
+    _db(conn)
+    monkeypatch.setattr(team_tips, "mu_v2", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
+    assert team_tips.build(conn, DAY, NOW)["inserted"] == 4
+    assert "verze 2 se nepodarilo" in capsys.readouterr().out
+    assert conn.execute("SELECT COUNT(*) FROM team_predictions WHERE mu_v2 IS NOT NULL").fetchone()[0] == 0
 
 
 def test_features_come_from_earlier_days_only(conn):
@@ -168,8 +189,10 @@ def test_features_come_from_earlier_days_only(conn):
 def test_team_tickets_in_the_bets_store():
     pred = {"market": "S-T", "game_id": 2001, "game_date": DAY, "start_time_utc": f"{DAY}T23:00:00Z",
             "team_id": 1, "tym": "AAA", "souper": "BBB", "mu": 27.9}
-    b = bets.save_team_bet(pred, 27.5, 1.88, 100, "Tipsport", "over", True, now=NOW)
+    b = bets.save_team_bet({**pred, "model_used": "team_v2_A"}, 27.5, 1.88, 100, "Tipsport", "over",
+                           True, now=NOW)
     assert b["paper"] is True and b["market"] == "S-T" and "player_id" not in b
+    assert b["model"] == "team_v2_A" and b["mu"] == 27.9
     assert bets.team_bets() == [b] and bets.player_bets() == []
     assert bets.settle(b, 31, True) == ("win", pytest.approx(88.0))
     assert bets.settle(b, 27, True) == ("loss", -100.0)

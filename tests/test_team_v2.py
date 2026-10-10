@@ -170,3 +170,37 @@ def test_band_draws_are_nested_and_losses_stack_by_line():
     loss = t2.bern_loss(p, over)
     assert loss.shape == (10000,)
     assert loss[:5000].mean() == pytest.approx(-(over[:, 0] * np.log(0.45) + (1 - over[:, 0]) * np.log(0.55)).mean())
+
+
+def test_block_b_sits_on_a_fixed_block_a_and_ignores_games_without_lines():
+    rng = np.random.default_rng(11)
+    n = 30000
+    has = (rng.random(n) < 0.9).astype(float)
+    s1 = np.where(has == 1, rng.normal(0, 0.1, n), 0.0)
+    s2 = np.where(has == 1, rng.normal(0, 0.4, n), 0.0)
+    X = np.column_stack([has, s1, s2])
+    mu_a = rng.uniform(24, 33, n)
+    truth = np.array([0.01, 0.30, 0.05])
+    y = rng.poisson(mu_a * np.exp(X @ truth))
+    block = t2.fit_block_b(y, mu_a, X)
+    assert [block["coef"][c] for c in t2.COLS_B] == pytest.approx(truth, abs=0.03)
+    assert block["rows_with_lines"] == int(has.sum()) and block["rows"] == n
+    df = pd.DataFrame(X, columns=t2.COLS_B)
+    mu_b = t2.predict_b(df, mu_a, block)
+    assert (mu_b[has == 0] == mu_a[has == 0]).all() and not np.allclose(mu_b[has == 1], mu_a[has == 1])
+
+
+def test_team_script_mirrors_the_win_probability(conn):
+    conn.executemany("INSERT INTO teams (team_id, abbreviation, full_name) VALUES (?, ?, ?)",
+                     [(1, "AAA", "A"), (2, "BBB", "B")])
+    conn.executemany("""INSERT INTO games (game_id, season, season_type, game_date, home_team_id,
+                            away_team_id, game_state) VALUES (?, '2025-26', 'regular', '2025-10-07', 1, 2, 'OFF')""",
+                     [(10,), (11,), (12,)])
+    script = pd.DataFrame({"game_id": [10, 11], "p_home": [0.6, np.nan], "goals": [6.4, 6.0]})
+    ts = t2.team_script(conn, script, goals_mean=6.1).set_index(["game_id", "team_id"])
+    assert ts.loc[(10, 1)].tolist() == pytest.approx([1.0, 0.1, 0.3])
+    assert ts.loc[(10, 2)].tolist() == pytest.approx([1.0, -0.1, 0.3])
+    assert ts.loc[(11, 1)].tolist() == [0.0, 0.0, 0.0]                  # one number missing = no script
+    frame = pd.DataFrame({"game_id": [10, 12], "team_id": [2, 1], "x": [1, 2]})
+    out = t2.add_script(frame, ts.reset_index())
+    assert out["S1"].tolist() == pytest.approx([-0.1, 0.0]) and out["S0"].tolist() == [1.0, 0.0]

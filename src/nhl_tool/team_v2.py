@@ -258,6 +258,52 @@ def fit_rho(train: pd.DataFrame, const: dict, block: dict) -> dict:
             "loglik": float(tm.nb_logpmf(y, np.exp(offset + X @ beta), k).sum())}
 
 
+# ------------------------------------------- block B (notes, amendment N-2)
+
+COLS_B = ["S0", "S1", "S2"]     # has lines; (p_win - 0.5); (expected goals - training mean)
+
+
+def team_script(conn, script: pd.DataFrame, goals_mean: float) -> pd.DataFrame:
+    """Per (game, team): the block B columns from the game's main lines.
+    `script` = main_lines.game_script(); a game without both numbers gets
+    zeros, so block B equals block A for it."""
+    g = pd.read_sql_query("SELECT game_id, home_team_id, away_team_id FROM games", conn)
+    g = g.merge(script[["game_id", "p_home", "goals"]], on="game_id", how="inner")
+    ok = g["p_home"].notna() & g["goals"].notna()
+    rows = []
+    for side, sign in (("home_team_id", 1.0), ("away_team_id", -1.0)):
+        rows.append(pd.DataFrame({
+            "game_id": g["game_id"], "team_id": g[side], "S0": ok.astype(float),
+            "S1": np.where(ok, sign * (g["p_home"] - 0.5), 0.0),
+            "S2": np.where(ok, g["goals"] - goals_mean, 0.0)}))
+    return pd.concat(rows, ignore_index=True)
+
+
+def add_script(df: pd.DataFrame, ts: pd.DataFrame) -> pd.DataFrame:
+    out = df.drop(columns=[c for c in COLS_B if c in df]).merge(ts, on=KEY, how="left")
+    out[COLS_B] = out[COLS_B].fillna(0.0)
+    assert len(out) == len(df)
+    return out
+
+
+def fit_block_b(y, mu_a, X) -> dict:
+    """delta on top of a FIXED block A, from the rows that have lines; the
+    size k then from all rows (rows without lines keep mu_A)."""
+    y, mu_a, X = np.asarray(y, dtype=float), np.asarray(mu_a, dtype=float), np.asarray(X, dtype=float)
+    rows = X[:, 0] == 1
+    beta, _ = nb_fit(y[rows], np.log(mu_a[rows]), X[rows])
+    mu_b = mu_a * np.exp(X @ beta)
+    k = tm.fit_k(y, mu_b)
+    return {"coef": {c: float(b) for c, b in zip(COLS_B, beta)}, "k": float(k),
+            "rows_with_lines": int(rows.sum()), "rows": int(len(y)),
+            "loglik": float(tm.nb_logpmf(y, mu_b, k).sum())}
+
+
+def predict_b(df: pd.DataFrame, mu_a, block: dict) -> np.ndarray:
+    beta = np.array([block["coef"][c] for c in COLS_B])
+    return np.asarray(mu_a, dtype=float) * np.exp(df[COLS_B].to_numpy(dtype=float) @ beta)
+
+
 def cal_json(cal: dict) -> dict:
     return {str(line): {"a": a, "b": b} for line, (a, b) in cal.items()}
 

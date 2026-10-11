@@ -187,3 +187,69 @@ průměr u nuly. Nic jiného se nemění.
   Stejně u hráčů (p_výhry týmu hráče), vlastní δ.
 - Vyhodnocení B proti A stejnou ztrátou a pravidlem jako A proti v1;
   u hráčů znovu kritéria fáze 0.
+
+**N-3 (11. 10. 2026, před kódem): opravy statistik NHL po zápase.**
+
+- **Nález (10. 10. 2026).** Kontrola kroku 0 (střely na branku za 60 minut
+  z pokusů = uložené `sog_reg`) neprošla u 9 ze 70 zápasů sezóny 2026-27
+  (2026020010, 027, 028, 035, 037, 050, 052, 068, 069), vždy o 1 střelu
+  u 1–2 hráčů. Všech 3 936 zápasů tří historických sezón prošlo. NHL
+  statistiky po zápase opravuje, kdežto box score a play-by-play živé
+  sezóny se stáhly jednou a už nikdy znovu. Zápasy z 9. 10. stažené
+  10. 10. ve 13:46 UTC se ve 20:53 UTC lišily ve 2 ze 4, tedy oprava
+  přišla zhruba 10–19 hodin po konci zápasu. Následek: těch 9 zápasů nemá
+  řádky v `player_shot_splits` a `with_attempts` (`team_v2.py`) je
+  vynechává z formy pokusů obou týmů. Hodnoty `mu_v2` zapsané do obnovy
+  je neviděly (zapisují se jednou a nepřepisují se).
+- **Kontrola se neuvolňuje** (žádná tolerance). Opravené zápasy se místo
+  toho stáhnou znovu.
+- **Kontrola oprav** = nový krok denního běhu před stažením box score.
+  Zápas základní části živé sezóny s hotovým box score se stáhne znovu
+  (box score a play-by-play, bez cache), nejvýš jednou za den UTC a ne
+  v den, kdy se jeho box score stahovalo:
+  (a) když je mu 1 až 10 dní (datum běhu UTC − `game_date`);
+  (b) bez ohledu na stáří, když má krok `pbp`, `penalties` nebo
+  `attempts` ve stavu `error`.
+  Porovná se vše, co se z těchto dvou zdrojů ukládá: box score hráčů,
+  brankářů a týmů a skóre zápasu; střely, bloky, střely na brankáře
+  a zákroky za 60 minut; pokusy o střelu a rozdělení podle přesilovek
+  a tresty po událostech, pokud jsou uložené. Časy na ledě podle situací
+  (jiný zdroj, stahují se po herních dnech) se neporovnávají, při obnově
+  se ale stáhnou znovu.
+- **Obnova.** Liší-li se cokoli a čerstvá data NHL sedí sama se sebou
+  (stejné kontroly jako dosud: střely a bloky z play-by-play = box score,
+  trestné minuty = box score, střely za 60 minut z pokusů = z
+  play-by-play), stav zápasu u kroků `boxscore`, `pbp`, `penalties`
+  a `attempts` a stav jeho herního dne u `toi` se přepíše na `stale`
+  a smažou se jeho soubory v cache. Zbytek téhož denního běhu ho stáhne
+  znovu stávajícími kroky se všemi jejich kontrolami. Nesedí-li čerstvá
+  data sama se sebou (oprava je rozpracovaná), nic se nemění a zkusí se
+  to další den.
+- **Záznam.** Každá kontrola = řádek v `stat_checks` (stáří ve dnech,
+  výsledek), každá hodnota změněná při obnově = řádek v
+  `stat_corrections` (staré → nové).
+- **Okno 10 dní je zvolené bez měření**: porovnání po 2, 5 a 10 dnech
+  nešlo udělat, protože NHL API ani databáze nejsou z prostředí, kde se
+  to psalo, dostupné. Po nejméně 3 týdnech (~300 zápasů) se ze
+  `stat_checks` vykáže podíl zápasů s opravou podle stáří. Okno se změní
+  jen dalším datovaným dodatkem.
+- **Vyhodnocení (rozhodnutí uživatele 11. 10. 2026):** vyhodnocené tipy
+  a tikety drží číslo známé při vyhodnocení, opravená čísla jdou jen do
+  vstupů modelů. Tipsport vyhodnocuje krátce po zápase a pozdější opravy
+  obvykle nebere (předpoklad, v pravidlech Tipsportu neověřený); naše
+  první stažení je jeho číslu nejblíž. Tipy
+  (`tips.actual_60`) a týmové predikce (`team_predictions.actual_60`) to
+  dělají už teď (vyhodnocení jen doplňuje prázdné). Hráčské tikety
+  v dashboardu, které číslo čtou živě z `player_game_logs`, vezmou
+  nejstarší původní `sog_reg` ze `stat_corrections`, a není-li tam,
+  uložené číslo. Omezení: opravu, kterou NHL udělá dřív, než zápas poprvé
+  stáhneme, nevidíme.
+- Zamrazené modely, kritéria a vyhodnocení se nemění. Vstupy modelů
+  (forma, pokusy o střelu) berou opravená čísla, stejně jako historické
+  sezóny stažené až po opravách.
+
+<!-- konec dodatku N-3 -->
+
+Otisk dodatku N-3 (text od jeho nadpisu po značku konce): **SHA-256
+`6f5fdd759146b7c3f61961bdf1e49ccc1c3f908b6242882f8aae22df29ed5605`**. Hlídá
+ho `tests/test_corrections.py`.

@@ -73,7 +73,9 @@ def test_page_shows_fair_prices_and_refuses_a_stale_snapshot(tmp_path, monkeypat
     conn = sqlite3.connect(path)
     conn.execute("UPDATE games SET start_time_utc = '2099-01-01T00:00:00Z', game_state = 'FUT' "
                  "WHERE game_id = 2026029999")
-    conn.execute("UPDATE tips SET start_time_utc = '2099-01-01T00:00:00Z'")
+    # The fixture's snapshot is today 14:00 UTC - not yet old before 15:00 UTC.
+    conn.execute("UPDATE tips SET start_time_utc = '2099-01-01T00:00:00Z', "
+                 "snapshot_time = '2026-01-01T14:00:00Z'")
     conn.commit()
     conn.close()
     monkeypatch.setenv("NHL_DASHBOARD_DB", str(path))

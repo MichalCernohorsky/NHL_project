@@ -33,6 +33,7 @@ pip install -r requirements.txt
 | 6 | `python scripts/report.py` | co je v databázi | nic |
 | — | `python scripts/backfill_penalties.py` / `backfill_officials.py` | tresty po událostech z play-by-play, rozhodčí odehraných zápasů (plán `docs/team_markets_plan.md`) | 1 request na zápas / nic (z cache) |
 | — | `python scripts/backfill_attempts.py` | pokusy o střelu a rozdělení střel podle přesilovek z play-by-play (modely v2, plán `docs/models_v2_plan.md`); v cloudu součást denního běhu, celá historie přes ruční workflow „Doplnění historie (zdarma)" | 1 request na zápas |
+| — | `python scripts/check_corrections.py` | kontrola oprav NHL po zápase: zápas živé sezóny se 1–10 dní po zápase jednou denně stáhne znovu a při změně se celý obnoví všemi kroky s jejich kontrolami; vyhodnocené tipy a tikety drží číslo z doby vyhodnocení (`docs/models_v2_notes.md`, dodatek N-3); v cloudu součást denního běhu | 2 requesty na zápas a den |
 | — | `make data` | kroky 2–5 + tresty a rozhodčí najednou | |
 | — | `python scripts/buy_main_lines.py` | suchý běh nákupu hlavních kurzů (vítěz zápasu, počet gólů); kupuje jen s `--buy` po „jeď" a nikdy nad zadaný strop | nic (bez klíče) |
 | — | `python scripts/build_team_tips.py` | predikce týmových trhů pro dnešní zápasy (střely týmu, dvouminutové tresty) a vyhodnocení (plán `docs/team_markets_plan.md`, etapa 2); od 11. 10. 2026 ukládá vedle verze 1 i verzi 2 (`docs/team_v2_report.md`); v cloudu součást denního běhu | nic |
@@ -45,7 +46,8 @@ pip install -r requirements.txt
 
 Všechny stahovací kroky jsou **resumable**: přerušení (Ctrl+C) nic
 neztratí, další spuštění pokračuje. Stažené JSON odehraných zápasů se
-ukládají do `data/raw_cache/` a znovu se nestahují.
+ukládají do `data/raw_cache/` a znovu se nestahují — kromě zápasů, které
+NHL dodatečně opravila: kontrola oprav jejich soubory z cache smaže.
 
 ## Struktura
 

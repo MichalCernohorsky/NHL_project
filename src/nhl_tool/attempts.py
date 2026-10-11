@@ -76,10 +76,15 @@ def on_goal_reg(events: list[dict]) -> dict[int, int]:
 def mismatches(conn, game_id: int, events: list[dict]) -> list[str]:
     """Skaters whose regulation shots on goal from these events differ from
     the stored 60-minute count (which was itself checked against the box score)."""
+    return compare(conn.execute("SELECT player_id, sog_reg FROM player_game_logs WHERE game_id = ?",
+                                (game_id,)), events)
+
+
+def compare(rows, events: list[dict]) -> list[str]:
+    """The same check against any rows (player_id, sog_reg)."""
     got = on_goal_reg(events)
     out = []
-    for r in conn.execute("SELECT player_id, sog_reg FROM player_game_logs WHERE game_id = ?",
-                          (game_id,)):
+    for r in rows:
         if r["sog_reg"] is None:
             out.append(f"{r['player_id']} sog_reg missing")
         elif r["sog_reg"] != got.get(r["player_id"], 0):

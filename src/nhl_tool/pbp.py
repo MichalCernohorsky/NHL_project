@@ -57,9 +57,15 @@ def parse_pbp(payload: dict) -> dict:
 
 def mismatches(conn, game_id: int, parsed: dict) -> list[str]:
     """Players whose full-game play-by-play count differs from the box score."""
+    return compare(conn.execute("SELECT player_id, sog, blocked_shots FROM player_game_logs"
+                                " WHERE game_id = ?", (game_id,)), parsed)
+
+
+def compare(box_rows, parsed: dict) -> list[str]:
+    """The same check against any box-score rows (player_id, sog,
+    blocked_shots) - stored ones or a freshly parsed box score."""
     out = []
-    for r in conn.execute("SELECT player_id, sog, blocked_shots FROM player_game_logs"
-                          " WHERE game_id = ?", (game_id,)):
+    for r in box_rows:
         pid = r["player_id"]
         if (r["sog"] or 0) != parsed["sog"][pid]:
             out.append(f"{pid} sog box={r['sog']} pbp={parsed['sog'][pid]}")

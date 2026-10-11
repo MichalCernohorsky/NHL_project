@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Daily run for the live season: schedule -> box scores -> TOI split ->
-names -> 60-minute counts -> penalties -> officials -> referee probe. Idempotent and resumable: a second run the same
+"""Daily run for the live season: schedule -> NHL corrections -> box scores ->
+TOI split -> names -> 60-minute counts -> penalties -> officials -> referee probe. Idempotent and resumable: a second run the same
 day downloads only what is new (finished games since the last run).
 
 Every step runs even when an earlier one failed (a failed TOI day must not
@@ -29,6 +29,9 @@ from nhl_tool.config import load_config
 STEPS = [
     ("schedule", "backfill_schedule.py", True),
     ("rosters", "backfill_rosters.py", True),
+    # NHL corrections after a game (models v2 notes, N-3): a changed game is
+    # marked stale here and downloaded again by the steps below
+    ("corrections", "check_corrections.py", True),
     ("boxscores", "backfill_boxscores.py", True),
     ("toi", "backfill_toi.py", True),
     ("players", "backfill_players.py", False),

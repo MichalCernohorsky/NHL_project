@@ -55,13 +55,18 @@ def box_minutes(row: dict) -> int:
 
 def mismatches(conn, game_id: int, rows: list[dict]) -> list[str]:
     """Skaters whose play-by-play penalty minutes differ from the box score."""
+    return compare(conn.execute("SELECT player_id, pim FROM player_game_logs WHERE game_id = ?",
+                                (game_id,)), rows)
+
+
+def compare(box_rows, rows: list[dict]) -> list[str]:
+    """The same check against any box-score rows (player_id, pim)."""
     pim = Counter()
     for r in rows:
         if r["committed_by"] and r["period_type"] != "SO":
             pim[r["committed_by"]] += box_minutes(r)
     out = []
-    for r in conn.execute("SELECT player_id, pim FROM player_game_logs WHERE game_id = ?",
-                          (game_id,)):
+    for r in box_rows:
         if (r["pim"] or 0) != pim[r["player_id"]]:
             out.append(f"{r['player_id']} pim box={r['pim']} pbp={pim[r['player_id']]}")
     return out

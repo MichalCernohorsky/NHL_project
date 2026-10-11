@@ -491,10 +491,17 @@ def tips_by_ids(tip_ids: list[str]) -> pd.DataFrame:
 
 def bet_facts(game_id: int, player_id: int) -> dict:
     """What a ticket needs to be settled: the game's state and the player's
-    60-minute shots (None until the play-by-play counts are loaded)."""
-    df = q("""SELECT g.game_state, g.game_date, g.start_time_utc,
+    60-minute shots (None until the play-by-play counts are loaded). A
+    settled ticket keeps the number known at settlement (models v2 notes,
+    N-3): after an NHL correction that is the oldest logged value."""
+    first = ("""(SELECT c.old_value FROM stat_corrections c
+                  WHERE c.game_id = g.game_id AND c.player_id = p.player_id
+                    AND c.field = 'sog_reg' AND c.old_value IS NOT NULL
+                  ORDER BY c.checked_at, c.rowid LIMIT 1)"""
+             if _has_table("stat_corrections") else "NULL")
+    df = q(f"""SELECT g.game_state, g.game_date, g.start_time_utc,
                      h.abbreviation AS h_ab, a.abbreviation AS a_ab,
-                     p.sog_reg, p.toi_s,
+                     COALESCE({first}, p.sog_reg) AS sog_reg, p.toi_s,
                      EXISTS (SELECT 1 FROM backfill_state b WHERE b.task = 'pbp'
                              AND b.key = CAST(g.game_id AS TEXT) AND b.status = 'done') AS counted
               FROM games g JOIN teams h ON h.team_id = g.home_team_id

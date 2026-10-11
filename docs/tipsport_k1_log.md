@@ -12,6 +12,7 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | pá 2. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | nevidět | nevidět | ~21:30 CZ |
 | ne 4. 10. | 5 | 5 (všechny) | 6, 6, 6, 6, 6 | neověřováno | neověřováno | ~13:05–13:20 CZ |
 | so 10. 10. | 14 | 5 z 5 vylosovaných (PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA, CBJ@STL) + 2 navíc (UTA@BUF, TOR@COL) | 6, 6, 6, 6, 6, 6, 6 | neověřováno | neověřováno | ~15:55–16:15 CZ |
+| ne 11. 10. | 3 | 3 (všechny: SEA@WSH, VAN@NYR, CAR@PHI) | 6, 6, 6 | neověřováno | neověřováno | odesláno ~17:35 CZ |
 
 ## Střely hráče na branku — kurzy a marže
 
@@ -125,10 +126,29 @@ Plán: `docs/market_discovery_plan.md`, sekce 3 (K1), 7 a dodatek D1.
 | 10. 10. | CBJ@STL | Fantilli Adam | 2.5 | 1.98 | 1.72 | 8.64 |
 | 10. 10. | CBJ@STL | Knies Matthew | 1.5 | 1.63 | 2.11 | 8.74 |
 | 10. 10. | CBJ@STL | Werenski Zach | 3.5 | 2.11 | 1.63 | 8.74 |
+| 11. 10. | SEA@WSH | Chychrun Jakob | 2.5 | 1.90 | 1.78 | 8.81 |
+| 11. 10. | SEA@WSH | Ovechkin Alex | 2.5 | 1.84 | 1.84 | 8.70 |
+| 11. 10. | SEA@WSH | Strome Dylan | 1.5 | 1.72 | 1.98 | 8.64 |
+| 11. 10. | SEA@WSH | Dunn Vince | 1.5 | 1.58 | 2.20 | 8.75 |
+| 11. 10. | SEA@WSH | McCann Jared | 2.5 | 2.11 | 1.63 | 8.74 |
+| 11. 10. | SEA@WSH | McMann Bobby | 2.5 | 2.08 | 1.65 | 8.68 |
+| 11. 10. | VAN@NYR | Dorofeyev Pavel | 2.5 | 1.58 | 2.20 | 8.75 |
+| 11. 10. | VAN@NYR | Fox Adam | 1.5 | 1.70 | 2.00 | 8.82 |
+| 11. 10. | VAN@NYR | Zibanejad Mika | 2.5 | 1.78 | 1.90 | 8.81 |
+| 11. 10. | VAN@NYR | Boeser Brock | 1.5 | 1.55 | 2.26 | 8.76 |
+| 11. 10. | VAN@NYR | Hronek Filip | 1.5 | 2.03 | 1.68 | 8.78 |
+| 11. 10. | VAN@NYR | Pettersson Elias (1998) | 1.5 | 1.70 | 2.00 | 8.82 |
+| 11. 10. | CAR@PHI | Drysdale Jamie | 1.5 | 2.26 | 1.55 | 8.76 |
+| 11. 10. | CAR@PHI | Tippett Owen | 2.5 | 2.00 | 1.70 | 8.82 |
+| 11. 10. | CAR@PHI | Zegras Trevor | 1.5 | 1.72 | 1.98 | 8.64 |
+| 11. 10. | CAR@PHI | Aho Sebastian (1997) | 2.5 | 1.98 | 1.72 | 8.64 |
+| 11. 10. | CAR@PHI | Gostisbehere Shayne | 1.5 | 1.68 | 2.03 | 8.78 |
+| 11. 10. | CAR@PHI | Svechnikov Andrei | 2.5 | 1.65 | 2.08 | 8.68 |
 
-Průběžně (108 dvojic, 4 dny): medián marže **8.74 %**, rozsah
-8.64–8.82 %. Kurzy jsou ze 4 herních dnů (29. 9., 2. 10., 4. 10., 10. 10.); *m* pro D1
-se do plánu zapíše spolu s počtem hráčů pro D2, až bude K1 celé (3 dny s kontrolou do 18:00).
+Průběžně (126 dvojic, 5 dnů): medián marže **8.74 %**, rozsah
+8.64–8.82 %. Kurzy jsou z 5 herních dnů (29. 9., 2. 10., 4. 10., 10. 10., 11. 10.).
+*m* = 0,0874 pro D1 je zafixované dodatkem D8 z prvních 108 dvojic (4 dny, medián 8,74 %);
+18 dvojic z 11. 10. přibylo až potom a *m* nemění.
 
 Týmové střely na branku (jen kontext, nesází se): FLA@CAR 1,88/1,84 a
 1,80/1,92 (7,5–7,6 %), MTL@TOR 1,85/1,86 (7,8 %).
@@ -175,6 +195,26 @@ Týmové trhy 10. 10. (~15:55–16:15 CZ; kurzy méně / více; podklad pro `doc
 
 Marže dvoucestných týmových trhů 10. 10.: 7,5–8,4 % (medián 7,8 %).
 
+Týmové trhy 11. 10. (odesláno ~17:35 CZ; kurzy méně / více; první den, kdy se porovnává s verzí 2 týmových modelů):
+
+| trh | SEA@WSH | VAN@NYR | CAR@PHI |
+|---|---|---|---|
+| střely týmu (domácí) | WSH 28.5: 1,94 / 1,78 | NYR 26.5: 1,77 / 1,95 | PHI 21.5: 1,85 / 1,86 |
+| střely týmu (hosté) | SEA 24.5: 1,87 / 1,84 | VAN 22.5: 1,94 / 1,78 | CAR 29.5: 1,86 / 1,85 |
+| střely v zápasu: lajny | 51.5–56.5 | 46.5–51.5 | 48.5–53.5 |
+| střely v zápasu: kurzy po lajnách | 2,29 / 1,56 · 2,05 / 1,69 · 1,85 / 1,86 · 1,69 / 2,06 · 1,55 / 2,30 · 1,44 / 2,57 | 2,47 / 1,48 · 2,20 / 1,60 · 1,96 / 1,76 · 1,77 / 1,95 · 1,61 / 2,18 · 1,49 / 2,44 | 2,48 / 1,48 · 2,21 / 1,60 · 1,97 / 1,75 · 1,78 / 1,94 · 1,63 / 2,16 · 1,50 / 2,42 |
+| kdo víc střel (1 / X / 2) | 1,40 · 14,20 · 3,06 | 1,48 · 13,30 · 2,76 | 5,29 · 18,40 · 1,16 |
+| dvouminutové tresty celkem | 5.5: 2,57 / 1,44 · 6.5: 1,97 / 1,75 · 7.5: 1,58 / 2,24 | 6.5: 2,12 / 1,65 · 7.5: 1,68 / 2,08 · 8.5: 1,43 / 2,63 | 6.5: 2,09 / 1,67 · 7.5: 1,68 / 2,07 · 8.5: 1,44 / 2,58 |
+| tresty týmu (domácí) | WSH 3.5: 1,81 / 1,90 | NYR 3.5: 1,90 / 1,81 | PHI 3.5: 1,81 / 1,91 |
+| tresty týmu (hosté) | SEA 3.5: 1,71 / 2,03 | VAN 3.5: 1,83 / 1,88 | CAR 3.5: 1,91 / 1,80 |
+| kdo víc trestů (1 / X / 2) | 2,18 · 4,01 · 2,55 | 2,25 · 4,04 · 2,45 | 2,54 · 4,03 · 2,18 |
+| každý tým 3+ trestů (ano / ne) | 1,70 / 2,04 | 1,61 / 2,19 | 1,63 / 2,16 |
+| každý tým 4+ trestů (ano / ne) | 2,76 / 1,39 | 2,54 / 1,45 | 2,51 / 1,47 |
+| využité přesilovky | 0.5: 3,15 / 1,30 · 1.5: 1,45 / 2,52 | 0.5: 3,25 / 1,28 · 1.5: 1,50 / 2,38 | 0.5: 3,15 / 1,30 · 1.5: 1,45 / 2,52 |
+| zápas rozhodnut v prodloužení (ano / ne) | 5,34 / 1,12 | 5,52 / 1,11 | 5,33 / 1,12 |
+
+Marže střel týmu a trestů týmu 11. 10.: 7,6–7,9 %.
+
 Vzor výběru hráčů (pozorování, 29. 9.): Tipsport vypisuje **3 hráče za tým**,
 typicky 2 útočníky s nejvyšší lajnou a 1 obránce (FLA: Tkachuk, Reinhart,
 Jones; CAR: Aho, Svechnikov, Gostisbehere; MTL: Caufield, Slafkovský,
@@ -205,3 +245,10 @@ vylosovaných zápasů PHI@BOS, VAN@NJD, EDM@SJS, MIN@FLA, CBJ@STL a dva navíc
 (UTA@BUF, TOR@COL): střely hráčů u všech, vždy 6 hráčů — **druhý započtený
 den K1 (2 ze 3)**. Dohromady 22 zkontrolovaných zápasů z 22 s trhem a se
 6 hráči. Zbývá jeden den (11. 10.: SEA@WSH, VAN@NYR, CAR@PHI do 18:00).
+
+**11. 10. (po uzavření K1 dodatkem D8):** uživatel poslal před 18:00 CZ
+všechny tři zápasy dne (SEA@WSH, VAN@NYR, CAR@PHI): střely hráčů u všech,
+vždy 6 hráčů (3 za tým). Byl by to třetí den s kontrolou do 18:00, takže
+K1 by bylo splněné i podle původního znění; na uzavřeném K1 ani na *m* se
+tím nic nemění. Dohromady 25 zkontrolovaných zápasů z 25 s trhem a se
+6 hráči.

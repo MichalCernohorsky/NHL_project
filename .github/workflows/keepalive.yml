@@ -1,0 +1,36 @@
+name: Udrzeni planovanych behu
+
+# GitHub turns off the scheduled workflows of a public repository after 60
+# days without a commit; the daily job would then silently stop. Once a week
+# this job looks at the age of the last commit on the default branch and,
+# only when it is 30 days or older, adds an EMPTY commit (no file changes).
+# The longest gap is therefore about 37 days. Commits pushed with the job's
+# own token start no other workflow.
+on:
+  schedule:
+    - cron: "17 6 * * 1"        # every Monday 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - name: Prazdny commit, kdyz je posledni starsi nez 30 dni
+        run: |
+          age_days=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "posledni commit pred $age_days dny"
+          if [ "$age_days" -lt 30 ]; then echo "nic se nedela"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Keepalive: last commit $age_days days ago; GitHub disables scheduled workflows after 60 days without one"
+          git push

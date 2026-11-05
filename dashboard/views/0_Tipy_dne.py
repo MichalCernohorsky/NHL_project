@@ -89,6 +89,14 @@ div[data-testid="stButton"] > button[kind="tertiary"]{color:#2E5FB7;font-weight:
 .naive{background:#fdf3e1;border:1px solid #f3d9a6;color:#7a5410;border-radius:12px;
   padding:10px 14px;font-size:13px;margin:2px 0 12px}
 .naive b{color:#5c3d06}
+.eltab{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;background:#fff;
+  border:1px solid #e2e6ea;border-radius:12px;overflow:hidden}
+.eltab th,.eltab td{padding:7px 10px;text-align:right;border-bottom:1px solid #eef0f3;white-space:nowrap}
+.eltab th{color:#5a6572;font-weight:650;font-size:11.5px;background:#f8f9fb}
+.eltab th:first-child,.eltab td:first-child{text-align:left}
+.eltab td.up{color:#1e7a46;font-weight:700}.eltab td.dn{color:#b3403a;font-weight:700}
+.elwrap{overflow-x:auto;margin-bottom:10px}
+.elnote{color:#5a6572;font-size:12px;margin:4px 0 14px}
 </style>
 """, unsafe_allow_html=True)
 
@@ -277,6 +285,41 @@ for i in range(0, len(rows), 2):
             st.markdown(card(g), unsafe_allow_html=True)
             if st.button("Rozbor zápasu →", key=f"go_{g.game_id}", type="tertiary"):
                 nav.goto("rozbor", game_id=int(g.game_id))
+
+# ------------------------------------------------------------- edge ladder
+lad = data.edge_ladder()
+if lad and lad["n"]:
+    section("Žebříček hrany", "roste ROI tipů s hranou? · slíbený výnos = pravděpodobnost modelu × "
+            "odhadnutý kurz Tipsportu − 1 · průběžně, rozhoduje jen pohled (docs/edge_ladder_plan.md)")
+    head = ("<tr><th>slíbený výnos</th><th>tipů</th><th>výhry</th><th>model sliboval</th><th>trh čekal</th>"
+            "<th>ROI</th><th>95% interval</th><th>posun trhu do closingu</th></tr>")
+    body = []
+    for r in lad["ladder"].itertuples():
+        if not r.n:
+            body.append(f"<tr><td>{r.name}</td><td>0</td><td colspan=6></td></tr>")
+            continue
+        ci = (f"{cz(r.lo * 100)} až {cz(r.hi * 100)} %" if lad["days"] >= MIN_DAYS_CI else "–")
+        move = "–" if pd.isna(getattr(r, "move_pp", None)) else f"{'+' if r.move_pp > 0 else ''}{cz(r.move_pp, 2)} p.b."
+        body.append(f"<tr><td>{r.name}</td><td>{r.n}</td><td>{cz(r.hit * 100)} %</td><td>{cz(r.p_model * 100)} %</td>"
+                    f"<td>{cz(r.p_market * 100)} %</td><td class=\"{'up' if r.roi > 0 else 'dn'}\">"
+                    f"{'+' if r.roi > 0 else ''}{cz(r.roi * 100)} %</td><td>{ci}</td><td>{move}</td></tr>")
+    st.markdown(f'<div class="elwrap"><table class="eltab">{head}{"".join(body)}</table></div>',
+                unsafe_allow_html=True)
+    a = lad["arm"]
+    arm_card = (kpi("Kandidát ≥ 10 %, 1 na zápas", f"{'+' if a['roi'] > 0 else ''}{cz(a['roi'] * 100)} %",
+                    [f"<b>{a['n']}</b> / {a['look']} tipů",
+                     (f"95% CI {cz(a['lo'] * 100)} až {cz(a['hi'] * 100)} %" if a["days"] >= MIN_DAYS_CI
+                      else f"interval až od {MIN_DAYS_CI} herních dnů (zatím {a['days']})"),
+                     f"čeká <b>{a['pending']}</b>"], " up" if a["roi"] > 0 else " dn")
+                if a["n"] else
+                kpi("Kandidát ≥ 10 %, 1 na zápas", "–",
+                    [f"<b>0</b> / {a['look']} tipů", f"čeká <b>{a['pending']}</b>", "sleduje se od 6. 11. 2026"]))
+    st.markdown('<div class="kpis">' + arm_card + kpi("Pohled 1 (tipy do 4. 11.)", phase0.EDGE_LOOK1_BIG,
+                                                       [phase0.EDGE_LOOK1]) + "</div>", unsafe_allow_html=True)
+    st.markdown(f'<div class="elnote">{lad["n"]} vyhodnocených tipů za {lad["days"]} herních dnů. Kurz Tipsportu je '
+                'odhad z amerického trhu (marže 8,74 %), ne skutečný kurz. Kandidát = v každém zápase tip s nejvyšším '
+                'slíbeným výnosem, je-li aspoň 10 %; počítá se jen dopředu, od zápasů 6. 11. Posun trhu = o kolik se '
+                'americký trh do začátku zápasu posunul ke straně tipu.</div>', unsafe_allow_html=True)
 
 # ------------------------------------------------------------- calculator
 if not df.empty:

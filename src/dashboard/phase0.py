@@ -41,3 +41,8 @@ CRITERIA = [
 ]
 
 TIPSPORT_MARGIN = "8,74 % (medián 108 dvojic kurzů ze 4 dnů; zafixováno 10. 10.)"
+
+# Edge ladder, look 1 (docs/edge_ladder_report.md) - written after the one
+# run of the pre-registered evaluation; empty until then.
+EDGE_LOOK1_BIG = "čeká"
+EDGE_LOOK1 = "první pohled se spočítá po vyhodnocení tipů ze 4. 11."

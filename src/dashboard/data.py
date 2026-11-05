@@ -392,6 +392,30 @@ def tips_on(game_date: str) -> pd.DataFrame:
     return df
 
 
+_LADDER: dict = {}
+
+
+def edge_ladder() -> dict:
+    """Edge ladder of the playable tips (docs/edge_ladder_plan.md): the band
+    table with the move of the market to closing, and the forward candidate
+    arm. Cached per version of the database file (the closing conversion
+    takes a few seconds)."""
+    from nhl_tool import edge_ladder as el
+    from nhl_tool import tips as tipmod
+    if not _has_table("tips"):
+        return {}
+    key = (str(db_path()), db_path().stat().st_mtime)
+    if key not in _LADDER:
+        with connect() as conn:
+            df = el.load_tips(conn)
+            pc = el.closing_p(conn, df, tipmod.load_model())
+        settled = df[df["settled"]]
+        _LADDER.clear()
+        _LADDER[key] = {"ladder": el.ladder(df, pc), "arm": el.arm_status(el.arm(df)),
+                        "n": int(len(settled)), "days": int(settled["game_date"].nunique())}
+    return _LADDER[key]
+
+
 def model_record() -> pd.DataFrame:
     """Settled playable tips (MODEL arm, paper), one row per tip."""
     if not _has_table("tips"):

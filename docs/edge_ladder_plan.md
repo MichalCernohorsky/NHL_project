@@ -122,3 +122,10 @@ Test ani kandidát pro ně v tomto plánu nejsou.
 
 Otisk schváleného znění (vše nad značkou konce schváleného znění):
 **SHA-256 `b110ee0225c10e47ee50956fddfa4457e94be8a44163d22513c827f8eb0ba3be`**. Hlídá ho `tests/test_edge_ladder_plan.py`.
+
+**Dodatek E-1 (7. 11. 2026, na žádost uživatele): označení kandidáta 🎯.**
+Sekce 9 nepovolovala jiné změny Tipů dne než žebříček a kartu kandidáta.
+Uživatel chce k tipům kandidáta (sekce 7) zapisovat skutečný kurz Tipsportu,
+proto se na kartách zápasů označí 🎯 tip, který pravidlo sekce 7 v zápase
+vybere (i u dnů před 6. 11.), a u každého tipu se ukáže jeho slíbený výnos.
+Jen zobrazení: populace, pásma, test, kandidát ani pohledy se nemění.

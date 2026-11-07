@@ -16,6 +16,7 @@ import streamlit as st
 from dashboard import bets, data, nav, phase0
 from dashboard.hero import hero, team_logo, ticker
 from dashboard.theme import section, setup_page
+from nhl_tool import edge_ladder as el
 from nhl_tool import explain
 from nhl_tool import naive_sog as ns
 from nhl_tool import tips as tipmod
@@ -114,6 +115,9 @@ model = tipmod.load_model()
 k = model["nb_k"]
 play = df[df["playable"] == 1].copy() if not df.empty else df
 n_warn = int((play["edge"] > WARN_EDGE).sum()) if not play.empty else 0
+if not play.empty:   # promised return at the estimated Tipsport price (docs/edge_ladder_plan.md)
+    play["ev"] = play["p_model"] * play["sim_tipsport_price"] - 1
+CANDIDATES = set(el.arm(play, start=None)["tip_id"]) if not play.empty else set()   # 🎯, amendment E-1
 snap = df["snapshot_time"].max() if not df.empty else None
 
 hero("Tipy dne",
@@ -236,6 +240,10 @@ def tip_row(r) -> str:
     minp = (f'<span class="minp">min. kurz<b>{cz(r.tipsport_min_price, 2)}</b></span>'
             if pd.notna(r.tipsport_min_price) else "")
     star = '<span class="star" title="TOP tip dne">⭐</span>' if r.arm_top else '<span class="star"></span>'
+    target = ('<span title="kandidát žebříčku: nejvyšší slíbený výnos v zápase, aspoň 10 %">🎯 </span>'
+              if r.tip_id in CANDIDATES else "")
+    ev = getattr(r, "ev", None)
+    ev_txt = "" if ev is None or pd.isna(ev) else f" · slib {'+' if ev > 0 else ''}{cz(ev * 100)} %"
     stub = ""
     if r.tip_id in mine:
         b = mine[r.tip_id]
@@ -243,10 +251,10 @@ def tip_row(r) -> str:
                 f'{cz(b["price"], 2)} · {b["stake"]:,.0f} Kč · {html.escape(str(b["book"]))}</div>'
                 ).replace(",", " ")
     return (f'<div class="tip">{star}<span class="chip {r.side}">{"VÍCE" if r.side == "over" else "MÉNĚ"}</span>'
-            f'<span class="lbl"><b>{html.escape(str(r.player_name))}</b> '
+            f'<span class="lbl">{target}<b>{html.escape(str(r.player_name))}</b> '
             f'<span style="color:#5a6572">{r.tym or ""}</span> · <b>{line_txt(r.side, r.line)}</b>{warn}'
             f'<small>model {cz(r.p_model * 100)} % · trh {cz(r.p_market * 100)} % · '
-            f'čeká {cz(r.mu_60, 2)} střely{" · " + " · ".join(ctx) if ctx else ""}</small>'
+            f'čeká {cz(r.mu_60, 2)} střely{ev_txt}{" · " + " · ".join(ctx) if ctx else ""}</small>'
             f'{why_line(r)}</span>'
             f'{minp}<span class="ebar"><i class="{"w" if r.edge > WARN_EDGE else ""}" '
             f'style="width:{width:.0f}%"></i></span>'
@@ -273,8 +281,9 @@ def card(g) -> str:
             f'<small><span class="side">domácí</span></small></div></div>{body}</div>')
 
 
-section("Zápasy a tipy", "⭐ TOP tip dne (max. 3, bez varování, jeden na zápas) · pruh = hrana "
-        "proti trhu (plný = 20 p.b.) · červená linka = zápas s TOP tipem")
+section("Zápasy a tipy", "⭐ TOP tip dne (max. 3, bez varování, jeden na zápas) · 🎯 kandidát žebříčku "
+        "(v zápase tip s nejvyšším slíbeným výnosem, je-li aspoň 10 %) · slib = slíbený výnos za odhadnutý "
+        "kurz Tipsportu · pruh = hrana proti trhu (plný = 20 p.b.) · červená linka = zápas s TOP tipem")
 if games.empty:
     st.info("V tento den se nehraje.")
 rows = list(games.itertuples())

@@ -252,3 +252,14 @@ vždy 6 hráčů (3 za tým). Byl by to třetí den s kontrolou do 18:00, takže
 K1 by bylo splněné i podle původního znění; na uzavřeném K1 ani na *m* se
 tím nic nemění. Dohromady 25 zkontrolovaných zápasů z 25 s trhem a se
 6 hráči.
+
+**Kontrola simulovaného kurzu Tipsportu (7. 11. 2026, `scripts/check_sim_price.py`).**
+Simulovaný kurz = medián amerických knih na téže lajně, převedený na 60 minut,
++ marže 8,74 %. Na 101 dvojicích s americkým snímkem z doby před screenshotem
+(medián stáří 0,6 h): pravděpodobnost Tipsportu bez marže − americký trh
+= −0,14 p. b. v průměru (medián −0,26), průměrná absolutní odchylka 2,40 p. b.,
+do ±2 p. b. 51 % dvojic, do ±4 p. b. 82 %, korelace 0,87. Kurzy: skutečný
+− simulovaný v průměru +0,000 (více) a −0,009 (méně), typicky o ±0,09.
+Proti closingu (121 dvojic) skoro totéž. **Závěr (popis):** v průměru
+simulovaný kurz sedí bez vychýlení, jednotlivá lajna se ale liší typicky
+o ±2,4 p. b.
